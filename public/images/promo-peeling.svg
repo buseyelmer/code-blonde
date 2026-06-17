@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" fill="none">
+  <rect width="900" height="600" fill="#ebe4dc"/>
+  <path d="M100 480 Q450 380 800 480 L800 560 Q450 600 100 560 Z" fill="#d5cec4"/>
+  <rect x="250" y="160" width="90" height="220" rx="18" fill="#f8d7e3"/>
+  <rect x="380" y="140" width="100" height="250" rx="20" fill="#f5c4c4"/>
+  <rect x="520" y="170" width="95" height="210" rx="18" fill="#ffd9a8"/>
+  <text x="450" y="100" text-anchor="middle" fill="#2d2d2d" font-family="system-ui,sans-serif" font-size="22" font-weight="600" letter-spacing="4">VÜCUT PEELING</text>
+</svg>

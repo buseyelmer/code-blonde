@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#faf5ee"/>
+      <stop offset="100%" stop-color="#efe6dc"/>
+    </linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d8d0c6"/>
+      <stop offset="100%" stop-color="#c2b8ad"/>
+    </linearGradient>
+    <linearGradient id="mango" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe0a8"/>
+      <stop offset="100%" stop-color="#e89430"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="640" rx="260" ry="36" fill="#afa59a" opacity="0.32"/>
+  <path d="M180 580 Q400 530 620 580 L620 700 Q400 735 180 700 Z" fill="url(#stone)"/>
+  <rect x="300" y="220" width="150" height="340" rx="26" fill="url(#mango)"/>
+  <rect x="320" y="195" width="110" height="36" rx="10" fill="#fff" opacity="0.88"/>
+  <text x="375" y="400" text-anchor="middle" fill="#6b4518" font-family="system-ui,sans-serif" font-size="14" font-weight="600" letter-spacing="4">MANGO</text>
+  <path d="M375 150 Q395 110 420 140 Q400 170 375 150" fill="#7cb342" opacity="0.7"/>
+  <circle cx="520" cy="200" r="35" fill="#ffb74d" opacity="0.25"/>
+  <circle cx="250" cy="220" r="25" fill="#ffcc80" opacity="0.2"/>
+</svg>

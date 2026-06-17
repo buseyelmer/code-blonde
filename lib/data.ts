@@ -1,0 +1,663 @@
+export type HeroSlide = {
+  id: string;
+  label: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  cta: string;
+  image: string;
+  imageAlt: string;
+};
+
+export type ProductCategoryId =
+  | "sac-bakim"
+  | "sac-sekillendirme"
+  | "epilasyon"
+  | "vucut-peeling"
+  | "parfumeri"
+  | "manikur-pedikur";
+
+export type ShopCategory = {
+  id: ProductCategoryId;
+  label: string;
+  subtitle: string;
+  image: string;
+  href: string;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  category: string;
+  categoryId: ProductCategoryId;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  isDeal?: boolean;
+  isExclusive?: boolean;
+  rating: number;
+  reviewCount: number;
+};
+
+export type ServiceBenefit = {
+  id: string;
+  title: string;
+  description: string;
+  icon: "shipping" | "return" | "payment" | "discount";
+};
+
+export const heroSlides: HeroSlide[] = [
+  {
+    id: "slide-1",
+    label: "Doğanın Işıltısı",
+    title: "Vücut Peeling Serisi",
+    subtitle: "Code Blonde",
+    description: "Cildine İyilik Yap",
+    cta: "Hemen Keşfet",
+    image: "/images/hero-peeling-collection.svg",
+    imageAlt: "Sakız, çilek ve mango vücut peeling ürünleri taş platform üzerinde",
+  },
+  {
+    id: "slide-2",
+    label: "Yeni Peeling Serisi",
+    title: "Sakız & Çilek",
+    subtitle: "Code Blonde",
+    description: "Sadece Online'da",
+    cta: "Hemen Keşfet",
+    image: "/images/hero-peeling-gum-strawberry.svg",
+    imageAlt: "Sakız ve çilek aromalı vücut peeling ürünleri",
+  },
+  {
+    id: "slide-3",
+    label: "Tropikal Bakım",
+    title: "Mango Peeling",
+    subtitle: "Code Blonde",
+    description: "Işıltılı ve Pürüzsüz Cilt",
+    cta: "Hemen Keşfet",
+    image: "/images/hero-peeling-mango.svg",
+    imageAlt: "Mango aromalı vücut peeling ürünü",
+  },
+];
+
+export const shopCategories: ShopCategory[] = [
+  {
+    id: "sac-bakim",
+    label: "Saç Bakım",
+    subtitle: "Işıltılı saçlar",
+    image: "/images/categories/sac-bakim.svg",
+    href: "/kategori/sac-bakim",
+  },
+  {
+    id: "sac-sekillendirme",
+    label: "Saç Şekillendirme",
+    subtitle: "Stil ve hacim",
+    image: "/images/categories/sac-sekillendirme.svg",
+    href: "/kategori/sac-sekillendirme",
+  },
+  {
+    id: "epilasyon",
+    label: "Epilasyon",
+    subtitle: "Pürüzsüz cilt",
+    image: "/images/categories/epilasyon.svg",
+    href: "/kategori/epilasyon",
+  },
+  {
+    id: "vucut-peeling",
+    label: "Vücut Peeling",
+    subtitle: "Doğal peeling",
+    image: "/images/categories/vucut-peeling.svg",
+    href: "/kategori/vucut-peeling",
+  },
+  {
+    id: "parfumeri",
+    label: "Parfümeri",
+    subtitle: "Zarif kokular",
+    image: "/images/categories/parfumeri.svg",
+    href: "/kategori/parfumeri",
+  },
+  {
+    id: "manikur-pedikur",
+    label: "Manikür & Pedikür",
+    subtitle: "El ve ayak bakımı",
+    image: "/images/categories/manikur-pedikur.svg",
+    href: "/kategori/manikur-pedikur",
+  },
+];
+
+export const productFilterOptions: { id: "all" | ProductCategoryId; label: string }[] = [
+  { id: "all", label: "Tüm Ürünler" },
+  ...shopCategories.map((c) => ({ id: c.id, label: c.label })),
+];
+
+export const newArrivalProducts: Product[] = [
+  {
+    id: "new-1",
+    name: "Onarıcı Saç Maskesi",
+    category: "Saç Bakım",
+    categoryId: "sac-bakim",
+    price: 289,
+    originalPrice: 349,
+    image: "/images/products/sac-mask.svg",
+    rating: 4.8,
+    reviewCount: 214,
+  },
+  {
+    id: "new-2",
+    name: "Hacim Veren Saç Serumu",
+    category: "Saç Bakım",
+    categoryId: "sac-bakim",
+    price: 199,
+    image: "/images/products/sac-serum.svg",
+    rating: 4.6,
+    reviewCount: 128,
+  },
+  {
+    id: "new-3",
+    name: "Termal Koruma Spreyi",
+    category: "Saç Şekillendirme",
+    categoryId: "sac-sekillendirme",
+    price: 249,
+    originalPrice: 299,
+    image: "/images/products/termal-sprey.svg",
+    rating: 4.7,
+    reviewCount: 96,
+  },
+  {
+    id: "new-4",
+    name: "Saç Köpüğü Extra Hold",
+    category: "Saç Şekillendirme",
+    categoryId: "sac-sekillendirme",
+    price: 179,
+    image: "/images/products/sac-kopugu.svg",
+    rating: 4.5,
+    reviewCount: 73,
+  },
+  {
+    id: "new-5",
+    name: "Hassas Cilt Epilasyon Bandı",
+    category: "Epilasyon",
+    categoryId: "epilasyon",
+    price: 159,
+    image: "/images/products/epilasyon-bant.svg",
+    rating: 4.4,
+    reviewCount: 312,
+  },
+  {
+    id: "new-6",
+    name: "Soğuk Ağda Seti",
+    category: "Epilasyon",
+    categoryId: "epilasyon",
+    price: 219,
+    originalPrice: 259,
+    image: "/images/products/agda-set.svg",
+    rating: 4.6,
+    reviewCount: 187,
+  },
+  {
+    id: "new-7",
+    name: "Sakız Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-gum.svg",
+    isDeal: true,
+    rating: 4.9,
+    reviewCount: 521,
+  },
+  {
+    id: "new-8",
+    name: "Çilek Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    image: "/images/product-strawberry.svg",
+    isDeal: true,
+    rating: 4.8,
+    reviewCount: 438,
+  },
+  {
+    id: "new-9",
+    name: "Mango Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 369,
+    image: "/images/product-mango.svg",
+    rating: 4.7,
+    reviewCount: 356,
+  },
+  {
+    id: "new-10",
+    name: "Vanilya & Amber EDP",
+    category: "Parfümeri",
+    categoryId: "parfumeri",
+    price: 599,
+    originalPrice: 699,
+    image: "/images/products/parfum.svg",
+    rating: 4.9,
+    reviewCount: 89,
+  },
+  {
+    id: "new-11",
+    name: "Çiçeksi Vücut Spreyi",
+    category: "Parfümeri",
+    categoryId: "parfumeri",
+    price: 279,
+    image: "/images/products/vucut-sprey.svg",
+    rating: 4.5,
+    reviewCount: 142,
+  },
+  {
+    id: "new-12",
+    name: "Besleyici El Kremi Seti",
+    category: "Manikür & Pedikür",
+    categoryId: "manikur-pedikur",
+    price: 189,
+    image: "/images/products/el-kremi.svg",
+    rating: 4.6,
+    reviewCount: 67,
+  },
+  {
+    id: "new-13",
+    name: "Ayak Peeling Maskesi",
+    category: "Manikür & Pedikür",
+    categoryId: "manikur-pedikur",
+    price: 229,
+    originalPrice: 269,
+    image: "/images/products/ayak-mask.svg",
+    rating: 4.7,
+    reviewCount: 203,
+  },
+];
+
+export const featuredProducts: Product[] = [
+  {
+    id: "prod-1",
+    name: "Sakız Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-gum.svg",
+    isDeal: true,
+    rating: 4.9,
+    reviewCount: 521,
+  },
+  {
+    id: "prod-2",
+    name: "Çilek Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-strawberry.svg",
+    isDeal: true,
+    rating: 4.8,
+    reviewCount: 438,
+  },
+  {
+    id: "prod-3",
+    name: "Mango Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 369,
+    image: "/images/product-mango.svg",
+    isDeal: true,
+    rating: 4.7,
+    reviewCount: 356,
+  },
+  {
+    id: "prod-4",
+    name: "Narenciye Vücut Peeling",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 359,
+    originalPrice: 399,
+    image: "/images/product-citrus.svg",
+    isDeal: true,
+    rating: 4.6,
+    reviewCount: 289,
+  },
+];
+
+export const bestSellerProducts: Product[] = [
+  {
+    id: "bs-1",
+    name: "Sakız Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-gum.svg",
+    isExclusive: true,
+    rating: 4.9,
+    reviewCount: 1121,
+  },
+  {
+    id: "bs-2",
+    name: "Çilek Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-strawberry.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 987,
+  },
+  {
+    id: "bs-3",
+    name: "Mango Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 369,
+    originalPrice: 449,
+    image: "/images/product-mango.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 856,
+  },
+  {
+    id: "bs-4",
+    name: "Narenciye Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 359,
+    originalPrice: 399,
+    image: "/images/product-citrus.svg",
+    isExclusive: true,
+    rating: 4.7,
+    reviewCount: 743,
+  },
+  {
+    id: "bs-5",
+    name: "Onarıcı Saç Maskesi 250ml",
+    category: "Saç Bakım",
+    categoryId: "sac-bakim",
+    price: 289,
+    originalPrice: 349,
+    image: "/images/products/sac-mask.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 612,
+  },
+  {
+    id: "bs-6",
+    name: "Hacim Veren Saç Serumu 100ml",
+    category: "Saç Bakım",
+    categoryId: "sac-bakim",
+    price: 199,
+    originalPrice: 249,
+    image: "/images/products/sac-serum.svg",
+    isExclusive: true,
+    rating: 4.6,
+    reviewCount: 534,
+  },
+  {
+    id: "bs-7",
+    name: "Termal Koruma Spreyi 200ml",
+    category: "Saç Şekillendirme",
+    categoryId: "sac-sekillendirme",
+    price: 249,
+    originalPrice: 299,
+    image: "/images/products/termal-sprey.svg",
+    isExclusive: true,
+    rating: 4.7,
+    reviewCount: 421,
+  },
+  {
+    id: "bs-8",
+    name: "Saç Köpüğü Extra Hold 200ml",
+    category: "Saç Şekillendirme",
+    categoryId: "sac-sekillendirme",
+    price: 179,
+    originalPrice: 219,
+    image: "/images/products/sac-kopugu.svg",
+    isExclusive: true,
+    rating: 4.5,
+    reviewCount: 389,
+  },
+  {
+    id: "bs-9",
+    name: "Hassas Cilt Epilasyon Bandı",
+    category: "Epilasyon",
+    categoryId: "epilasyon",
+    price: 159,
+    originalPrice: 189,
+    image: "/images/products/epilasyon-bant.svg",
+    isExclusive: true,
+    rating: 4.4,
+    reviewCount: 678,
+  },
+  {
+    id: "bs-10",
+    name: "Soğuk Ağda Seti",
+    category: "Epilasyon",
+    categoryId: "epilasyon",
+    price: 219,
+    originalPrice: 259,
+    image: "/images/products/agda-set.svg",
+    isExclusive: true,
+    rating: 4.6,
+    reviewCount: 502,
+  },
+  {
+    id: "bs-11",
+    name: "Vanilya & Amber EDP 50ml",
+    category: "Parfümeri",
+    categoryId: "parfumeri",
+    price: 599,
+    originalPrice: 699,
+    image: "/images/products/parfum.svg",
+    isExclusive: true,
+    rating: 4.9,
+    reviewCount: 312,
+  },
+  {
+    id: "bs-12",
+    name: "Çiçeksi Vücut Spreyi 200ml",
+    category: "Parfümeri",
+    categoryId: "parfumeri",
+    price: 279,
+    originalPrice: 329,
+    image: "/images/products/vucut-sprey.svg",
+    isExclusive: true,
+    rating: 4.5,
+    reviewCount: 267,
+  },
+  {
+    id: "bs-13",
+    name: "Besleyici El Kremi Seti",
+    category: "Manikür & Pedikür",
+    categoryId: "manikur-pedikur",
+    price: 189,
+    originalPrice: 229,
+    image: "/images/products/el-kremi.svg",
+    isExclusive: true,
+    rating: 4.6,
+    reviewCount: 198,
+  },
+  {
+    id: "bs-14",
+    name: "Ayak Peeling Maskesi",
+    category: "Manikür & Pedikür",
+    categoryId: "manikur-pedikur",
+    price: 229,
+    originalPrice: 269,
+    image: "/images/products/ayak-mask.svg",
+    isExclusive: true,
+    rating: 4.7,
+    reviewCount: 445,
+  },
+  {
+    id: "bs-15",
+    name: "Nemlendirici Vücut Losyonu 400ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 319,
+    originalPrice: 379,
+    image: "/images/product-gum.svg",
+    isExclusive: true,
+    rating: 4.7,
+    reviewCount: 356,
+  },
+  {
+    id: "bs-16",
+    name: "Günlük Bakım Peeling Seti",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 499,
+    originalPrice: 599,
+    image: "/images/product-strawberry.svg",
+    isExclusive: true,
+    rating: 4.9,
+    reviewCount: 891,
+  },
+];
+
+export const highlightedProducts: Product[] = [
+  {
+    id: "feat-1",
+    name: "Sakız Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-gum.svg",
+    isExclusive: true,
+    rating: 4.9,
+    reviewCount: 1121,
+  },
+  {
+    id: "feat-2",
+    name: "Çilek Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 349,
+    originalPrice: 429,
+    image: "/images/product-strawberry.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 987,
+  },
+  {
+    id: "feat-3",
+    name: "Onarıcı Saç Maskesi 250ml",
+    category: "Saç Bakım",
+    categoryId: "sac-bakim",
+    price: 289,
+    originalPrice: 349,
+    image: "/images/products/sac-mask.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 612,
+  },
+  {
+    id: "feat-4",
+    name: "Termal Koruma Spreyi 200ml",
+    category: "Saç Şekillendirme",
+    categoryId: "sac-sekillendirme",
+    price: 249,
+    originalPrice: 299,
+    image: "/images/products/termal-sprey.svg",
+    isExclusive: true,
+    rating: 4.7,
+    reviewCount: 421,
+  },
+  {
+    id: "feat-5",
+    name: "Soğuk Ağda Seti",
+    category: "Epilasyon",
+    categoryId: "epilasyon",
+    price: 219,
+    originalPrice: 259,
+    image: "/images/products/agda-set.svg",
+    isExclusive: true,
+    rating: 4.6,
+    reviewCount: 502,
+  },
+  {
+    id: "feat-6",
+    name: "Vanilya & Amber EDP 50ml",
+    category: "Parfümeri",
+    categoryId: "parfumeri",
+    price: 599,
+    originalPrice: 699,
+    image: "/images/products/parfum.svg",
+    isExclusive: true,
+    rating: 4.9,
+    reviewCount: 312,
+  },
+  {
+    id: "feat-7",
+    name: "Mango Vücut Peeling 300ml",
+    category: "Vücut Peeling",
+    categoryId: "vucut-peeling",
+    price: 369,
+    originalPrice: 449,
+    image: "/images/product-mango.svg",
+    isExclusive: true,
+    rating: 4.8,
+    reviewCount: 856,
+  },
+  {
+    id: "feat-8",
+    name: "Besleyici El Kremi Seti",
+    category: "Manikür & Pedikür",
+    categoryId: "manikur-pedikur",
+    price: 189,
+    originalPrice: 229,
+    image: "/images/products/el-kremi.svg",
+    isExclusive: true,
+    rating: 4.6,
+    reviewCount: 198,
+  },
+];
+
+export const serviceBenefits: ServiceBenefit[] = [
+  {
+    id: "shipping",
+    title: "Ücretsiz Kargo",
+    description: "500 TL ve üzeri siparişlerde",
+    icon: "shipping",
+  },
+  {
+    id: "return",
+    title: "Kolay İade",
+    description: "14 gün içinde ücretsiz iade",
+    icon: "return",
+  },
+  {
+    id: "payment",
+    title: "Güvenli Ödeme",
+    description: "256-bit SSL ile koruma",
+    icon: "payment",
+  },
+  {
+    id: "discount",
+    title: "Özel İndirimler",
+    description: "Üyelere özel fırsatlar",
+    icon: "discount",
+  },
+];
+
+export const navLinks = [
+  { label: "Tüm Ürünler", href: "/urunler" },
+  { label: "Koleksiyonlar", href: "/koleksiyonlar" },
+  { label: "Peelingler", href: "/peelingler" },
+  { label: "Hakkımızda", href: "/hakkimizda" },
+] as const;
+
+export const footerCategories = [
+  { label: "Cilt Bakımı", href: "/kategori/cilt-bakimi" },
+  { label: "Vücut Bakımı", href: "/kategori/vucut-bakimi" },
+  { label: "Peelingler", href: "/peelingler" },
+  { label: "Yeni Gelenler", href: "/yeni-gelenler" },
+] as const;
+
+export const footerSupport = [
+  { label: "Sıkça Sorulan Sorular", href: "/sss" },
+  { label: "Kargo & İade", href: "/kargo-iade" },
+  { label: "İletişim", href: "/iletisim" },
+  { label: "Gizlilik Politikası", href: "/gizlilik" },
+] as const;

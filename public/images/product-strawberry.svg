@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" fill="none">
+  <rect width="400" height="520" fill="#f3ebe4"/>
+  <defs>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5c4c4"/>
+      <stop offset="100%" stop-color="#d96b6b"/>
+    </linearGradient>
+  </defs>
+  <rect x="125" y="70" width="150" height="320" rx="26" fill="url(#s)"/>
+  <rect x="145" y="50" width="110" height="32" rx="8" fill="#faf8f5"/>
+  <text x="200" y="250" text-anchor="middle" fill="#6b2d2d" font-family="system-ui,sans-serif" font-size="12" font-weight="600" letter-spacing="2">Ç0LEK</text>
+</svg>
