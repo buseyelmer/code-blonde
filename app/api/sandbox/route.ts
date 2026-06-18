@@ -103,15 +103,6 @@ async function fetchCodeBlondeProducts(brandId: string) {
   };
 }
 
-function withProductGrouping(products: Product[]) {
-  const grouped = groupProductsByCategory(products);
-  return {
-    products,
-    productCategories: grouped.productCategories,
-    productGroups: grouped.groups,
-  };
-}
-
 async function fetchHomeBundle(brandId: string) {
   const [productRes, bestSellerRes, categoryRes] = await Promise.all([
     fetchData<IData<Record<string, unknown>>>("/customer/product", {
