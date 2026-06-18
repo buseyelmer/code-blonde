@@ -3,10 +3,9 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/data";
+import { PLACEHOLDER_IMAGE } from "@/lib/product-utils";
 import { HeartIcon, PlusIcon } from "./icons";
 import { StarRating } from "./StarRating";
-
-const PLACEHOLDER_IMAGE = "/placeholder.jpg";
 
 type NewArrivalCardProps = {
   product: Product;

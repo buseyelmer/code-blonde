@@ -1,4 +1,8 @@
-export const PLACEHOLDER_IMAGE = "/placeholder.jpg";
+export const PLACEHOLDER_IMAGE = "/placeholder.svg";
+
+export function isPlaceholderImage(src: string): boolean {
+  return src === PLACEHOLDER_IMAGE || /\/placeholder\.(svg|jpg)$/i.test(src);
+}
 
 export function formatPrice(amount: unknown): string {
   if (amount === undefined || amount === null) return "₺0,00";

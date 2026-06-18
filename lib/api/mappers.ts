@@ -5,7 +5,7 @@ import { getProductCategoryMeta } from "@/lib/api/group-products";
 import { limitCategories, resolveCategoryImage, toCategoryHref } from "@/lib/category-utils";
 import type { ProductCategoryOption } from "@/lib/api/group-products";
 
-const PLACEHOLDER_IMAGE = "/placeholder.jpg";
+const PLACEHOLDER_IMAGE = "/placeholder.svg";
 
 function resolveDisplayPrice(product: ApiProduct): number {
   if (typeof product.salePrice === "number") return product.salePrice;

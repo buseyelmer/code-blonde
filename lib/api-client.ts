@@ -59,10 +59,6 @@ function buildHeaders(): Record<string, string> {
 
   if (env.ticimaxAjaxProToken) {
     headers["X-Ajaxpro-Token"] = env.ticimaxAjaxProToken;
-  } else {
-    console.warn(
-      "[api-client] TICIMAX_AJAXPRO_TOKEN boş — X-Ajaxpro-Token gönderilmiyor.",
-    );
   }
 
   if (env.ticimaxMemberCode) {

@@ -50,16 +50,6 @@ export async function fetchAllCodeBlondeProducts(
     return raw ? isCodeBlondeProduct(raw, brandId) : true;
   });
 
-  if (process.env.NODE_ENV === "development") {
-    console.warn(
-      `[fetch-brand-products] API ham: ${uniqueRaw.length}, normalize: ${normalized.length}, filtre sonrası: ${products.length}`,
-    );
-    console.warn(
-      "[fetch-brand-products] ürün id listesi:",
-      products.map((p) => p.id),
-    );
-  }
-
   return {
     products,
     rawItems: uniqueRaw,

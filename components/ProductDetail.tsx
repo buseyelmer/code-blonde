@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { QuantitySelector } from "@/components/cart/QuantitySelector";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { useSandboxProducts } from "@/hooks/useHomeData";
-import { formatPrice, resolveProductImageUrl } from "@/lib/product-utils";
+import { formatPrice, PLACEHOLDER_IMAGE, resolveProductImageUrl } from "@/lib/product-utils";
 import { ProductImageZoom } from "@/components/product/ProductImageZoom";
 import { ProductTabs } from "@/components/product/ProductTabs";
 
@@ -19,7 +19,7 @@ type ProductWithMedia = ReturnType<typeof mapApiProductsToCards>[number] & {
 
 export function ProductDetail({ productId }: ProductDetailProps) {
   const { data, isLoading, isError } = useSandboxProducts();
-  const [imageUrl, setImageUrl] = useState("/placeholder.jpg");
+  const [imageUrl, setImageUrl] = useState(PLACEHOLDER_IMAGE);
 
   const products = useMemo(
     () => mapApiProductsToCards(data?.products),
