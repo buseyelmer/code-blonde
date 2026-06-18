@@ -3,6 +3,7 @@ import { IData } from "@/core/interface/nexine.interface";
 import { Product } from "@/core/interface/product.interface";
 import { Category, Status } from "@/core/interface/prisma.interface";
 import { normalizeApiProducts } from "@/lib/api/normalize-product";
+import { groupProductsByCategory } from "@/lib/api/group-products";
 import {
   CODE_BLONDE_BRAND_NAME,
   isCodeBlondeProduct,
@@ -83,6 +84,7 @@ async function fetchCodeBlondeProducts(brandId: string) {
     brandId,
     productData?.data,
   );
+  const grouped = groupProductsByCategory(products);
 
   if (!productData) {
     console.warn("[sandbox] Code Blonde ürünleri çekilemedi, boş dizi dönülüyor.");
@@ -90,12 +92,23 @@ async function fetchCodeBlondeProducts(brandId: string) {
 
   return {
     products,
+    productCategories: grouped.productCategories,
+    productGroups: grouped.groups,
     meta: {
       scope: "products",
       brand: CODE_BLONDE_BRAND_NAME,
       brandId,
       count: products.length,
     },
+  };
+}
+
+function withProductGrouping(products: Product[]) {
+  const grouped = groupProductsByCategory(products);
+  return {
+    products,
+    productCategories: grouped.productCategories,
+    productGroups: grouped.groups,
   };
 }
 
@@ -128,6 +141,7 @@ async function fetchHomeBundle(brandId: string) {
     bestSellerRes?.data,
   );
   const category = categoryRes?.data ?? [];
+  const grouped = groupProductsByCategory(products);
 
   if (!productRes && !bestSellerRes && !categoryRes) {
     console.warn("[sandbox] Ana veri paketi çekilemedi, boş diziler dönülüyor.");
@@ -138,6 +152,8 @@ async function fetchHomeBundle(brandId: string) {
     products,
     bestSeller,
     category,
+    productCategories: grouped.productCategories,
+    productGroups: grouped.groups,
     meta: {
       scope: "home",
       brand: CODE_BLONDE_BRAND_NAME,
