@@ -13,8 +13,8 @@ export function Header() {
 
   return (
     <header className="max-w-full overflow-hidden border-b border-stone/50 bg-white">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-3 sm:h-[4.5rem] sm:gap-4 sm:px-6 lg:px-8">
-        <Logo className="min-w-0 shrink-0" variant="compact" crossColor="#ffffff" />
+      <div className="mx-auto flex min-h-[4.25rem] max-w-7xl items-center gap-2 px-3 py-2 sm:min-h-[5.25rem] sm:gap-4 sm:px-6 sm:py-2.5 lg:px-8">
+        <Logo variant="header" />
 
         <div className="relative hidden min-w-0 flex-1 md:block">
           <label htmlFor="site-search" className="sr-only">

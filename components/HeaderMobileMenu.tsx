@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/context/AuthContext";
 import { useSandboxData } from "@/hooks/useHomeData";
 import { toCategoryHref } from "@/lib/category-utils";
 import { CloseIcon } from "./icons";
+import { Logo } from "./Logo";
 
 type HeaderMobileMenuProps = {
   open: boolean;
@@ -40,8 +41,8 @@ export function HeaderMobileMenu({ open, onClose }: HeaderMobileMenuProps) {
       />
 
       <aside className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-stone/60 px-4 py-4">
-          <p className="text-sm font-semibold text-charcoal">Menü</p>
+        <div className="flex items-center justify-between gap-3 border-b border-stone/60 px-4 py-3.5">
+          <Logo variant="mobile" onNavigate={onClose} />
           <button
             type="button"
             onClick={onClose}

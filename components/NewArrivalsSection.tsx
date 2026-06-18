@@ -1,24 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import type { Product as ApiProduct } from "@/core/interface/product.interface";
 import type { ProductCategoryOption } from "@/lib/api/group-products";
-import { getProductCategoryMeta } from "@/lib/api/group-products";
-import { mapApiProductsToCards } from "@/lib/api/mappers";
 import type { Product } from "@/lib/data";
 import { ProductCard } from "@/components/ProductCard";
 
 const VISIBLE_COUNT = 8;
 
 type NewArrivalsSectionProps = {
-  products?: ApiProduct[];
+  products?: Product[];
   productCategories?: ProductCategoryOption[];
 };
-
-function toArrivalProducts(apiProducts?: ApiProduct[]): Product[] {
-  return mapApiProductsToCards(apiProducts);
-}
 
 function buildCategoryOptions(
   apiCategories: ProductCategoryOption[] | undefined,
@@ -35,14 +27,9 @@ function buildCategoryOptions(
 }
 
 export function NewArrivalsSection({
-  products: apiProducts,
+  products: sourceProducts = [],
   productCategories,
 }: NewArrivalsSectionProps) {
-  const sourceProducts = useMemo(
-    () => toArrivalProducts(apiProducts),
-    [apiProducts],
-  );
-
   const categoryOptions = useMemo(
     () => buildCategoryOptions(productCategories, sourceProducts),
     [productCategories, sourceProducts],
@@ -60,27 +47,12 @@ export function NewArrivalsSection({
 
     if (!activeCategory) return sourceProducts;
 
-    return sourceProducts.filter((product) => {
-      const meta = getProductCategoryMeta(
-        apiProducts?.find((item) => item.id === product.id) ?? {
-          id: product.id,
-          category: product.category,
-          categoryId: product.categoryId,
-        },
-      );
-
-      return (
-        meta.categoryId === selectedCategory ||
-        meta.categoryName === activeCategory.name ||
-        product.category === activeCategory.name
-      );
-    });
-  }, [
-    selectedCategory,
-    sourceProducts,
-    categoryOptions,
-    apiProducts,
-  ]);
+    return sourceProducts.filter(
+      (product) =>
+        product.categoryId === selectedCategory ||
+        product.category === activeCategory.name,
+    );
+  }, [selectedCategory, sourceProducts, categoryOptions]);
 
   const totalPages = Math.max(
     1,
@@ -129,32 +101,20 @@ export function NewArrivalsSection({
           })}
         </div>
 
-        {filteredProducts.length === 0 ? (
+        {sourceProducts.length === 0 ? (
+          <p className="mt-8 text-center text-sm text-muted">
+            Ürünler yükleniyor veya henüz listelenecek ürün yok.
+          </p>
+        ) : filteredProducts.length === 0 ? (
           <p className="mt-8 text-center text-sm text-muted">
             Bu kategoride ürün bulunamadı
           </p>
         ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${selectedCategory}-${currentPage}`}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-            >
-              {visibleProducts.map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <ProductCard product={product} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {visibleProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         )}
 
         {filteredProducts.length > VISIBLE_COUNT && (

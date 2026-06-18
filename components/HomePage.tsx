@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { HeroSlider } from "@/components/HeroSlider";
 import { CategoryNav } from "@/components/CategoryNav";
 import { BestSellersSection } from "@/components/BestSellersSection";
@@ -9,9 +10,21 @@ import { PromoSection } from "@/components/PromoSection";
 import { HomeSection } from "@/components/HomeSection";
 import { HomePageError, HomePageLoader } from "@/components/HomePageStatus";
 import { useSandboxData } from "@/hooks/useHomeData";
+import { mapApiProductsToCards } from "@/lib/api/mappers";
 
 export function HomePage() {
   const { data, isLoading, isError, error, refetch } = useSandboxData();
+
+  const cardProducts = useMemo(
+    () => mapApiProductsToCards(data?.products),
+    [data?.products],
+  );
+
+  const bestSellerSource = useMemo(
+    () =>
+      data?.bestSeller?.length ? data.bestSeller : data?.products,
+    [data?.bestSeller, data?.products],
+  );
 
   if (isLoading) {
     return <HomePageLoader />;
@@ -37,22 +50,18 @@ export function HomePage() {
       </HomeSection>
 
       <HomeSection>
-        <BestSellersSection
-          products={
-            data?.bestSeller?.length ? data.bestSeller : data?.products
-          }
-        />
+        <BestSellersSection products={bestSellerSource} />
       </HomeSection>
 
       <HomeSection>
         <NewArrivalsSection
-          products={data?.products}
+          products={cardProducts}
           productCategories={data?.productCategories}
         />
       </HomeSection>
 
       <HomeSection>
-        <ProductGrid products={data?.products} />
+        <ProductGrid products={cardProducts} />
       </HomeSection>
 
       <HomeSection>

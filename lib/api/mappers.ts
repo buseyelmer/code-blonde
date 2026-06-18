@@ -10,6 +10,21 @@ const PLACEHOLDER_IMAGE = "/placeholder.jpg";
 function resolveDisplayPrice(product: ApiProduct): number {
   if (typeof product.salePrice === "number") return product.salePrice;
   if (typeof product.price === "number") return product.price;
+
+  if (product.price && typeof product.price === "object") {
+    const nested = product.price as {
+      payPrice?: number;
+      mainPrice?: number;
+      discountPrice?: number;
+    };
+    return (
+      nested.payPrice ??
+      nested.discountPrice ??
+      nested.mainPrice ??
+      0
+    );
+  }
+
   return 0;
 }
 

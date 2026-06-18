@@ -10,11 +10,11 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-stone/70 bg-powder/40">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-14 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Logo />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">
+            <Logo variant="footer" />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
               Code Blonde, doğanın saflığını modern formüllerle buluşturan
               minimalist bir bakım markasıdır. Cildinize iyi gelen, sade ve
               etkili ürünler.
