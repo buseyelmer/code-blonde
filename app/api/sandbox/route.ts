@@ -1,18 +1,18 @@
-import { fetchData } from "@/lib/api-client";
+import { fetchData, API_REVALIDATE_SECONDS } from "@/lib/api-client";
 import { IData } from "@/core/interface/nexine.interface";
 import { Product } from "@/core/interface/product.interface";
 import { Category, Status } from "@/core/interface/prisma.interface";
-import { normalizeApiProducts } from "@/lib/api/normalize-product";
+import { fetchAllCodeBlondeProducts } from "@/lib/api/fetch-brand-products";
 import { groupProductsByCategory } from "@/lib/api/group-products";
+import { normalizeApiProducts } from "@/lib/api/normalize-product";
 import {
   CODE_BLONDE_BRAND_NAME,
   isCodeBlondeProduct,
   resolveCodeBlondeBrandId,
 } from "@/lib/api/resolve-brand";
-import { NO_CACHE_HEADERS } from "@/core/util/no-cache";
-import { NextResponse } from "next/server";
+import { jsonWithCache } from "@/app/api/sandbox/cache";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const EMPTY_HOME_PAYLOAD = {
   products: [] as Product[],
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       console.warn(
         `[sandbox] ${CODE_BLONDE_BRAND_NAME} brandId bulunamadı, boş diziler dönülüyor.`,
       );
-      return jsonWithNoCache({
+      return jsonWithCache({
         ...(scope === "products"
           ? { products: [], meta: { scope, brandId: null, count: 0 } }
           : {
@@ -56,13 +56,13 @@ export async function GET(request: Request) {
     }
 
     if (scope === "products") {
-      return jsonWithNoCache(await fetchCodeBlondeProducts(brandId));
+      return jsonWithCache(await fetchCodeBlondeProducts(brandId));
     }
 
-    return jsonWithNoCache(await fetchHomeBundle(brandId));
+    return jsonWithCache(await fetchHomeBundle(brandId));
   } catch (error) {
     console.error("[sandbox] Beklenmeyen hata:", error);
-    return jsonWithNoCache({
+    return jsonWithCache({
       ...EMPTY_HOME_PAYLOAD,
       meta: { scope, error: true },
     });
@@ -70,25 +70,9 @@ export async function GET(request: Request) {
 }
 
 async function fetchCodeBlondeProducts(brandId: string) {
-  const productData = await fetchData<IData<Record<string, unknown>>>(
-    "/customer/product",
-    {
-      status: Status.PUBLISHED,
-      brandId,
-      amount: 20,
-    },
-  );
-
-  const products = filterCodeBlondeProducts(
-    normalizeApiProducts(productData?.data),
-    brandId,
-    productData?.data,
-  );
+  const { products, apiReportedCount } =
+    await fetchAllCodeBlondeProducts(brandId);
   const grouped = groupProductsByCategory(products);
-
-  if (!productData) {
-    console.warn("[sandbox] Code Blonde ürünleri çekilemedi, boş dizi dönülüyor.");
-  }
 
   return {
     products,
@@ -99,33 +83,32 @@ async function fetchCodeBlondeProducts(brandId: string) {
       brand: CODE_BLONDE_BRAND_NAME,
       brandId,
       count: products.length,
+      apiReportedCount,
     },
   };
 }
 
 async function fetchHomeBundle(brandId: string) {
-  const [productRes, bestSellerRes, categoryRes] = await Promise.all([
-    fetchData<IData<Record<string, unknown>>>("/customer/product", {
-      status: Status.PUBLISHED,
-      brandId,
-      amount: 20,
-    }),
-    fetchData<IData<Record<string, unknown>>>("/customer/product", {
-      status: Status.PUBLISHED,
-      brandId,
-      tag: "best-seller",
-      amount: 16,
-    }),
-    fetchData<IData<Category>>("/customer/category", {
-      viewType: "tree",
-    }),
+  const [productBundle, bestSellerRes, categoryRes] = await Promise.all([
+    fetchAllCodeBlondeProducts(brandId),
+    fetchData<IData<Record<string, unknown>>>(
+      "/customer/product",
+      {
+        status: Status.PUBLISHED,
+        brandId,
+        tag: "best-seller",
+        amount: 100,
+      },
+      { revalidate: API_REVALIDATE_SECONDS },
+    ),
+    fetchData<IData<Category>>(
+      "/customer/category",
+      { viewType: "tree" },
+      { revalidate: API_REVALIDATE_SECONDS },
+    ),
   ]);
 
-  const products = filterCodeBlondeProducts(
-    normalizeApiProducts(productRes?.data),
-    brandId,
-    productRes?.data,
-  );
+  const products = productBundle.products;
   const bestSeller = filterCodeBlondeProducts(
     normalizeApiProducts(bestSellerRes?.data),
     brandId,
@@ -133,10 +116,6 @@ async function fetchHomeBundle(brandId: string) {
   );
   const category = categoryRes?.data ?? [];
   const grouped = groupProductsByCategory(products);
-
-  if (!productRes && !bestSellerRes && !categoryRes) {
-    console.warn("[sandbox] Ana veri paketi çekilemedi, boş diziler dönülüyor.");
-  }
 
   return {
     ...EMPTY_HOME_PAYLOAD,
@@ -150,6 +129,7 @@ async function fetchHomeBundle(brandId: string) {
       brand: CODE_BLONDE_BRAND_NAME,
       brandId,
       productCount: products.length,
+      apiReportedCount: productBundle.apiReportedCount,
       bestSellerCount: bestSeller.length,
       categoryCount: category.length,
     },
@@ -170,17 +150,7 @@ function filterCodeBlondeProducts(
       .filter(Boolean),
   );
 
-  if (allowedIds.size === 0) return [];
+  if (allowedIds.size === 0) return normalized;
 
   return normalized.filter((product) => product.id && allowedIds.has(product.id));
-}
-
-function jsonWithNoCache(body: unknown) {
-  const response = NextResponse.json(body, { status: 200 });
-
-  Object.entries(NO_CACHE_HEADERS).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
-
-  return response;
 }
