@@ -3,73 +3,109 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Product as ApiProduct } from "@/core/interface/product.interface";
+import type { ProductCategoryOption } from "@/lib/api/group-products";
+import { getProductCategoryMeta } from "@/lib/api/group-products";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
-import {
-  newArrivalProducts,
-  productFilterOptions,
-  type Product,
-  type ProductCategoryId,
-} from "@/lib/data";
-import { NewArrivalCard } from "./NewArrivalCard";
+import type { Product } from "@/lib/data";
+import { ProductCard } from "@/components/ProductCard";
 
-type SelectedCategory = "all" | ProductCategoryId;
-
-const VISIBLE_COUNT = 6;
+const VISIBLE_COUNT = 8;
 
 type NewArrivalsSectionProps = {
   products?: ApiProduct[];
+  productCategories?: ProductCategoryOption[];
 };
 
 function toArrivalProducts(apiProducts?: ApiProduct[]): Product[] {
-  if (apiProducts?.length) {
-    return mapApiProductsToCards(apiProducts);
-  }
-  return newArrivalProducts;
+  return mapApiProductsToCards(apiProducts);
 }
 
-export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSectionProps) {
+function buildCategoryOptions(
+  apiCategories: ProductCategoryOption[] | undefined,
+  products: Product[],
+) {
+  if (!apiCategories?.length) {
+    return [{ id: "all", name: "Tüm Ürünler", count: products.length }];
+  }
+
+  return [
+    { id: "all", name: "Tüm Ürünler", count: products.length },
+    ...apiCategories,
+  ];
+}
+
+export function NewArrivalsSection({
+  products: apiProducts,
+  productCategories,
+}: NewArrivalsSectionProps) {
   const sourceProducts = useMemo(
     () => toArrivalProducts(apiProducts),
     [apiProducts],
   );
-  const [selectedCategory, setSelectedCategory] =
-    useState<SelectedCategory>("all");
+
+  const categoryOptions = useMemo(
+    () => buildCategoryOptions(productCategories, sourceProducts),
+    [productCategories, sourceProducts],
+  );
+
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [page, setPage] = useState(0);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "all") return sourceProducts;
 
-    const activeOption = productFilterOptions.find(
-      (option) => option.id === selectedCategory,
+    const activeCategory = categoryOptions.find(
+      (category) => category.id === selectedCategory,
     );
-    const categoryName = activeOption?.label ?? "";
 
-    return sourceProducts.filter(
-      (product) => product.category === categoryName,
-    );
-  }, [selectedCategory, sourceProducts]);
+    if (!activeCategory) return sourceProducts;
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / VISIBLE_COUNT));
+    return sourceProducts.filter((product) => {
+      const meta = getProductCategoryMeta(
+        apiProducts?.find((item) => item.id === product.id) ?? {
+          id: product.id,
+          category: product.category,
+          categoryId: product.categoryId,
+        },
+      );
+
+      return (
+        meta.categoryId === selectedCategory ||
+        meta.categoryName === activeCategory.name ||
+        product.category === activeCategory.name
+      );
+    });
+  }, [
+    selectedCategory,
+    sourceProducts,
+    categoryOptions,
+    apiProducts,
+  ]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / VISIBLE_COUNT),
+  );
   const currentPage = Math.min(page, totalPages - 1);
   const visibleProducts = filteredProducts.slice(
     currentPage * VISIBLE_COUNT,
     currentPage * VISIBLE_COUNT + VISIBLE_COUNT,
   );
 
-  const handleCategoryChange = (category: SelectedCategory) => {
-    setSelectedCategory(category);
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
     setPage(0);
   };
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="w-full">
       <div className="rounded-3xl bg-gradient-to-br from-powder via-cream to-powder/60 p-5 sm:p-8">
         <h2 className="text-lg font-bold tracking-tight text-charcoal sm:text-xl">
           YENİ GELEN ÜRÜNLER
         </h2>
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {productFilterOptions.map((option) => {
+          {categoryOptions.map((option) => {
             const isActive = selectedCategory === option.id;
             return (
               <button
@@ -82,7 +118,12 @@ export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSection
                     : "border-stone bg-cream text-charcoal hover:border-gold hover:text-gold"
                 }`}
               >
-                {option.label}
+                {option.name}
+                {option.id !== "all" && (
+                  <span className="ml-1 text-[0.65rem] opacity-70">
+                    ({option.count})
+                  </span>
+                )}
               </button>
             );
           })}
@@ -100,7 +141,7 @@ export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSection
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6"
+              className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
             >
               {visibleProducts.map((product, index) => (
                 <motion.div
@@ -109,7 +150,7 @@ export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSection
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <NewArrivalCard product={product} />
+                  <ProductCard product={product} />
                 </motion.div>
               ))}
             </motion.div>
@@ -144,6 +185,6 @@ export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSection
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

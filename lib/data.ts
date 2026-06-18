@@ -17,14 +17,6 @@ export type ProductCategoryId =
   | "parfumeri"
   | "manikur-pedikur";
 
-export type ShopCategory = {
-  id: ProductCategoryId;
-  label: string;
-  subtitle: string;
-  image: string;
-  href: string;
-};
-
 export type Product = {
   id: string;
   name: string;
@@ -79,56 +71,6 @@ export const heroSlides: HeroSlide[] = [
     image: "/images/hero-peeling-mango.svg",
     imageAlt: "Mango aromalı vücut peeling ürünü",
   },
-];
-
-export const shopCategories: ShopCategory[] = [
-  {
-    id: "sac-bakim",
-    label: "Saç Bakım",
-    subtitle: "Işıltılı saçlar",
-    image: "/images/categories/sac-bakim.svg",
-    href: "/kategori/sac-bakim",
-  },
-  {
-    id: "sac-sekillendirme",
-    label: "Saç Şekillendirme",
-    subtitle: "Stil ve hacim",
-    image: "/images/categories/sac-sekillendirme.svg",
-    href: "/kategori/sac-sekillendirme",
-  },
-  {
-    id: "epilasyon",
-    label: "Epilasyon",
-    subtitle: "Pürüzsüz cilt",
-    image: "/images/categories/epilasyon.svg",
-    href: "/kategori/epilasyon",
-  },
-  {
-    id: "vucut-peeling",
-    label: "Vücut Peeling",
-    subtitle: "Doğal peeling",
-    image: "/images/categories/vucut-peeling.svg",
-    href: "/kategori/vucut-peeling",
-  },
-  {
-    id: "parfumeri",
-    label: "Parfümeri",
-    subtitle: "Zarif kokular",
-    image: "/images/categories/parfumeri.svg",
-    href: "/kategori/parfumeri",
-  },
-  {
-    id: "manikur-pedikur",
-    label: "Manikür & Pedikür",
-    subtitle: "El ve ayak bakımı",
-    image: "/images/categories/manikur-pedikur.svg",
-    href: "/kategori/manikur-pedikur",
-  },
-];
-
-export const productFilterOptions: { id: "all" | ProductCategoryId; label: string }[] = [
-  { id: "all", label: "Tüm Ürünler" },
-  ...shopCategories.map((c) => ({ id: c.id, label: c.label })),
 ];
 
 export const newArrivalProducts: Product[] = [

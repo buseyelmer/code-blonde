@@ -1,17 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useCart } from "@/lib/context/CartContext";
+import { QuantitySelector } from "@/components/cart/QuantitySelector";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { useSandboxProducts } from "@/hooks/useHomeData";
-import {
-  formatPrice,
-  PLACEHOLDER_IMAGE,
-  resolveProductImageUrl,
-} from "@/lib/product-utils";
-import { MinusIcon, PlusIcon } from "@/components/icons";
+import { formatPrice, resolveProductImageUrl } from "@/lib/product-utils";
+import { ProductImageZoom } from "@/components/product/ProductImageZoom";
+import { ProductTabs } from "@/components/product/ProductTabs";
 
 type ProductDetailProps = {
   productId: string;
@@ -23,13 +19,27 @@ type ProductWithMedia = ReturnType<typeof mapApiProductsToCards>[number] & {
 
 export function ProductDetail({ productId }: ProductDetailProps) {
   const { data, isLoading, isError } = useSandboxProducts();
-  const { addItem, incrementItem, decrementItem, getQuantity } = useCart();
-  const [imageUrl, setImageUrl] = useState(PLACEHOLDER_IMAGE);
+  const [imageUrl, setImageUrl] = useState("/placeholder.jpg");
 
-  const product = useMemo(() => {
-    const products = mapApiProductsToCards(data?.products);
-    return products.find((item) => item.id === productId);
-  }, [data?.products, productId]);
+  const products = useMemo(
+    () => mapApiProductsToCards(data?.products),
+    [data?.products],
+  );
+
+  const product = useMemo(
+    () => products.find((item) => item.id === productId),
+    [products, productId],
+  );
+
+  const similarProducts = useMemo(() => {
+    if (!product) return [];
+    return products
+      .filter(
+        (item) =>
+          item.id !== product.id && item.categoryId === product.categoryId,
+      )
+      .slice(0, 4);
+  }, [product, products]);
 
   useEffect(() => {
     if (!product) return;
@@ -39,7 +49,13 @@ export function ProductDetail({ productId }: ProductDetailProps) {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="h-[480px] animate-pulse rounded-3xl bg-powder/60" />
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="aspect-square animate-pulse rounded-3xl bg-powder/60" />
+          <div className="space-y-4">
+            <div className="h-8 w-2/3 animate-pulse rounded bg-powder/60" />
+            <div className="h-12 w-1/3 animate-pulse rounded bg-powder/60" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -61,31 +77,26 @@ export function ProductDetail({ productId }: ProductDetailProps) {
     );
   }
 
-  const quantity = getQuantity(product.id);
-  const safeImageSrc = imageUrl?.trim() || PLACEHOLDER_IMAGE;
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-        <div className="relative aspect-square overflow-hidden rounded-3xl bg-powder/40">
-          <Image
-            src={safeImageSrc}
-            alt={product.name}
-            fill
-            className="object-contain p-8"
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            priority
-            onError={() => setImageUrl(PLACEHOLDER_IMAGE)}
-          />
-        </div>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12 lg:px-8">
+      <nav className="text-sm text-muted">
+        <Link href="/" className="hover:text-charcoal">
+          Ana Sayfa
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-charcoal">{product.name}</span>
+      </nav>
 
-        <div>
+      <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:items-start">
+        <ProductImageZoom src={imageUrl} alt={product.name} />
+
+        <div className="lg:sticky lg:top-24">
           {product.category && (
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-gold">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
               {product.category}
             </p>
           )}
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl">
             {product.name}
           </h1>
 
@@ -100,49 +111,25 @@ export function ProductDetail({ productId }: ProductDetailProps) {
             </p>
           </div>
 
+          <p className="mt-4 text-sm leading-7 text-muted">
+            {product.description ||
+              "Code Blonde ile günlük bakım rutininize doğal bir dokunuş katın."}
+          </p>
+
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            {quantity === 0 ? (
-              <button
-                type="button"
-                onClick={() => addItem(product)}
-                className="inline-flex items-center gap-2 rounded-full bg-charcoal px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-brand-purple"
-              >
-                <PlusIcon className="h-4 w-4" />
-                Sepete Ekle
-              </button>
-            ) : (
-              <div className="inline-flex items-center gap-3 rounded-full bg-brand-purple px-4 py-2 text-white">
-                <button
-                  type="button"
-                  onClick={() => decrementItem(product.id)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15"
-                  aria-label="Adedi azalt"
-                >
-                  <MinusIcon className="h-4 w-4" />
-                </button>
-                <span className="min-w-8 text-center text-lg font-semibold tabular-nums">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => incrementItem(product.id)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15"
-                  aria-label="Adedi artır"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+            <QuantitySelector product={product} variant="detail" />
 
             <Link
-              href="/sepet"
-              className="rounded-full border border-charcoal px-6 py-3 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
+              href="/cart"
+              className="rounded-full border border-charcoal px-6 py-3.5 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
             >
               Sepete Git
             </Link>
           </div>
         </div>
       </div>
+
+      <ProductTabs product={product} similarProducts={similarProducts} />
     </div>
   );
 }

@@ -10,6 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import type { Product } from "@/lib/data";
+import {
+  getPromoDiscount,
+  PROMO_CODE,
+  validatePromoCode,
+} from "@/lib/promo-utils";
 
 export type CartItem = Product & {
   quantity: number;
@@ -24,10 +29,15 @@ type CartContextValue = {
   getQuantity: (productId: string) => number;
   totalItems: number;
   totalPrice: number;
+  promoCode: string | null;
+  promoDiscount: number;
+  applyPromoCode: (code: string) => { ok: boolean; message: string };
+  clearPromoCode: () => void;
   clearCart: () => void;
 };
 
-const STORAGE_KEY = "code-blonde-cart";
+const CART_STORAGE_KEY = "code-blonde-cart";
+const PROMO_STORAGE_KEY = "code-blonde-promo";
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -35,7 +45,7 @@ function readStoredCart(): CartItem[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as CartItem[];
@@ -53,19 +63,41 @@ function readStoredCart(): CartItem[] {
   }
 }
 
+function readStoredPromo(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const stored = window.localStorage.getItem(PROMO_STORAGE_KEY);
+  if (!stored) return null;
+
+  return getPromoDiscount(stored) > 0 ? PROMO_CODE : null;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     setItems(readStoredCart());
+    setPromoCode(readStoredPromo());
     setIsReady(true);
   }, []);
 
   useEffect(() => {
     if (!isReady) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items, isReady]);
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    if (promoCode) {
+      window.localStorage.setItem(PROMO_STORAGE_KEY, promoCode);
+      return;
+    }
+
+    window.localStorage.removeItem(PROMO_STORAGE_KEY);
+  }, [promoCode, isReady]);
 
   const addItem = useCallback((product: Product) => {
     setItems((current) => {
@@ -115,8 +147,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
+  const applyPromoCode = useCallback((code: string) => {
+    const result = validatePromoCode(code);
+
+    if (result.ok && result.normalizedCode) {
+      setPromoCode(result.normalizedCode);
+    } else {
+      setPromoCode(null);
+    }
+
+    return { ok: result.ok, message: result.message };
+  }, []);
+
+  const clearPromoCode = useCallback(() => {
+    setPromoCode(null);
+  }, []);
+
   const clearCart = useCallback(() => {
     setItems([]);
+    setPromoCode(null);
   }, []);
 
   const totalItems = useMemo(
@@ -130,6 +179,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
+  const promoDiscount = useMemo(
+    () => getPromoDiscount(promoCode),
+    [promoCode],
+  );
+
   const value = useMemo(
     () => ({
       items,
@@ -140,6 +194,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       getQuantity,
       totalItems,
       totalPrice,
+      promoCode,
+      promoDiscount,
+      applyPromoCode,
+      clearPromoCode,
       clearCart,
     }),
     [
@@ -151,6 +209,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       getQuantity,
       totalItems,
       totalPrice,
+      promoCode,
+      promoDiscount,
+      applyPromoCode,
+      clearPromoCode,
       clearCart,
     ],
   );

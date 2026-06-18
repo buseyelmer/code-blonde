@@ -31,7 +31,7 @@ export function HeroSlider() {
 
   return (
     <section
-      className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"
+      className="relative w-full overflow-hidden"
       aria-label="Öne çıkan kampanyalar"
       aria-roledescription="carousel"
     >
@@ -51,7 +51,7 @@ export function HeroSlider() {
               {slide.description}
             </p>
             <Link
-              href="/peelingler"
+              href="/products"
               className="mt-8 inline-flex items-center justify-center rounded-full border border-charcoal bg-cream px-8 py-3 text-sm font-medium text-charcoal transition-colors hover:border-gold hover:bg-white"
             >
               {slide.cta}
@@ -98,6 +98,7 @@ export function HeroSlider() {
                     fill
                     className="object-cover"
                     priority={index === 0}
+                    loading={index === 0 ? undefined : "lazy"}
                     sizes="(max-width: 1024px) 90vw, 420px"
                   />
                 </div>

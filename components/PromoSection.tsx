@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { HOME_CONTAINER_CLASS } from "@/components/HomeSection";
 import { serviceBenefits } from "@/lib/data";
 import {
   DiscountIcon,
@@ -36,9 +37,9 @@ export function PromoSection() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (
-    <section className="mt-4" aria-label="Marka tanıtımı">
-      <div className="bg-powder/70">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="w-full" aria-label="Marka tanıtımı">
+      <div className="-mx-4 bg-powder/70 sm:-mx-6 lg:-mx-8">
+        <div className={`${HOME_CONTAINER_CLASS} py-8 sm:py-10`}>
           <div className="overflow-hidden rounded-3xl bg-powder">
             <div className="grid lg:grid-cols-2">
               <div className="relative min-h-[280px] sm:min-h-[360px] lg:min-h-[420px]">
@@ -117,7 +118,7 @@ export function PromoSection() {
                     ürünlerle tanışın.
                   </p>
                   <Link
-                    href="/hakkimizda"
+                    href="/products"
                     className="mt-8 inline-flex items-center justify-center rounded-full border border-charcoal bg-cream px-8 py-3 text-sm font-medium text-charcoal transition-colors hover:border-gold hover:bg-white"
                   >
                     Detaylı Bilgi
@@ -129,8 +130,8 @@ export function PromoSection() {
         </div>
       </div>
 
-      <div className="border-t border-stone/50 bg-cream">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="-mx-4 border-t border-stone/50 bg-cream sm:-mx-6 lg:-mx-8">
+        <div className={`${HOME_CONTAINER_CLASS} grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 lg:grid-cols-4`}>
           {serviceBenefits.map((benefit, index) => {
             const Icon = benefitIcons[benefit.icon];
             return (
@@ -158,6 +159,6 @@ export function PromoSection() {
           })}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

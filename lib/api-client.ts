@@ -5,6 +5,15 @@ export type FetchParams = Record<
   string | number | boolean | string[] | undefined | null
 >;
 
+export type FetchDataOptions = {
+  /** ISR: saniye cinsinden yeniden doğrulama süresi */
+  revalidate?: number;
+  cache?: RequestCache;
+};
+
+/** Sandbox ve ürün API çağrıları için önerilen cache süresi */
+export const API_REVALIDATE_SECONDS = 60;
+
 export class ApiClientError extends Error {
   constructor(
     message: string,
@@ -79,17 +88,27 @@ async function parseErrorBody(response: Response): Promise<string> {
 export async function fetchData<T>(
   endpoint: string,
   params?: FetchParams,
+  options?: FetchDataOptions,
 ): Promise<T | null> {
   try {
     const env = getServerEnv();
     const requestUrl = buildUrl(env.apiBaseUrl, endpoint, params);
     const headers = buildHeaders();
 
-    const response = await fetch(requestUrl, {
+    const fetchInit: RequestInit & { next?: { revalidate: number } } = {
       method: "GET",
       headers,
-      cache: "no-store",
-    });
+    };
+
+    if (options?.revalidate !== undefined) {
+      fetchInit.next = { revalidate: options.revalidate };
+    } else if (options?.cache) {
+      fetchInit.cache = options.cache;
+    } else {
+      fetchInit.cache = "no-store";
+    }
+
+    const response = await fetch(requestUrl, fetchInit);
 
     if (!response.ok) {
       const body = await parseErrorBody(response);

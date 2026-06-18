@@ -15,7 +15,7 @@ type ProductGridProps = {
 
 function ProductGridSkeleton() {
   return (
-    <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
+    <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:gap-5 lg:grid-cols-4 lg:gap-6">
       {Array.from({ length: FEATURED_PRODUCT_COUNT }).map((_, index) => (
         <div
           key={index}
@@ -45,7 +45,7 @@ export function ProductGrid({ products: productsProp }: ProductGridProps) {
   const showError = !productsProp && isError;
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+    <div className="w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">
@@ -56,8 +56,8 @@ export function ProductGrid({ products: productsProp }: ProductGridProps) {
           </h2>
         </div>
         <Link
-          href="/urunler"
-          className="text-sm font-medium text-charcoal underline-offset-4 transition-colors hover:text-brand-purple hover:underline"
+          href="/products"
+          className="text-sm font-medium text-charcoal underline-offset-4 transition-colors hover:text-brand-brown hover:underline"
         >
           Tümünü Gör
         </Link>
@@ -87,12 +87,12 @@ export function ProductGrid({ products: productsProp }: ProductGridProps) {
       )}
 
       {!showLoading && !showError && displayProducts.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:gap-5 lg:grid-cols-4 lg:gap-6">
           {displayProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }

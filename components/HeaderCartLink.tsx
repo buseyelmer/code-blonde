@@ -9,7 +9,7 @@ export function HeaderCartLink() {
 
   return (
     <Link
-      href="/sepet"
+      href="/cart"
       className="relative rounded-full p-2.5 text-charcoal transition-colors hover:bg-stone/30"
       aria-label={`Sepet${totalItems > 0 ? `, ${totalItems} ürün` : ""}`}
     >

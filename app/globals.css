@@ -10,8 +10,17 @@
   --gold-light: #d4b896;
   --charcoal: #2d2d2d;
   --muted: #6b6560;
-  --brand-purple: #6d2e8c;
-  --brand-purple-light: #f3ebf7;
+  --brand-brown: rgb(58, 38, 24);
+  --brand-brown-accent: rgb(108, 79, 57);
+  --brand-brown-light: #f8f0e8;
+  --brand-brown-muted: #b8956a;
+  --primary: rgb(58, 38, 24);
+  --primary-accent: rgb(108, 79, 57);
+  --primary-light: #f8f0e8;
+  --primary-muted: #b8956a;
+  /* Geriye dönük uyumluluk */
+  --brand-purple: rgb(58, 38, 24);
+  --brand-purple-light: #f8f0e8;
 }
 
 @theme inline {
@@ -24,6 +33,13 @@
   --color-gold-light: var(--gold-light);
   --color-charcoal: var(--charcoal);
   --color-muted: var(--muted);
+  --color-brand-brown: var(--brand-brown);
+  --color-brand-brown-light: var(--brand-brown-light);
+  --color-brand-brown-muted: var(--brand-brown-muted);
+  --color-primary-accent: var(--primary-accent);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-muted: var(--primary-muted);
   --color-brand-purple: var(--brand-purple);
   --color-brand-purple-light: var(--brand-purple-light);
   --font-sans: var(--font-dm-sans);
@@ -33,4 +49,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded-full border-2 border-primary bg-white px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white;
+  }
+
+  .btn-primary-solid {
+    @apply rounded-full border-2 border-primary bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-accent hover:border-primary-accent;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

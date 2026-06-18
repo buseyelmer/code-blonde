@@ -1,58 +1,67 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
+import { useCart } from "@/lib/context/CartContext";
 import { calculateOrderTotal } from "@/lib/checkout-utils";
 import { formatPrice } from "@/lib/product-utils";
 
 type OrderSummaryProps = {
-  subtotal: number;
+  subtotal?: number;
   showCheckoutButton?: boolean;
   checkoutLabel?: string;
   className?: string;
 };
 
 export function OrderSummary({
-  subtotal,
+  subtotal: subtotalProp,
   showCheckoutButton = true,
   checkoutLabel = "Ödemeye Geç",
   className = "",
 }: OrderSummaryProps) {
   const router = useRouter();
   const { isAuthenticated, isReady } = useAuth();
-  const [promoCode, setPromoCode] = useState("");
-  const [appliedCode, setAppliedCode] = useState<string | null>(null);
-  const [promoMessage, setPromoMessage] = useState<string | null>(null);
-
-  const discount = useMemo(() => {
-    if (appliedCode === "CODEBLONDE") return Math.min(subtotal * 0.1, 150);
-    return 0;
-  }, [appliedCode, subtotal]);
-
-  const totals = useMemo(
-    () => calculateOrderTotal(subtotal, discount),
-    [subtotal, discount],
+  const {
+    totalPrice,
+    promoCode,
+    promoDiscount,
+    applyPromoCode,
+    clearPromoCode,
+  } = useCart();
+  const [promoInput, setPromoInput] = useState(promoCode ?? "");
+  const [promoMessage, setPromoMessage] = useState<string | null>(
+    promoCode ? "CODE kodu uygulandı" : null,
   );
 
-  const applyPromo = () => {
-    const normalized = promoCode.trim().toUpperCase();
+  const subtotal = subtotalProp ?? totalPrice;
 
-    if (normalized === "CODEBLONDE") {
-      setAppliedCode(normalized);
-      setPromoMessage("CODEBLONDE kodu uygulandı");
-      return;
+  useEffect(() => {
+    setPromoInput(promoCode ?? "");
+    if (promoCode) {
+      setPromoMessage("CODE kodu uygulandı");
     }
+  }, [promoCode]);
 
-    setAppliedCode(null);
-    setPromoMessage("Geçersiz indirim kodu");
+  const totals = useMemo(
+    () => calculateOrderTotal(subtotal, promoDiscount),
+    [subtotal, promoDiscount],
+  );
+
+  const handleApplyPromo = () => {
+    const result = applyPromoCode(promoInput);
+    setPromoMessage(result.message);
+
+    if (!result.ok) {
+      clearPromoCode();
+    }
   };
 
   const handleCheckout = () => {
     if (!isReady) return;
 
     if (!isAuthenticated) {
-      router.push("/giris?redirect=/checkout");
+      router.push("/login?redirect=/checkout");
       return;
     }
 
@@ -90,10 +99,10 @@ export function OrderSummary({
             {formatPrice(totals.vat)}
           </dd>
         </div>
-        {discount > 0 && (
+        {promoDiscount > 0 && (
           <div className="flex items-center justify-between text-emerald-700">
-            <dt>İndirim</dt>
-            <dd className="font-medium">-{formatPrice(discount)}</dd>
+            <dt>İndirim (CODE)</dt>
+            <dd className="font-medium">-{formatPrice(promoDiscount)}</dd>
           </div>
         )}
       </dl>
@@ -105,14 +114,14 @@ export function OrderSummary({
         <div className="mt-2 flex gap-2">
           <input
             id="promo-code"
-            value={promoCode}
-            onChange={(event) => setPromoCode(event.target.value)}
-            placeholder="Kod girin"
-            className="flex-1 rounded-xl border border-stone/80 bg-cream px-3 py-2 text-sm outline-none focus:border-brand-purple/40"
+            value={promoInput}
+            onChange={(event) => setPromoInput(event.target.value)}
+            placeholder="CODE"
+            className="flex-1 rounded-xl border border-stone/80 bg-cream px-3 py-2 text-sm uppercase outline-none focus:border-brand-brown/40"
           />
           <button
             type="button"
-            onClick={applyPromo}
+            onClick={handleApplyPromo}
             className="rounded-xl border border-charcoal px-4 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
           >
             Uygula
@@ -121,7 +130,7 @@ export function OrderSummary({
         {promoMessage && (
           <p
             className={`mt-2 text-xs ${
-              appliedCode ? "text-emerald-700" : "text-red-600"
+              promoCode ? "text-emerald-700" : "text-red-600"
             }`}
           >
             {promoMessage}
@@ -140,7 +149,7 @@ export function OrderSummary({
         <button
           type="button"
           onClick={handleCheckout}
-          className="mt-6 w-full rounded-full bg-charcoal px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-purple"
+          className="btn-primary-solid mt-6 w-full py-3.5"
         >
           {checkoutLabel}
         </button>

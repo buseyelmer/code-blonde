@@ -1,4 +1,4 @@
-import { fetchData } from "@/lib/api-client";
+import { fetchData, API_REVALIDATE_SECONDS } from "@/lib/api-client";
 import type { IData } from "@/core/interface/nexine.interface";
 import type { Brand } from "@/core/interface/prisma.interface";
 
@@ -22,9 +22,11 @@ export async function resolveCodeBlondeBrandId(): Promise<string | null> {
   const fromEnv = process.env.CODE_BLONDE_BRAND_ID?.trim();
   if (fromEnv) return fromEnv;
 
-  const brandRes = await fetchData<IData<Brand>>("/customer/brand", {
-    amount: 600,
-  });
+  const brandRes = await fetchData<IData<Brand>>(
+    "/customer/brand",
+    { amount: 600 },
+    { revalidate: API_REVALIDATE_SECONDS },
+  );
 
   const brands = brandRes?.data ?? [];
   const match = brands.find((brand) => matchesCodeBlonde(brand.name));

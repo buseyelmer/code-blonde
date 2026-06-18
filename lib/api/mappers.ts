@@ -1,16 +1,9 @@
 import type { Product as ApiProduct } from "@/core/interface/product.interface";
 import type { Category } from "@/core/interface/prisma.interface";
-import type { Product, ProductCategoryId, ShopCategory } from "@/lib/data";
-import { shopCategories } from "@/lib/data";
-
-const CATEGORY_IMAGES: Record<string, string> = {
-  "sac-bakim": "/images/categories/sac-bakim.svg",
-  "sac-sekillendirme": "/images/categories/sac-sekillendirme.svg",
-  epilasyon: "/images/categories/epilasyon.svg",
-  "vucut-peeling": "/images/categories/vucut-peeling.svg",
-  parfumeri: "/images/categories/parfumeri.svg",
-  "manikur-pedikur": "/images/categories/manikur-pedikur.svg",
-};
+import type { Product, ProductCategoryId } from "@/lib/data";
+import { getProductCategoryMeta } from "@/lib/api/group-products";
+import { limitCategories, resolveCategoryImage, toCategoryHref } from "@/lib/category-utils";
+import type { ProductCategoryOption } from "@/lib/api/group-products";
 
 const PLACEHOLDER_IMAGE = "/placeholder.jpg";
 
@@ -34,78 +27,15 @@ function toDisplayString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
-function normalizeSearchText(value: string): string {
-  return value
-    .toLocaleLowerCase("tr-TR")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ı/g, "i");
-}
-
-const CATEGORY_RULES: {
-  id: ProductCategoryId;
-  label: string;
-  keywords: string[];
-}[] = [
-  {
-    id: "sac-bakim",
-    label: "Saç Bakım",
-    keywords: ["sac bakim", "sac mask", "sac serum", "sampuan", "sac yag"],
-  },
-  {
-    id: "sac-sekillendirme",
-    label: "Saç Şekillendirme",
-    keywords: ["sekillendir", "sac kopugu", "jole", "termal"],
-  },
-  {
-    id: "epilasyon",
-    label: "Epilasyon",
-    keywords: ["epilasyon", "agda", "band", "kartus", "wax"],
-  },
-  {
-    id: "vucut-peeling",
-    label: "Vücut Peeling",
-    keywords: ["peeling", "peel", "vucut peeling"],
-  },
-  {
-    id: "parfumeri",
-    label: "Parfümeri",
-    keywords: ["parfum", "edp", "kolonya", "vucut sprey"],
-  },
-  {
-    id: "manikur-pedikur",
-    label: "Manikür & Pedikür",
-    keywords: ["manikur", "pedikur", "oje", "tirnak", "el-ayak", "el ayak"],
-  },
-];
-
 function resolveProductCategory(product: ApiProduct): {
   category: string;
   categoryId: ProductCategoryId;
 } {
-  const apiCategoryName = product.categories?.[0]?.name ?? "";
-  const productName = toDisplayString(product.name);
-  const searchText = normalizeSearchText(`${apiCategoryName} ${productName}`);
-
-  for (const rule of CATEGORY_RULES) {
-    if (rule.keywords.some((keyword) => searchText.includes(keyword))) {
-      return { category: rule.label, categoryId: rule.id };
-    }
-  }
-
-  const shopMatch = shopCategories.find((shopCategory) => {
-    const label = normalizeSearchText(shopCategory.label);
-    const apiName = normalizeSearchText(apiCategoryName);
-    return apiName.includes(label) || label.includes(apiName);
-  });
-
-  if (shopMatch) {
-    return { category: shopMatch.label, categoryId: shopMatch.id };
-  }
+  const meta = getProductCategoryMeta(product);
 
   return {
-    category: apiCategoryName || "Ürün",
-    categoryId: "vucut-peeling",
+    category: meta.categoryName,
+    categoryId: meta.categoryId as ProductCategoryId,
   };
 }
 
@@ -176,38 +106,51 @@ export function mapApiProductsToCards(products?: ApiProduct[]): Product[] {
 
 export function mapApiCategoriesToNav(
   categories?: Category[],
-): ShopCategory[] | null {
+  productCategories?: ProductCategoryOption[],
+): NavCategoryItem[] | null {
+  if (productCategories?.length) {
+    return limitCategories(productCategories, 12).map((category) => ({
+      id: category.id,
+      label: category.name,
+      subtitle: `${category.count} ürün`,
+      image: resolveCategoryImage(category.name),
+      href: toCategoryHref(category.id),
+    }));
+  }
+
   if (!categories?.length) return null;
 
   const flat = flattenCategories(categories);
 
-  return flat.slice(0, 6).map((category, index) => {
-    const slug =
-      toDisplayString(category.slug) ||
-      toDisplayString(category.id) ||
-      `category-${index}`;
-    const label =
-      toDisplayString(category.name) ||
-      toDisplayString((category as Record<string, unknown>).title) ||
-      "Kategori";
-
-    return {
-      id: slugToCategoryId(slug),
-      label,
-      subtitle: "",
-      image: CATEGORY_IMAGES[slug] ?? CATEGORY_IMAGES["vucut-peeling"],
-      href: `/kategori/${slug}`,
-    };
-  });
+  return limitCategories(
+    flat.map((category, index) => ({
+      id:
+        toDisplayString(category.slug) ||
+        toDisplayString(category.id) ||
+        `category-${index}`,
+      name:
+        toDisplayString(category.name) ||
+        toDisplayString((category as Record<string, unknown>).title) ||
+        "Kategori",
+      count: 0,
+    })),
+    12,
+  ).map((category) => ({
+    id: category.id,
+    label: category.name,
+    subtitle: "",
+    image: resolveCategoryImage(category.name),
+    href: toCategoryHref(category.id),
+  }));
 }
 
-function slugToCategoryId(slug?: string): ProductCategoryId {
-  const normalized = slug?.toLowerCase() ?? "";
-  const match = shopCategories.find(
-    (c) => c.id === normalized || c.label.toLowerCase() === normalized,
-  );
-  return match?.id ?? "vucut-peeling";
-}
+type NavCategoryItem = {
+  id: string;
+  label: string;
+  subtitle: string;
+  image: string;
+  href: string;
+};
 
 function flattenCategories(categories: Category[]): Category[] {
   return categories.flatMap((category) => [
