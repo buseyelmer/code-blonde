@@ -25,7 +25,7 @@
   <text x="280" y="410" text-anchor="middle" fill="#5a3545" font-family="system-ui,sans-serif" font-size="13" font-weight="600" letter-spacing="3">SAKIZ</text>
   <rect x="400" y="230" width="135" height="310" rx="24" fill="url(#berry)"/>
   <rect x="418" y="208" width="99" height="34" rx="9" fill="#fff" opacity="0.85"/>
-  <text x="467" y="400" text-anchor="middle" fill="#6b2222" font-family="system-ui,sans-serif" font-size="13" font-weight="600" letter-spacing="3">Ç0LEK</text>
+  <text x="467" y="400" text-anchor="middle" fill="#6b2222" font-family="system-ui,sans-serif" font-size="13" font-weight="600" letter-spacing="3">ï¿½0LEK</text>
   <circle cx="280" cy="180" r="28" fill="#f0c4d4" opacity="0.6"/>
   <circle cx="520" cy="160" r="22" fill="#e88888" opacity="0.5"/>
 </svg>

@@ -33,6 +33,8 @@ export type Product = {
   price: number;
   originalPrice?: number;
   image: string;
+  description?: string;
+  articleNumber?: string;
   isDeal?: boolean;
   isExclusive?: boolean;
   rating: number;
@@ -657,7 +659,7 @@ export const footerCategories = [
 
 export const footerSupport = [
   { label: "Sıkça Sorulan Sorular", href: "/sss" },
-  { label: "Kargo & İade", href: "/kargo-iade" },
+  { label: "Kargo & İade", href: "/kargo-ve-iade" },
   { label: "İletişim", href: "/iletisim" },
-  { label: "Gizlilik Politikası", href: "/gizlilik" },
+  { label: "Gizlilik Politikası", href: "/gizlilik-politikasi" },
 ] as const;
