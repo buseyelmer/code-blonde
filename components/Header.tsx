@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
-import { CartIcon, HeartIcon, SearchIcon } from "./icons";
+import { HeaderCartLink } from "./HeaderCartLink";
+import { HeartIcon, SearchIcon } from "./icons";
 
 export function Header() {
   return (
@@ -29,13 +30,7 @@ export function Header() {
           >
             <HeartIcon />
           </Link>
-          <Link
-            href="/sepet"
-            className="rounded-full p-2.5 text-charcoal transition-colors hover:bg-stone/30"
-            aria-label="Sepet"
-          >
-            <CartIcon />
-          </Link>
+          <HeaderCartLink />
         </div>
       </div>
 

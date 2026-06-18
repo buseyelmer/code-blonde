@@ -1,22 +1,69 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import type { Product } from "@/lib/data";
 import { HeartIcon, PlusIcon } from "./icons";
 import { StarRating } from "./StarRating";
-import Image from "next/image";
+
+const PLACEHOLDER_IMAGE = "/placeholder.jpg";
 
 type NewArrivalCardProps = {
   product: Product;
 };
 
-function formatPrice(amount: number) {
+type ProductWithMedia = Product & {
+  media?: { path?: string } | null;
+};
+
+function formatPrice(amount: number | undefined | null) {
+  if (amount === undefined || amount === null) return "₺0,00";
+
+  const value = Number(amount);
+  if (Number.isNaN(value)) return "₺0,00";
+
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(value);
+}
+
+function resolveImageUrl(product: ProductWithMedia): string {
+  if (product.image?.trim() && !product.image.endsWith(".svg")) {
+    return product.image;
+  }
+
+  const mediaPath = product.media?.path?.trim();
+  if (mediaPath) {
+    if (/^https?:\/\//i.test(mediaPath)) return mediaPath;
+
+    const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL?.replace(/\/$/, "");
+    if (storageUrl) {
+      const normalizedPath = mediaPath.startsWith("/")
+        ? mediaPath
+        : `/${mediaPath}`;
+      return `${storageUrl}${normalizedPath}`;
+    }
+
+    return mediaPath;
+  }
+
+  return PLACEHOLDER_IMAGE;
 }
 
 export function NewArrivalCard({ product }: NewArrivalCardProps) {
+  const [imageUrl, setImageUrl] = useState(() =>
+    resolveImageUrl(product as ProductWithMedia),
+  );
+
+  useEffect(() => {
+    setImageUrl(resolveImageUrl(product as ProductWithMedia));
+  }, [product]);
+
+  const safeImageSrc = imageUrl?.trim() || PLACEHOLDER_IMAGE;
+
   return (
     <article className="group relative flex flex-col rounded-2xl bg-cream p-3 shadow-sm ring-1 ring-stone/50 transition-shadow hover:shadow-md sm:p-4">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-powder/50">
@@ -33,11 +80,12 @@ export function NewArrivalCard({ product }: NewArrivalCardProps) {
           <HeartIcon className="h-4 w-4" />
         </button>
         <Image
-          src={product.image}
+          src={safeImageSrc}
           alt={product.name}
           fill
           className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 200px"
+          onError={() => setImageUrl(PLACEHOLDER_IMAGE)}
         />
       </div>
 
@@ -58,7 +106,7 @@ export function NewArrivalCard({ product }: NewArrivalCardProps) {
               </p>
             )}
             <p className="text-sm font-bold text-charcoal sm:text-base">
-              {formatPrice(product.price)}
+              {formatPrice(Number(product.price))}
             </p>
           </div>
           <button

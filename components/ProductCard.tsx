@@ -1,81 +1,126 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState, type MouseEvent } from "react";
+import { useCart } from "@/lib/context/CartContext";
 import type { Product } from "@/lib/data";
-import { HeartIcon, PlusIcon } from "./icons";
-import { StarRating } from "./StarRating";
+import { formatPrice, PLACEHOLDER_IMAGE, resolveProductImageUrl } from "@/lib/product-utils";
+import { MinusIcon, PlusIcon } from "./icons";
 
 type ProductCardProps = {
   product: Product;
 };
 
-function formatPrice(amount: number) {
-  return new Intl.NumberFormat("tr-TR", {
-    style: "currency",
-    currency: "TRY",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+type ProductWithMedia = Product & {
+  media?: { path?: string } | null;
+};
+
+function CartControls({ product }: { product: Product }) {
+  const { addItem, incrementItem, decrementItem, getQuantity } = useCart();
+  const quantity = getQuantity(product.id);
+
+  const handleClick = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  if (quantity === 0) {
+    return (
+      <button
+        type="button"
+        onClick={(event) => {
+          handleClick(event);
+          addItem(product);
+        }}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand-purple text-white transition-colors hover:bg-charcoal"
+        aria-label={`${product.name} sepete ekle`}
+      >
+        <PlusIcon className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="inline-flex items-center gap-1 rounded-lg bg-brand-purple p-1 text-white"
+      onClick={handleClick}
+    >
+      <button
+        type="button"
+        onClick={() => decrementItem(product.id)}
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/15"
+        aria-label={`${product.name} adedini azalt`}
+      >
+        <MinusIcon className="h-3.5 w-3.5" />
+      </button>
+      <span className="min-w-6 text-center text-sm font-semibold tabular-nums">
+        {quantity}
+      </span>
+      <button
+        type="button"
+        onClick={() => incrementItem(product.id)}
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/15"
+        aria-label={`${product.name} adedini artır`}
+      >
+        <PlusIcon className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  return (
-    <article className="flex flex-col overflow-hidden rounded-lg border border-stone/70 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-      <div className="relative mb-3">
-        {product.isExclusive && (
-          <span className="absolute left-0 top-0 z-10 rounded-full bg-brand-purple px-2 py-1 text-[0.6rem] font-semibold leading-tight text-white sm:px-2.5 sm:text-[0.65rem]">
-            Code Blonde&apos;a Özel
-          </span>
-        )}
-        {product.isDeal && !product.isExclusive && (
-          <span className="absolute left-0 top-0 z-10 rounded-full bg-emerald-600 px-2.5 py-1 text-[0.65rem] font-semibold text-white">
-            Fırsat Ürünü
-          </span>
-        )}
+  const [imageUrl, setImageUrl] = useState(() =>
+    resolveProductImageUrl(product as ProductWithMedia),
+  );
 
-        <div className="relative mx-auto aspect-square w-full max-w-[180px]">
-          <button
-            type="button"
-            className="absolute right-0 top-0 z-10 rounded-full p-1.5 text-stone transition-colors hover:text-brand-purple"
-            aria-label={`${product.name} favorilere ekle`}
-          >
-            <HeartIcon className="h-4 w-4" />
-          </button>
+  useEffect(() => {
+    setImageUrl(resolveProductImageUrl(product as ProductWithMedia));
+  }, [product]);
+
+  const safeImageSrc = imageUrl?.trim() || PLACEHOLDER_IMAGE;
+
+  return (
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-stone/70 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <Link
+        href={`/product/${product.id}`}
+        className="flex flex-1 flex-col"
+      >
+        <div className="relative aspect-[4/5] w-full bg-powder/30">
           <Image
-            src={product.image}
-            alt={product.name}
+            src={safeImageSrc}
+            alt={product.name || "Ürün"}
             fill
-            className="object-contain p-2"
-            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
+            className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.02]"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+            onError={() => setImageUrl(PLACEHOLDER_IMAGE)}
           />
         </div>
-      </div>
 
-      <h3 className="line-clamp-2 min-h-[2.5rem] text-xs font-semibold leading-snug text-charcoal sm:text-sm">
-        {product.name}
-      </h3>
+        <div className="flex flex-1 flex-col px-4 pb-4 pt-3">
+          {product.category && (
+            <p className="text-[0.65rem] font-medium uppercase tracking-[0.12em] text-muted">
+              {product.category}
+            </p>
+          )}
+          <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-charcoal">
+            {product.name || "İsimsiz Ürün"}
+          </h3>
+        </div>
+      </Link>
 
-      <StarRating
-        rating={product.rating}
-        reviewCount={product.reviewCount}
-        className="mt-2"
-      />
-
-      {product.originalPrice && (
-        <p className="mt-1.5 text-[0.65rem] text-muted line-through sm:text-xs">
-          {formatPrice(product.originalPrice)}
-        </p>
-      )}
-
-      <div className="-mx-4 -mb-4 mt-3 flex items-center justify-between rounded-b-lg bg-brand-purple-light px-4 py-3">
-        <span className="text-base font-bold text-charcoal sm:text-lg">
-          {formatPrice(product.price)}
-        </span>
-        <button
-          type="button"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-purple text-white transition-colors hover:bg-brand-purple/90"
-          aria-label={`${product.name} sepete ekle`}
-        >
-          <PlusIcon className="h-4 w-4" />
-        </button>
+      <div className="flex items-center justify-between gap-3 border-t border-stone/50 bg-brand-purple-light px-4 py-3">
+        <div>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <p className="text-xs text-muted line-through">
+              {formatPrice(product.originalPrice)}
+            </p>
+          )}
+          <p className="text-base font-bold text-charcoal">
+            {formatPrice(Number(product.price))}
+          </p>
+        </div>
+        <CartControls product={product} />
       </div>
     </article>
   );

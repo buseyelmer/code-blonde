@@ -2,25 +2,52 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import type { Product as ApiProduct } from "@/core/interface/product.interface";
+import { mapApiProductsToCards } from "@/lib/api/mappers";
 import {
   newArrivalProducts,
   productFilterOptions,
+  type Product,
   type ProductCategoryId,
 } from "@/lib/data";
 import { NewArrivalCard } from "./NewArrivalCard";
 
-type FilterId = "all" | ProductCategoryId;
+type SelectedCategory = "all" | ProductCategoryId;
 
 const VISIBLE_COUNT = 6;
 
-export function NewArrivalsSection() {
-  const [activeFilter, setActiveFilter] = useState<FilterId>("all");
+type NewArrivalsSectionProps = {
+  products?: ApiProduct[];
+};
+
+function toArrivalProducts(apiProducts?: ApiProduct[]): Product[] {
+  if (apiProducts?.length) {
+    return mapApiProductsToCards(apiProducts);
+  }
+  return newArrivalProducts;
+}
+
+export function NewArrivalsSection({ products: apiProducts }: NewArrivalsSectionProps) {
+  const sourceProducts = useMemo(
+    () => toArrivalProducts(apiProducts),
+    [apiProducts],
+  );
+  const [selectedCategory, setSelectedCategory] =
+    useState<SelectedCategory>("all");
   const [page, setPage] = useState(0);
 
   const filteredProducts = useMemo(() => {
-    if (activeFilter === "all") return newArrivalProducts;
-    return newArrivalProducts.filter((p) => p.categoryId === activeFilter);
-  }, [activeFilter]);
+    if (selectedCategory === "all") return sourceProducts;
+
+    const activeOption = productFilterOptions.find(
+      (option) => option.id === selectedCategory,
+    );
+    const categoryName = activeOption?.label ?? "";
+
+    return sourceProducts.filter(
+      (product) => product.category === categoryName,
+    );
+  }, [selectedCategory, sourceProducts]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / VISIBLE_COUNT));
   const currentPage = Math.min(page, totalPages - 1);
@@ -29,8 +56,8 @@ export function NewArrivalsSection() {
     currentPage * VISIBLE_COUNT + VISIBLE_COUNT,
   );
 
-  const handleFilterChange = (filter: FilterId) => {
-    setActiveFilter(filter);
+  const handleCategoryChange = (category: SelectedCategory) => {
+    setSelectedCategory(category);
     setPage(0);
   };
 
@@ -43,12 +70,12 @@ export function NewArrivalsSection() {
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {productFilterOptions.map((option) => {
-            const isActive = activeFilter === option.id;
+            const isActive = selectedCategory === option.id;
             return (
               <button
                 key={option.id}
                 type="button"
-                onClick={() => handleFilterChange(option.id)}
+                onClick={() => handleCategoryChange(option.id)}
                 className={`shrink-0 rounded-full border px-4 py-2 text-xs font-medium transition-all duration-300 sm:text-sm ${
                   isActive
                     ? "border-charcoal bg-charcoal text-cream shadow-sm"
@@ -61,32 +88,32 @@ export function NewArrivalsSection() {
           })}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${activeFilter}-${currentPage}`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6"
-          >
-            {visibleProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <NewArrivalCard product={product} />
-              </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length === 0 ? (
           <p className="mt-8 text-center text-sm text-muted">
-            Bu kategoride henüz ürün bulunmuyor.
+            Bu kategoride ürün bulunamadı
           </p>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${selectedCategory}-${currentPage}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6"
+            >
+              {visibleProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <NewArrivalCard product={product} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         )}
 
         {filteredProducts.length > VISIBLE_COUNT && (
