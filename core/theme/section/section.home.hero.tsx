@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { SectionHomePageError, SectionHomePageLoader } from "@/theme/section/home/section.home.page.status";
+import { SectionHomePageError, SectionHomePageLoader } from "@/theme/section/section.home.page.status";
 import { useSandboxData } from "@/hooks/useHomeData";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { SectionHomeBannerGrid } from "@/theme/section/section.home.banner.grid";

@@ -6,7 +6,7 @@ import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { getProductCategoryMeta } from "@/lib/api/group-products";
 import { useSandboxProducts } from "@/hooks/useHomeData";
 import { ItemProductCard } from "@/theme/item/item.product.card";
-import { SectionHomePageLoader } from "@/theme/section/home/section.home.page.status";
+import { SectionHomePageLoader } from "@/theme/section/section.home.page.status";
 
 export default function ProductsPageContent() {
   const searchParams = useSearchParams();

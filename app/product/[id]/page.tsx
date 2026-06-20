@@ -1,4 +1,4 @@
-import { SectionProductDetail } from "@/theme/product-detail/section.product.detail";
+import { SectionProductDetail } from "@/theme/section/section.product.detail";
 
 type ProductPageProps = {
   params: Promise<{ id: string }>;

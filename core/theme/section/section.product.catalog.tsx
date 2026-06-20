@@ -1,5 +1,5 @@
-import { SectionProductGrid } from "@/theme/product/section.product.grid";
-import { SectionProductGridBreadcrumb } from "@/theme/product/section.product.grid.breadcrumb";
+import { SectionProductGrid } from "@/theme/section/section.product.grid";
+import { SectionProductGridBreadcrumb } from "@/theme/section/section.product.grid.breadcrumb";
 
 export function SectionProductCatalog() {
   return (

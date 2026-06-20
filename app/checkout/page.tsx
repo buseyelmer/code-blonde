@@ -1,4 +1,4 @@
-import { SectionCheckoutFlow } from "@/theme/section/checkout/section.checkout.flow";
+import { SectionCheckoutFlow } from "@/theme/section/section.checkout.flow";
 
 export default function CheckoutPage() {
   return <SectionCheckoutFlow />;

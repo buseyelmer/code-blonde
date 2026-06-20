@@ -20,15 +20,10 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@/theme/section/checkout/*": ["./core/theme/section/checkout/*"],
-      "@/theme/section/legal/*": ["./core/theme/section/legal/*"],
-      "@/theme/section/home/*": ["./core/theme/section/home/*"],
+      "@/theme/section/*": ["./core/theme/section/*"],
+      "@/theme/view/*": ["./core/theme/view/*"],
+      "@/theme/item/*": ["./core/theme/item/*"],
       "@/theme/provider/*": ["./core/theme/provider/*"],
-      "@/theme/section/*": ["./core/theme/section/section/*"],
-      "@/theme/view/*": ["./core/theme/section/view/*"],
-      "@/theme/item/*": ["./core/theme/section/item/*"],
-      "@/theme/product/*": ["./core/theme/section/product/*"],
-      "@/theme/product-detail/*": ["./core/theme/section/product-detail/*"],
       "@/theme/*": ["./core/theme/*"]
     },
     "baseUrl": "."

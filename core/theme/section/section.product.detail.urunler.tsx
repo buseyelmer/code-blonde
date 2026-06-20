@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { ChevronRight, Home, Loader2, ShoppingBag } from "lucide-react";
 import { useProduct } from "@raxonltd/raxon-core/hook";
-import { SectionProductDetailGallery } from "@/theme/product-detail/section.product.detail.gallery";
-import { SectionProductDetailInfo } from "@/theme/product-detail/section.product.detail.info";
+import { SectionProductDetailGallery } from "@/theme/section/section.product.detail.gallery";
+import { SectionProductDetailInfo } from "@/theme/section/section.product.detail.info";
 import { getSafeImageUrl } from "@/core/util/util";
 
 export function SectionProductDetailUrunler() {

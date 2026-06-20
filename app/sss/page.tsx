@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SectionLegalFaqAccordion } from "@/theme/section/legal/section.legal.faq.accordion";
+import { SectionLegalFaqAccordion } from "@/theme/section/section.legal.faq.accordion";
 import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {

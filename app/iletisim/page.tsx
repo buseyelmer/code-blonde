@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SectionLegalContactForm } from "@/theme/section/legal/section.legal.contact.form";
+import { SectionLegalContactForm } from "@/theme/section/section.legal.contact.form";
 import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {
