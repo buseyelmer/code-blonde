@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
-import { CartLineItem } from "@/components/cart/CartLineItem";
-import { CartCheckoutButton } from "@/components/cart/CartCheckoutButton";
-import { OrderSummary } from "@/components/cart/OrderSummary";
+import { ItemCartLineItem } from "@/theme/item/item.cart.line.item";
+import { ItemCartCheckoutButton } from "@/theme/item/item.cart.checkout.button";
+import { ViewCartOrdersSummary } from "@/theme/view/view.cart.orders.summary";
 
 export default function CartPage() {
   const {
@@ -71,7 +71,7 @@ export default function CartPage() {
           </div>
 
           {items.map((item) => (
-            <CartLineItem
+            <ItemCartLineItem
               key={item.id}
               item={item}
               onIncrement={() => incrementItem(item.id)}
@@ -82,11 +82,11 @@ export default function CartPage() {
         </section>
 
         <div className="flex flex-col gap-4 lg:sticky lg:top-28 lg:self-start">
-          <OrderSummary
+          <ViewCartOrdersSummary
             subtotal={totalPrice}
             showCheckoutButton={false}
           />
-          <CartCheckoutButton />
+          <ItemCartCheckoutButton />
         </div>
       </div>
     </div>

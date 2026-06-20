@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useFavorites } from "@/lib/context/FavoritesContext";
-import { ProductCard } from "@/components/ProductCard";
+import { ItemProductCard } from "@/theme/item/item.product.card";
 
 export default function FavoritesPage() {
   const { favorites } = useFavorites();
@@ -45,7 +45,7 @@ export default function FavoritesPage() {
 
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {favorites.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ItemProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>

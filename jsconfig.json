@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/theme/section/checkout/*": ["./core/theme/section/checkout/*"],
+      "@/theme/section/legal/*": ["./core/theme/section/legal/*"],
+      "@/theme/section/home/*": ["./core/theme/section/home/*"],
+      "@/theme/provider/*": ["./core/theme/provider/*"],
+      "@/theme/section/*": ["./core/theme/section/section/*"],
+      "@/theme/view/*": ["./core/theme/section/view/*"],
+      "@/theme/item/*": ["./core/theme/section/item/*"],
+      "@/theme/product/*": ["./core/theme/section/product/*"],
+      "@/theme/product-detail/*": ["./core/theme/section/product-detail/*"],
+      "@/theme/*": ["./core/theme/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", ".next", "out", "build"]
+}

@@ -1,12 +1,13 @@
+import React from "react";
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SectionFooter } from "@/theme/section/section.footer";
+import { SectionLayoutSiteHeader } from "@/theme/section/section.layout.site.header";
 import { CartProvider } from "@/lib/context/CartContext";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import { FavoritesProvider } from "@/lib/context/FavoritesContext";
 import { OrdersProvider } from "@/lib/context/OrdersContext";
-import { QueryProvider } from "@/components/providers/QueryProvider";
+import { ProviderQuery } from "@/theme/provider/provider.query";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -53,19 +54,19 @@ export default function RootLayout({
         className="flex min-h-full flex-col overflow-x-hidden bg-cream text-foreground"
         suppressHydrationWarning
       >
-        <QueryProvider>
+        <ProviderQuery>
           <AuthProvider>
             <FavoritesProvider>
               <OrdersProvider>
                 <CartProvider>
-                  <SiteHeader />
+                  <SectionLayoutSiteHeader />
                   <main className="flex-1 max-w-full overflow-x-hidden">{children}</main>
-                  <Footer />
+                  <SectionFooter />
                 </CartProvider>
               </OrdersProvider>
             </FavoritesProvider>
           </AuthProvider>
-        </QueryProvider>
+        </ProviderQuery>
       </body>
     </html>
   );

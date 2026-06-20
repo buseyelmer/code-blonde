@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AccountShell } from "@/components/account/AccountShell";
+import { ViewAccountShell } from "@/theme/view/view.account.shell";
 import { useAuth } from "@/lib/context/AuthContext";
 import { useUserOrders } from "@/lib/context/OrdersContext";
 import { formatPrice } from "@/lib/product-utils";
@@ -28,7 +28,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <AccountShell
+    <ViewAccountShell
       title="Siparişlerim"
       subtitle="Geçmiş siparişlerinizi bu sayfadan takip edebilirsiniz."
     >
@@ -93,6 +93,6 @@ export default function OrdersPage() {
           </table>
         </div>
       )}
-    </AccountShell>
+    </ViewAccountShell>
   );
 }

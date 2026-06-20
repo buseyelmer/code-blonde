@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { AuthFormLayout } from "@/components/auth/AuthFormLayout";
+import { ViewAuthFormLayout } from "@/theme/view/view.auth.form.layout";
 import { useAuth } from "@/lib/context/AuthContext";
 
 export default function RegisterPage() {
@@ -40,7 +40,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <AuthFormLayout
+    <ViewAuthFormLayout
       title="Kayıt Ol"
       subtitle="Code Blonde hesabınızı oluşturun ve favorilerinizi kaydedin."
       footerText="Zaten hesabınız var mı?"
@@ -87,6 +87,6 @@ export default function RegisterPage() {
           Kayıt Ol
         </button>
       </form>
-    </AuthFormLayout>
+    </ViewAuthFormLayout>
   );
 }

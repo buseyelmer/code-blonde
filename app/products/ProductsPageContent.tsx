@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { getProductCategoryMeta } from "@/lib/api/group-products";
 import { useSandboxProducts } from "@/hooks/useHomeData";
-import { ProductCard } from "@/components/ProductCard";
-import { HomePageLoader } from "@/components/HomePageStatus";
+import { ItemProductCard } from "@/theme/item/item.product.card";
+import { SectionHomePageLoader } from "@/theme/section/home/section.home.page.status";
 
 export default function ProductsPageContent() {
   const searchParams = useSearchParams();
@@ -41,7 +41,7 @@ export default function ProductsPageContent() {
   }, [categoryFilter, data?.productCategories]);
 
   if (isLoading) {
-    return <HomePageLoader />;
+    return <SectionHomePageLoader />;
   }
 
   return (
@@ -83,7 +83,7 @@ export default function ProductsPageContent() {
       {filteredProducts.length > 0 && (
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ItemProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

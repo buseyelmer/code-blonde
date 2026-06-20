@@ -1,5 +1,5 @@
-import { HomePage } from "@/components/HomePage";
+import { SectionHomeHero } from "@/theme/section/section.home.hero";
 
 export default function Home() {
-  return <HomePage />;
+  return <SectionHomeHero />;
 }

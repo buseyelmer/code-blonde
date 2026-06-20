@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AccountShell } from "@/components/account/AccountShell";
+import { ViewAccountShell } from "@/theme/view/view.account.shell";
 import { useAuth } from "@/lib/context/AuthContext";
 
 export default function AccountPage() {
@@ -30,7 +30,7 @@ export default function AccountPage() {
   });
 
   return (
-    <AccountShell
+    <ViewAccountShell
       title="Hesabım / Bilgilerim"
       subtitle="Profil bilgilerinizi buradan görüntüleyebilirsiniz."
     >
@@ -62,6 +62,6 @@ export default function AccountPage() {
           <dd className="mt-1 text-sm font-semibold text-emerald-700">Aktif</dd>
         </div>
       </dl>
-    </AccountShell>
+    </ViewAccountShell>
   );
 }

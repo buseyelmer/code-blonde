@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PageLayout } from "@/components/legal/PageLayout";
+import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {
   title: "Kargo & İade",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function KargoVeIadePage() {
   return (
-    <PageLayout
+    <ViewPageLayout
       title="Kargo & İade"
       description="Siparişlerinizin teslimat süreci ve iade koşulları hakkında bilmeniz gereken her şey."
     >
@@ -79,6 +79,6 @@ export default function KargoVeIadePage() {
           işlemi gerçekleştirilir.
         </p>
       </section>
-    </PageLayout>
+    </ViewPageLayout>
   );
 }

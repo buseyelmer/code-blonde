@@ -6,7 +6,7 @@ import { useProduct } from "@raxonltd/raxon-core/hook";
 import { getSafeImageUrl } from "@/core/util/util";
 import { formatPrice } from "@/lib/product-utils";
 
-export default function SectionProductGrid() {
+export function SectionProductGrid() {
   const { data, isLoading, error } = useProduct().fetch({
     page: 1,
     amount: 24,

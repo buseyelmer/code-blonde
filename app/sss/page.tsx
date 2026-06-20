@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FaqAccordion } from "@/components/legal/FaqAccordion";
-import { PageLayout } from "@/components/legal/PageLayout";
+import { SectionLegalFaqAccordion } from "@/theme/section/legal/section.legal.faq.accordion";
+import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {
   title: "Sıkça Sorulan Sorular",
@@ -44,11 +44,11 @@ const faqItems = [
 
 export default function SssPage() {
   return (
-    <PageLayout
+    <ViewPageLayout
       title="Sıkça Sorulan Sorular"
       description="Sipariş, ödeme, kargo ve iade süreçleri hakkında en çok merak edilen soruların yanıtları."
     >
-      <FaqAccordion items={faqItems} />
+      <SectionLegalFaqAccordion items={faqItems} />
       <p className="mt-8 text-sm text-muted">
         Aradığınız yanıtı bulamadınız mı?{" "}
         <Link
@@ -59,6 +59,6 @@ export default function SssPage() {
         </Link>{" "}
         bize ulaşabilirsiniz.
       </p>
-    </PageLayout>
+    </ViewPageLayout>
   );
 }

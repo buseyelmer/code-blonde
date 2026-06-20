@@ -1,9 +1,6 @@
 "use client";
 
-import type { Product } from "@/lib/data";
-import type { ProductShippingInfo } from "@/lib/product-shipping";
-import { ProductDetailGallery } from "@/components/product/ProductDetailGallery";
-import { ProductDetailInfo } from "@/components/product/ProductDetailInfo";
+import { ItemProductDetailGallery } from "@/theme/item/item.product.detail.gallery";
 
 type GalleryImage = {
   id: string | number;
@@ -11,17 +8,17 @@ type GalleryImage = {
   alt: string;
 };
 
-type SectionProductGalleryProps = {
+type SectionProductDetailGalleryProps = {
   images: GalleryImage[];
   productId: string;
   isFavorite?: boolean;
 };
 
-export default function SectionProductGallery({
+export function SectionProductDetailGallery({
   images,
-}: SectionProductGalleryProps) {
+}: SectionProductDetailGalleryProps) {
   return (
-    <ProductDetailGallery
+    <ItemProductDetailGallery
       src={images[0]?.src}
       alt={images[0]?.alt || "Ürün görseli"}
     />

@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/components/PageSkeleton";
+import { ViewPageSkeleton } from "@/theme/view/view.page.skeleton";
 
 export default function Loading() {
-  return <PageSkeleton rows={4} />;
+  return <ViewPageSkeleton rows={4} />;
 }

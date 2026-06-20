@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { ContactForm } from "@/components/legal/ContactForm";
-import { PageLayout } from "@/components/legal/PageLayout";
+import { SectionLegalContactForm } from "@/theme/section/legal/section.legal.contact.form";
+import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {
   title: "İletişim",
@@ -31,7 +31,7 @@ const contactInfo = [
 
 export default function IletisimPage() {
   return (
-    <PageLayout
+    <ViewPageLayout
       title="İletişim"
       description="Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçin."
     >
@@ -74,9 +74,9 @@ export default function IletisimPage() {
           <h2 className="mb-6 text-lg font-semibold text-charcoal">
             Bize Yazın
           </h2>
-          <ContactForm />
+          <SectionLegalContactForm />
         </div>
       </div>
-    </PageLayout>
+    </ViewPageLayout>
   );
 }

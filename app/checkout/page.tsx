@@ -1,5 +1,5 @@
-import { CheckoutFlow } from "@/components/checkout/CheckoutFlow";
+import { SectionCheckoutFlow } from "@/theme/section/checkout/section.checkout.flow";
 
 export default function CheckoutPage() {
-  return <CheckoutFlow />;
+  return <SectionCheckoutFlow />;
 }

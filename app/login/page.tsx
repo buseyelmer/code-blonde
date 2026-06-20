@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useState } from "react";
-import { AuthFormLayout } from "@/components/auth/AuthFormLayout";
+import { ViewAuthFormLayout } from "@/theme/view/view.auth.form.layout";
 import { useAuth } from "@/lib/context/AuthContext";
 
 function LoginForm() {
@@ -43,7 +43,7 @@ function LoginForm() {
   };
 
   return (
-    <AuthFormLayout
+    <ViewAuthFormLayout
       title="Giriş Yap"
       subtitle="Hesabınıza giriş yaparak alışverişe devam edin."
       footerText="Hesabınız yok mu?"
@@ -81,7 +81,7 @@ function LoginForm() {
           Giriş Yap
         </button>
       </form>
-    </AuthFormLayout>
+    </ViewAuthFormLayout>
   );
 }
 

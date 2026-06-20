@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PageLayout } from "@/components/legal/PageLayout";
+import { ViewPageLayout } from "@/theme/view/view.page.layout";
 
 export const metadata: Metadata = {
   title: "Gizlilik Politikası",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function GizlilikPolitikasiPage() {
   return (
-    <PageLayout
+    <ViewPageLayout
       title="Gizlilik Politikası"
       description="6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerinizin işlenmesine ilişkin bilgilendirme metni."
     >
@@ -99,6 +99,6 @@ export default function GizlilikPolitikasiPage() {
         </p>
         <p className="text-sm text-muted">Son güncelleme: Haziran 2026</p>
       </section>
-    </PageLayout>
+    </ViewPageLayout>
   );
 }

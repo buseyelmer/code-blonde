@@ -1,5 +1,5 @@
-import { CartPageSkeleton } from "@/components/PageSkeleton";
+import { ViewCartPageSkeleton } from "@/theme/view/view.page.skeleton";
 
 export default function Loading() {
-  return <CartPageSkeleton />;
+  return <ViewCartPageSkeleton />;
 }

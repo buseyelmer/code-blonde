@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/components/PageSkeleton";
+import { ViewPageSkeleton } from "@/theme/view/view.page.skeleton";
 
 export default function ProductLoading() {
-  return <PageSkeleton rows={1} />;
+  return <ViewPageSkeleton rows={1} />;
 }
