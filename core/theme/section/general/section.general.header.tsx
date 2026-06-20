@@ -37,6 +37,11 @@ export default function SectionGeneralHeader() {
     const router = useRouter();
 
     const {branch} = useRaxon();
+
+    const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL?.replace(/\/$/, '');
+    const logoPath = branch?.logoMedia?.relativePath;
+    const logoUrl = storageUrl && logoPath ? `${storageUrl}/${logoPath}` : null;
+
     useEffect(() => {
       const onScroll = () => setScrolled(window.scrollY > 40);
       window.addEventListener('scroll', onScroll, { passive: true });
@@ -56,7 +61,9 @@ export default function SectionGeneralHeader() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
           <a href="#" className="flex items-center gap-3">
             <div className="relative h-8 w-28 lg:h-9 lg:w-32">
-              <Image src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/` + (branch?.logoMedia?.relativePath ?? '')} alt="Code Blonde" fill className="object-contain object-left" priority />
+              {logoUrl && (
+                <Image src={logoUrl} alt="Code Blonde" fill className="object-contain object-left" priority />
+              )}
             </div>
           </a>
 
