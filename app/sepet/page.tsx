@@ -53,16 +53,16 @@ export default function CartPage() {
 
   if (isEmpty) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-white px-4 py-16 sm:py-24">
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#F8F1E9] px-4 py-16 sm:py-24 text-[#5C4638]">
         <div className="flex flex-col items-center text-center">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-gray-200 bg-white">
-            <ShoppingBag className="h-10 w-10 text-gray-400" strokeWidth={1.5} />
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full border border-[#D9C5B0] bg-white/50 backdrop-blur-sm shadow-sm">
+            <ShoppingBag className="h-10 w-10 text-[#A17E65]" strokeWidth={1} />
           </div>
-          <h2 className="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">Sepetiniz boş</h2>
-          <p className="mb-8 max-w-sm text-sm leading-relaxed text-gray-600">Sepetinize ürün ekleyerek alışverişe başlayın.</p>
-          <Link href="/urunler" className="inline-flex items-center gap-2 rounded-lg bg-rose-900 px-6 py-4 text-sm font-medium uppercase tracking-wide text-white shadow-md transition hover:bg-rose-800 hover:shadow-lg">
-            <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
-            Alışverişe başla
+          <h2 className="mb-3 font-serif text-3xl tracking-tight text-[#5C4638] sm:text-4xl">Sepetiniz boş</h2>
+          <p className="mb-10 max-w-sm text-[15px] leading-relaxed text-[#8B6B57]">Sepetinize zarif bir nude seçerek alışverişe başlayın.</p>
+          <Link href="/urunler" className="inline-flex items-center gap-3 rounded-full bg-[#5C4638] px-10 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[#F8F1E9] shadow-lg transition-all hover:bg-black hover:shadow-xl active:scale-[0.98]">
+            Koleksiyonu Keşfet
+            <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
           </Link>
         </div>
       </div>
@@ -70,132 +70,150 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between mb-8 lg:mb-10">
+    <div className="min-h-screen bg-[#F8F1E9] text-[#5C4638] overflow-x-hidden selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between mb-12 lg:mb-16">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sepetim</h1>
+            <div className="text-[10px] tracking-[4px] text-[#A17E65] mb-2 uppercase">ALIŞVERİŞ ÇANTASI</div>
+            <h1 className="font-serif text-4xl sm:text-5xl tracking-tight text-[#5C4638]">Sepetim</h1>
           </div>
-          <Link href="/urunler" className="group inline-flex items-center gap-2 text-sm font-medium uppercase tracking-[0.15em] text-gray-900 hover:text-rose-900 transition-colors w-fit">
+          <Link href="/urunler" className="group inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638] transition-colors w-fit">
             Alışverişe devam et
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={1.5} />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px] lg:gap-12">
-          <div className="rounded-xl border border-gray-100 bg-gray-50/50">
-            <div className="p-4 sm:p-6">
-              {cartLoading ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-rose-900" />
-                  <p className="mt-4 text-sm text-gray-600">Yükleniyor...</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {(cart?.items ?? []).map((item: BasketItemSummaryInterface) => {
-                    const variantLine = formatBasketItemVariantLine(item);
-                    const linePay = item.linePay ?? (item.lineTotal != null ? (item.lineTotal ?? 0) + (item.lineTax ?? 0) : null);
-                    const listGross = (item.lineTotal ?? 0) + (item.lineTax ?? 0);
-                    const showListStrike = linePay != null && listGross - linePay > 0.01;
-                    return (
-                      <div key={item.id} className="group flex gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-gray-300">
-                        <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-32 sm:w-28">
-                          {item.images ? (
-                            <GeneralImage src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${item.images[0]}`} alt={item.product.name} fill objectFit="cover" className="rounded-xl" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                              <ShoppingBag className="h-8 w-8 text-gray-300" strokeWidth={1.5} />
-                            </div>
-                          )}
-                        </Link>
-
-                        <div className="flex min-w-0 flex-1 flex-col justify-between">
-                          <div>
-                            <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="block">
-                              <h3 className="text-base font-semibold text-gray-900 leading-snug transition-colors hover:text-rose-900 line-clamp-2">{item.product.name}</h3>
-                            </Link>
-                            {variantLine ? <p className="mt-1.5 text-[12px] font-medium text-gray-500">{variantLine}</p> : null}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-16">
+          <div className="space-y-6">
+            {cartLoading ? (
+              <div className="flex flex-col items-center justify-center py-32 bg-white/30 rounded-3xl border border-[#D9C5B0]/50">
+                <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-[#D9C5B0] border-t-[#5C4638]" />
+                <p className="mt-6 text-xs tracking-[0.2em] text-[#A17E65] uppercase">Yükleniyor...</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {(cart?.items ?? []).map((item: BasketItemSummaryInterface) => {
+                  const variantLine = formatBasketItemVariantLine(item);
+                  const linePay = item.linePay ?? (item.lineTotal != null ? (item.lineTotal ?? 0) + (item.lineTax ?? 0) : null);
+                  const listGross = (item.lineTotal ?? 0) + (item.lineTax ?? 0);
+                  const showListStrike = linePay != null && listGross - linePay > 0.01;
+                  return (
+                    <div key={item.id} className="group flex gap-6 rounded-[2rem] border border-[#EDE0D1] bg-white p-5 transition-all duration-300 hover:border-[#C9A99A] hover:shadow-xl">
+                      <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="relative h-32 w-28 shrink-0 overflow-hidden rounded-2xl bg-[#F8F1E9] sm:h-40 sm:w-32">
+                        {item.images ? (
+                          <GeneralImage src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${item.images[0]}`} alt={item.product.name} fill objectFit="cover" className="rounded-2xl transition-transform duration-500 group-hover:scale-105" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[#F8F1E9]">
+                            <ShoppingBag className="h-10 w-10 text-[#D9C5B0]" strokeWidth={1} />
                           </div>
-                          <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                              <InputQuantity quantity={item.quantity} onChange={newQuantity => handleQuantityChange(item, newQuantity)} disabled={isInsertPending || isRemovePending} min={1} max={item.stock > 0 ? item.stock : undefined} />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveItem(item)}
-                                disabled={isRemovePending}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-all hover:border-rose-900 hover:bg-rose-50 hover:text-rose-900 disabled:cursor-not-allowed disabled:opacity-50"
-                                title="Ürünü kaldır"
-                              >
-                                <Trash2 className="h-4 w-4" strokeWidth={2} />
-                              </button>
-                            </div>
-                            <div className="text-right">
-                              {linePay == null ? (
-                                <p className="text-sm font-medium text-gray-400">Fiyat bilgisi yok</p>
-                              ) : (
-                                <>
-                                  <div className="flex flex-wrap items-center justify-end gap-2">
-                                    {showListStrike ? <span className="text-sm text-gray-400 line-through tabular-nums leading-none">{listGross.toTry()}</span> : null}
-                                    <p className="text-lg font-bold text-gray-900 leading-none tabular-nums">{linePay.toTry()}</p>
-                                  </div>
-                                  {item.basePrice != null && item.basePrice !== undefined ? <p className="mt-1.5 text-xs font-medium text-gray-500 tabular-nums">Birim: {item.basePrice.toTry()}</p> : null}
-                                </>
-                              )}
-                            </div>
+                        )}
+                      </Link>
+
+                      <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
+                        <div>
+                          <div className="flex justify-between items-start gap-4">
+                            <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="block">
+                              <h3 className="font-serif text-xl text-[#5C4638] leading-tight transition-colors hover:text-[#A17E65] line-clamp-2">{item.product.name}</h3>
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(item)}
+                              disabled={isRemovePending}
+                              className="text-[#A17E65] hover:text-[#5C4638] transition-colors disabled:opacity-30"
+                              title="Ürünü kaldır"
+                            >
+                              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                            </button>
+                          </div>
+                          {variantLine ? <p className="mt-2 text-[11px] font-medium tracking-widest text-[#A17E65] uppercase">{variantLine}</p> : null}
+                        </div>
+                        
+                        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <InputQuantity 
+                              quantity={item.quantity} 
+                              onChange={newQuantity => handleQuantityChange(item, newQuantity)} 
+                              disabled={isInsertPending || isRemovePending} 
+                              min={1} 
+                              max={item.stock > 0 ? item.stock : undefined}
+                              size="sm"
+                            />
+                          </div>
+                          <div className="text-right">
+                            {linePay == null ? (
+                              <p className="text-xs tracking-widest text-[#A17E65] uppercase">Fiyat bilgisi yok</p>
+                            ) : (
+                              <div className="flex flex-col items-end">
+                                <div className="flex items-center gap-3">
+                                  {showListStrike ? <span className="text-sm text-[#A17E65]/60 line-through tabular-nums">{listGross.toTry()}</span> : null}
+                                  <p className="font-mono text-xl text-[#5C4638] tabular-nums">{linePay.toTry()}</p>
+                                </div>
+                                {item.basePrice != null && item.basePrice !== undefined ? <p className="mt-1 text-[10px] tracking-widest text-[#A17E65] uppercase">Birim: {item.basePrice.toTry()}</p> : null}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {cart && cart.items && cart.items.length > 0 && (
-            <div className="h-fit lg:sticky lg:top-24">
-              <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6">
-                <h2 className="text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500 mb-6">Sipariş özeti</h2>
+            <div className="h-fit lg:sticky lg:top-28">
+              <div className="rounded-[2.5rem] border border-[#D9C5B0]/50 bg-white/60 backdrop-blur-sm p-8 sm:p-10 shadow-sm">
+                <h2 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#A17E65] mb-8">Sipariş özeti</h2>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 font-medium">Ara toplam</span>
-                    <span className="text-gray-900 font-semibold tabular-nums">{cart.info?.basePrice.total ? cart.info.basePrice.total.toTry() : '0,00 ₺'}</span>
+                <div className="space-y-4 mb-8">
+                  <div className="flex justify-between text-sm tracking-tight">
+                    <span className="text-[#8B6B57]">Ara toplam</span>
+                    <span className="text-[#5C4638] font-mono tabular-nums">{cart.info?.basePrice.total ? cart.info.basePrice.total.toTry() : '0,00 ₺'}</span>
                   </div>
                   {cart.info?.tax && cart.info.tax.length > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 font-medium">KDV</span>
-                      <span className="text-gray-900 font-semibold tabular-nums">{cart.info.tax.reduce((acc, curr) => acc + curr.tax, 0).toTry()}</span>
+                    <div className="flex justify-between text-sm tracking-tight">
+                      <span className="text-[#8B6B57]">KDV</span>
+                      <span className="text-[#5C4638] font-mono tabular-nums">{cart.info.tax.reduce((acc, curr) => acc + curr.tax, 0).toTry()}</span>
                     </div>
                   )}
                   {cart.info?.delivery?.pay && cart.info.delivery.pay > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 font-medium">Kargo</span>
-                      <span className="text-gray-900 font-semibold tabular-nums">{cart.info.delivery.pay.toTry()}</span>
+                    <div className="flex justify-between text-sm tracking-tight">
+                      <span className="text-[#8B6B57]">Kargo</span>
+                      <span className="text-[#5C4638] font-mono tabular-nums">{cart.info.delivery.pay.toTry()}</span>
                     </div>
                   )}
                   {cart.info?.discount?.pay && cart.info.discount.pay > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-red-600">İndirim</span>
-                      <span className="font-semibold text-red-600 tabular-nums">-{cart.info.discount.pay.toTry()}</span>
+                    <div className="flex justify-between text-sm tracking-tight">
+                      <span className="text-[#A17E65]">İndirim</span>
+                      <span className="text-[#A17E65] font-mono tabular-nums">-{cart.info.discount.pay.toTry()}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between border-t border-gray-200 pt-5 pb-6">
-                  <span className="text-base font-semibold text-gray-900">Toplam</span>
-                  <span className="text-2xl font-bold text-gray-900 tabular-nums">{totalPrice.toTry()}</span>
+                <div className="flex items-center justify-between border-t border-[#D9C5B0]/40 pt-6 pb-8">
+                  <span className="text-sm tracking-[0.2em] uppercase text-[#5C4638]">Toplam</span>
+                  <span className="font-serif text-3xl text-[#5C4638] tabular-nums">{totalPrice.toTry()}</span>
                 </div>
 
-                <Button onClick={handleCheckout} className="w-full rounded-lg bg-rose-900 py-4 px-6 text-sm font-medium uppercase tracking-wide text-white shadow-md transition hover:bg-rose-800 hover:shadow-lg">
+                <button 
+                  onClick={handleCheckout} 
+                  className="w-full rounded-full bg-[#5C4638] py-5 px-8 text-sm font-medium uppercase tracking-[0.25em] text-[#F8F1E9] shadow-lg transition-all hover:bg-black hover:shadow-xl active:scale-[0.985]"
+                >
                   Ödemeye geç
-                </Button>
+                </button>
 
-                <div className="mt-5 text-center">
-                  <Link href="/urunler" className="group inline-flex items-center justify-center gap-2 text-sm font-medium uppercase tracking-[0.12em] text-gray-600 hover:text-rose-900 transition-colors">
+                <div className="mt-8 text-center">
+                  <Link href="/urunler" className="group inline-flex items-center justify-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638] transition-colors">
                     Alışverişe devam et
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                   </Link>
+                </div>
+                
+                <div className="mt-8 flex justify-center items-center gap-4 text-[9px] tracking-[0.15em] text-[#A17E65]/70 uppercase border-t border-[#D9C5B0]/20 pt-6">
+                  <span>Güvenli Ödeme</span>
+                  <div className="w-1 h-1 rounded-full bg-[#D9C5B0]" />
+                  <span>30 Gün İade</span>
                 </div>
               </div>
             </div>
