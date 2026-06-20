@@ -2,8 +2,6 @@
 import { HOME_DATA } from "@/core/constant/home.constant";
 import type { Product, Shade } from "@/core/constant/home.constant";
 import { useState } from "react";
-import { useRaxon } from "@raxonltd/raxon-core";
-
 
 
 import SectionHomeHero from "@/core/theme/section/home/section.home.hero";
@@ -30,9 +28,6 @@ export default function Home() {
   const [addedItems, setAddedItems] = useState<{ product: Product; shade: Shade }[]>([]);
   const [isAdded, setIsAdded] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
-
-  const { branch } = useRaxon();
-  branch?.socialMediaLinks;
 
   const currentShade = selectedProduct ? selectedProduct.shades[selectedShadeIndex] : null;
 
