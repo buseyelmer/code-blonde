@@ -14,6 +14,7 @@ export default function SectionHomeCollection() {
             <h2 className='mt-3 font-serif text-4xl text-[#5C4638] lg:text-5xl'>Nude Serileri</h2>
             <p className='mx-auto mt-4 max-w-lg text-[#8B6B57]'>Her ten tonuna özel tasarlanmış üç imza koleksiyon</p>
           </div>
+          
 
           <div className='grid gap-6 md:grid-cols-3'>
             {collection.map((col, idx) => {
