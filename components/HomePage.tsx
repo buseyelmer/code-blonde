@@ -69,7 +69,7 @@ export function HomePage() {
         <ProductGrid products={cardProducts} />
       </HomeSection>
 
-      <HomeSection>
+      <HomeSection className="!mb-0">
         <PromoSection />
       </HomeSection>
     </div>

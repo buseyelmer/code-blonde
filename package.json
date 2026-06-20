@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@raxonltd/raxon-core": "^1.1.14",
     "@tanstack/react-query": "^5.101.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.21.0",

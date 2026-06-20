@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { QuantitySelector } from "@/components/cart/QuantitySelector";
+import { useMemo } from "react";
+import { ChevronRight, Home, Loader2 } from "lucide-react";
+import { ProductDetailGallery } from "@/components/product/ProductDetailGallery";
+import { ProductDetailInfo } from "@/components/product/ProductDetailInfo";
 import { mapApiProductsToCards } from "@/lib/api/mappers";
 import { useSandboxProducts } from "@/hooks/useHomeData";
-import { formatPrice, PLACEHOLDER_IMAGE, resolveProductImageUrl } from "@/lib/product-utils";
-import { ProductImageZoom } from "@/components/product/ProductImageZoom";
-import { ProductTabs } from "@/components/product/ProductTabs";
+import { resolveProductImageUrl } from "@/lib/product-utils";
 
 type ProductDetailProps = {
   productId: string;
@@ -19,7 +19,6 @@ type ProductWithMedia = ReturnType<typeof mapApiProductsToCards>[number] & {
 
 export function ProductDetail({ productId }: ProductDetailProps) {
   const { data, isLoading, isError } = useSandboxProducts();
-  const [imageUrl, setImageUrl] = useState(PLACEHOLDER_IMAGE);
 
   const products = useMemo(
     () => mapApiProductsToCards(data?.products),
@@ -31,105 +30,62 @@ export function ProductDetail({ productId }: ProductDetailProps) {
     [products, productId],
   );
 
-  const similarProducts = useMemo(() => {
-    if (!product) return [];
-    return products
-      .filter(
-        (item) =>
-          item.id !== product.id && item.categoryId === product.categoryId,
-      )
-      .slice(0, 4);
-  }, [product, products]);
-
-  useEffect(() => {
-    if (!product) return;
-    setImageUrl(resolveProductImageUrl(product as ProductWithMedia));
+  const imageUrl = useMemo(() => {
+    if (!product) return undefined;
+    return resolveProductImageUrl(product as ProductWithMedia);
   }, [product]);
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="aspect-square animate-pulse rounded-3xl bg-powder/60" />
-          <div className="space-y-4">
-            <div className="h-8 w-2/3 animate-pulse rounded bg-powder/60" />
-            <div className="h-12 w-1/3 animate-pulse rounded bg-powder/60" />
-          </div>
-        </div>
-      </div>
+      <main className="flex min-h-[50vh] items-center justify-center bg-cream">
+        <Loader2 className="h-8 w-8 animate-spin text-charcoal" strokeWidth={1.5} />
+      </main>
     );
   }
 
   if (isError || !product) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold text-charcoal">Ürün bulunamadı</h1>
-        <p className="mt-3 text-sm text-muted">
-          Aradığınız ürün mevcut değil veya kaldırılmış olabilir.
-        </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex rounded-full border border-charcoal px-6 py-3 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
-        >
-          Ana Sayfaya Dön
-        </Link>
-      </div>
+      <main className="bg-cream">
+        <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-semibold text-charcoal">Ürün bulunamadı</h1>
+          <p className="mt-3 text-sm text-muted">
+            Aradığınız ürün mevcut değil veya kaldırılmış olabilir.
+          </p>
+          <Link
+            href="/"
+            className="mt-6 inline-flex rounded-xl border border-charcoal px-6 py-3 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
+          >
+            Ana Sayfaya Dön
+          </Link>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12 lg:px-8">
-      <nav className="text-sm text-muted">
-        <Link href="/" className="hover:text-charcoal">
-          Ana Sayfa
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-charcoal">{product.name}</span>
-      </nav>
+    <main className="bg-cream">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+        <nav className="mb-8 flex flex-wrap items-center gap-2 border-b border-stone/50 pb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-muted">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 transition-colors hover:text-charcoal"
+          >
+            <Home className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Ana Sayfa
+          </Link>
+          <ChevronRight className="h-3 w-3 shrink-0 text-stone" />
+          <Link href="/products" className="transition-colors hover:text-charcoal">
+            Ürünler
+          </Link>
+          <ChevronRight className="h-3 w-3 shrink-0 text-stone" />
+          <span className="max-w-[220px] truncate text-charcoal">{product.name}</span>
+        </nav>
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:items-start">
-        <ProductImageZoom src={imageUrl} alt={product.name} />
-
-        <div className="lg:sticky lg:top-24">
-          {product.category && (
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
-              {product.category}
-            </p>
-          )}
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl">
-            {product.name}
-          </h1>
-
-          <div className="mt-6 flex items-end gap-3">
-            {product.originalPrice && product.originalPrice > product.price && (
-              <p className="text-lg text-muted line-through">
-                {formatPrice(product.originalPrice)}
-              </p>
-            )}
-            <p className="text-3xl font-bold text-charcoal">
-              {formatPrice(Number(product.price))}
-            </p>
-          </div>
-
-          <p className="mt-4 text-sm leading-7 text-muted">
-            {product.description ||
-              "Code Blonde ile günlük bakım rutininize doğal bir dokunuş katın."}
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <QuantitySelector product={product} variant="detail" />
-
-            <Link
-              href="/cart"
-              className="rounded-full border border-charcoal px-6 py-3.5 text-sm font-medium text-charcoal transition-colors hover:bg-powder"
-            >
-              Sepete Git
-            </Link>
-          </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
+          <ProductDetailGallery src={imageUrl} alt={product.name} />
+          <ProductDetailInfo product={product} />
         </div>
       </div>
-
-      <ProductTabs product={product} similarProducts={similarProducts} />
-    </div>
+    </main>
   );
 }

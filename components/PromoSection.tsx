@@ -131,32 +131,34 @@ export function PromoSection() {
       </div>
 
       <div className="-mx-4 border-t border-stone/50 bg-cream sm:-mx-6 lg:-mx-8">
-        <div className={`${HOME_CONTAINER_CLASS} grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 lg:grid-cols-4`}>
-          {serviceBenefits.map((benefit, index) => {
-            const Icon = benefitIcons[benefit.icon];
-            return (
-              <motion.div
-                key={benefit.id}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
-                className="flex items-start gap-4"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-stone bg-powder/50 text-charcoal">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-charcoal">
-                    {benefit.title}
-                  </h3>
-                  <p className="mt-0.5 text-xs text-muted sm:text-sm">
-                    {benefit.description}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
+        <div className={`${HOME_CONTAINER_CLASS} py-5 sm:py-6`}>
+          <ul className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-5 lg:gap-x-12">
+            {serviceBenefits.map((benefit, index) => {
+              const Icon = benefitIcons[benefit.icon];
+              return (
+                <motion.li
+                  key={benefit.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  className="flex w-full max-w-[15rem] items-start gap-3 sm:w-auto"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-stone bg-powder/50 text-charcoal">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <h3 className="text-sm font-semibold text-charcoal">
+                      {benefit.title}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-muted sm:text-sm">
+                      {benefit.description}
+                    </p>
+                  </div>
+                </motion.li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     </div>
