@@ -11,13 +11,13 @@ import { AccountSpinner } from "@/core/component/account/account.ui";
 
 const menuItems = [
   { href: "/hesabim", label: "Hesabım", icon: User, exact: true },
-  { href: "/hesabim/siparislerim", label: "Siparişlerim", icon: ShoppingBag },
-  { href: "/hesabim/favorilerim", label: "Favorilerim", icon: Heart },
-  { href: "/hesabim/adreslerim", label: "Adreslerim", icon: MapPin },
-  { href: "/hesabim/faturalarim", label: "Faturalarım", icon: FileText },
+  { href: "/hesabim/siparislerim", label: "Siparişlerim", icon: ShoppingBag, exact: false },
+  { href: "/hesabim/favorilerim", label: "Favorilerim", icon: Heart, exact: false },
+  { href: "/hesabim/adreslerim", label: "Adreslerim", icon: MapPin, exact: false },
+  { href: "/hesabim/faturalarim", label: "Faturalarım", icon: FileText, exact: false },
 ] as const;
 
-function isMenuActive(pathname: string, href: string, exact?: boolean) {
+function isMenuActive(pathname: string, href: string, exact: boolean = false) {
   if (exact) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
