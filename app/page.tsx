@@ -3,20 +3,17 @@ import { HOME_DATA } from "@/core/constant/home.constant";
 import type { Product } from "@/core/constant/home.constant";
 import { useState } from "react";
 import { useRaxon } from "@raxonltd/raxon-core";
-import { useCart } from "@/core/hook/use.cart"; 
+import { useCart } from "@/core/hook/use.cart";
 
-import SectionHomeHero from "@/core/theme/section/home/section.home.hero";
-import SectionHomeCollection from "@/core/theme/section/home/section.home.collection";
-import SectionHomeProducts from "@/core/theme/section/home/section.home.products";
-import SectionHomePalette from "@/core/theme/section/home/section.home.palette";
-import SectionHomePhilosophy from "@/core/theme/section/home/section.home.philosophy";
-import SectionHomeStory from "@/core/theme/section/home/section.home.story";
-import SectionHomeTestimonials from "@/core/theme/section/home/section.home.testimonials";
-import SectionHomeNewsletter from "@/core/theme/section/home/section.home.newsletter";
+import { 
+  SectionHomeHero, SectionHomeCollection, SectionHomeProducts, 
+  SectionHomePalette, SectionHomePhilosophy, SectionHomeStory, 
+  SectionHomeTestimonials, SectionHomeNewsletter 
+} from "@/core/theme/section/home";
 
 import CartDrawer from "@/core/component/cart.drawer";
 import ProductModal from "@/core/component/product.modal";
-import Footer from "@/core/component/footer";
+
 
 export default function Home() {
   const { 
@@ -79,7 +76,7 @@ export default function Home() {
         totalPrice={totalPrice} 
         cartCount={cartCount}
       />
-      <Footer />
+      
     </div>
   );
 }
