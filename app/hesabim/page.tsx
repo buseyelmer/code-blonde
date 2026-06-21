@@ -304,7 +304,7 @@ export default function ProfilPage() {
       {phoneVerification.isOpen && (
         <AccountModal
           title="Telefon Doğrulama"
-          subtitle={profile?.phoneNumber}
+          subtitle={profile?.phoneNumber ?? undefined}
           onClose={() => setPhoneVerification({ isOpen: false, code: "", step: "send" })}
         >
           {phoneVerification.step === "send" ? (
