@@ -2,7 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["images.unsplash.com", "cdn.raxon.tr"],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "cdn.raxon.tr" },
+      { protocol: "https", hostname: "placehold.co" },
+    ],
+    minimumCacheTTL: 60,
   },
 };
 

@@ -5,6 +5,7 @@ import { MapPin, Plus, Home, Building2, Trash2, Edit2, Check, X, Loader2 } from 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { AccountButtonPrimary, AccountPageHeader, AccountSpinner } from '@/core/component/account/account.ui';
 
 type AddressTypeUI = 'HOME' | 'WORK';
 
@@ -145,42 +146,28 @@ export default function AdreslerimPage() {
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-900" />
-      </div>
-    );
-  }
+  if (isLoading) return <AccountSpinner />;
 
   const addressesList = addresses || [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl text-gray-900 font-serif font-bold">
-            Adreslerim
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Teslimat adreslerinizi yönetin
-          </p>
-        </div>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-900 text-white rounded-lg hover:bg-rose-800 transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Yeni Adres
-          </button>
-        )}
-      </div>
+    <div className="space-y-8">
+      <AccountPageHeader
+        title="Adreslerim"
+        subtitle="Teslimat adreslerinizi yönetin"
+        action={
+          !showForm ? (
+            <AccountButtonPrimary onClick={() => setShowForm(true)} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              Yeni Adres
+            </AccountButtonPrimary>
+          ) : undefined
+        }
+      />
 
       {/* Address Form */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">
               {editingId ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
@@ -204,7 +191,7 @@ export default function AdreslerimPage() {
                   onClick={() => form.setValue('type', 'HOME')}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
                     form.watch('type') === 'HOME'
-                      ? 'border-rose-900 bg-rose-900 text-white'
+                      ? 'border-[#5C4638] bg-[#5C4638] text-white'
                       : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -216,7 +203,7 @@ export default function AdreslerimPage() {
                   onClick={() => form.setValue('type', 'WORK')}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
                     form.watch('type') === 'WORK'
-                      ? 'border-rose-900 bg-rose-900 text-white'
+                      ? 'border-[#5C4638] bg-[#5C4638] text-white'
                       : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -235,7 +222,7 @@ export default function AdreslerimPage() {
               <input
                 {...form.register('title', { required: 'Adres başlığı gerekli' })}
                 placeholder="Örn: Ev Adresi, İş Adresi"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
               />
             </div>
 
@@ -247,7 +234,7 @@ export default function AdreslerimPage() {
                 </label>
                 <input
                   {...form.register('firstName', { required: 'Ad gerekli' })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                 />
               </div>
               <div>
@@ -256,7 +243,7 @@ export default function AdreslerimPage() {
                 </label>
                 <input
                   {...form.register('lastName', { required: 'Soyad gerekli' })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                 />
               </div>
             </div>
@@ -269,7 +256,7 @@ export default function AdreslerimPage() {
               <input
                 {...form.register('phoneNumber', { required: 'Telefon gerekli' })}
                 placeholder="0 (5XX) XXX XX XX"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
               />
             </div>
 
@@ -282,7 +269,7 @@ export default function AdreslerimPage() {
                 {...form.register('fullAddress', { required: 'Adres gerekli' })}
                 rows={3}
                 placeholder="Sokak, bina no, daire no..."
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors resize-none"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors resize-none"
               />
             </div>
 
@@ -295,7 +282,7 @@ export default function AdreslerimPage() {
                 <input
                   {...form.register('administrativeAreaLevel1', { required: 'İl gerekli' })}
                   placeholder="İstanbul"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                 />
               </div>
               <div>
@@ -305,7 +292,7 @@ export default function AdreslerimPage() {
                 <input
                   {...form.register('administrativeAreaLevel2', { required: 'İlçe gerekli' })}
                   placeholder="Kadıköy"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                 />
               </div>
               <div>
@@ -315,7 +302,7 @@ export default function AdreslerimPage() {
                 <input
                   {...form.register('postalCode')}
                   placeholder="34000"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                 />
               </div>
             </div>
@@ -331,7 +318,7 @@ export default function AdreslerimPage() {
                     </label>
                     <input
                       {...form.register('companyName')}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                     />
                   </div>
                   <div>
@@ -340,7 +327,7 @@ export default function AdreslerimPage() {
                     </label>
                     <input
                       {...form.register('taxOffice')}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                     />
                   </div>
                 </div>
@@ -350,7 +337,7 @@ export default function AdreslerimPage() {
                   </label>
                   <input
                     {...form.register('taxNumber')}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-rose-900 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#5C4638] transition-colors"
                   />
                 </div>
               </div>
@@ -361,7 +348,7 @@ export default function AdreslerimPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center gap-2 px-6 py-2.5 bg-rose-900 text-white rounded-lg hover:bg-rose-800 transition-colors text-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#5C4638] text-white rounded-lg hover:bg-[#3F2F25] transition-colors text-sm disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -385,14 +372,14 @@ export default function AdreslerimPage() {
 
       {/* Addresses Grid */}
       {addressesList.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className="rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] p-12 text-center">
           <MapPin className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Kayıtlı Adresiniz Yok</h3>
           <p className="text-sm text-gray-500 mb-6">Teslimat adresi ekleyin.</p>
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-rose-900 text-white rounded-lg hover:bg-rose-800 transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#5C4638] text-white rounded-lg hover:bg-[#3F2F25] transition-colors text-sm"
             >
               <Plus className="w-4 h-4" />
               Adres Ekle
@@ -405,14 +392,14 @@ export default function AdreslerimPage() {
             <div
               key={address.id}
               className={`bg-white rounded-xl border overflow-hidden transition-colors ${
-                address.isDefault ? 'border-rose-900' : 'border-gray-200 hover:border-gray-300'
+                address.isDefault ? 'border-[#5C4638]' : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <div className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      address.isDefault ? 'bg-rose-900 text-white' : 'bg-gray-100 text-gray-600'
+                      address.isDefault ? 'bg-[#5C4638] text-white' : 'bg-gray-100 text-gray-600'
                     }`}>
                       {address.type === 'WORK' ? <Building2 className="w-5 h-5" /> : <Home className="w-5 h-5" />}
                     </div>

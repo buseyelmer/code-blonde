@@ -1,114 +1,132 @@
-'use client';
+"use client";
 
-import { useOrder } from '@raxonltd/raxon-core/hook';
-import { Package, Truck, CheckCircle, Clock, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { useOrder } from "@raxonltd/raxon-core/hook";
+import { Package, Truck, CheckCircle, Clock, ChevronRight, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import { AccountPageHeader, AccountSpinner } from "@/core/component/account/account.ui";
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  PENDING: { label: 'Bekliyor', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  PROCESSING: { label: 'Hazırlanıyor', color: 'bg-blue-100 text-blue-800', icon: Package },
-  SHIPPED: { label: 'Kargoda', color: 'bg-purple-100 text-purple-800', icon: Truck },
-  DELIVERED: { label: 'Teslim Edildi', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  CANCELLED: { label: 'İptal Edildi', color: 'bg-red-100 text-red-800', icon: Clock },
+const statusConfig: Record<string, { label: string; className: string; icon: LucideIcon }> = {
+  PENDING: {
+    label: "Bekliyor",
+    className: "border-[#D9C5B0] bg-[#F8F1E9] text-[#8B6B57]",
+    icon: Clock,
+  },
+  PROCESSING: {
+    label: "Hazırlanıyor",
+    className: "border-[#C9A99A]/50 bg-[#EDE0D1]/40 text-[#5C4638]",
+    icon: Package,
+  },
+  SHIPPED: {
+    label: "Kargoda",
+    className: "border-[#A17E65]/40 bg-[#F5EDE4] text-[#5C4638]",
+    icon: Truck,
+  },
+  DELIVERED: {
+    label: "Teslim Edildi",
+    className: "border-[#5C4638]/30 bg-[#EDE0D1]/60 text-[#5C4638]",
+    icon: CheckCircle,
+  },
+  CANCELLED: {
+    label: "İptal Edildi",
+    className: "border-[#D9C5B0] bg-[#F8F1E9] text-[#8B6B57]/70",
+    icon: Clock,
+  },
 };
 
 export default function SiparislerimPage() {
   const { fetch } = useOrder();
   const { data: ordersData, isLoading } = fetch();
-  const orders = ordersData?.data || [];
+  const ordersList = ordersData?.data ?? [];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  const ordersList = orders || [];
+  if (isLoading) return <AccountSpinner />;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl text-gray-900 font-serif font-bold">
-          Siparişlerim
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Tüm siparişlerinizi görüntüleyin ve takip edin
-        </p>
-      </div>
+    <div className="space-y-8">
+      <AccountPageHeader
+        title="Siparişlerim"
+        subtitle="Tüm siparişlerinizi görüntüleyin ve takip edin"
+      />
 
-      {/* Orders List */}
       {ordersList.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz Siparişiniz Yok</h3>
-          <p className="text-sm text-gray-500 mb-6">İlk siparişinizi vermek için ürünlerimize göz atın.</p>
+        <div className="rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] px-6 py-16 text-center">
+          <Package className="mx-auto mb-4 h-12 w-12 text-[#D9C5B0]" strokeWidth={1.25} />
+          <h2 className="font-serif text-xl text-[#5C4638]">Henüz siparişiniz yok</h2>
+          <p className="mt-2 text-sm text-[#8B6B57]">İlk siparişinizi vermek için ürünlerimize göz atın.</p>
           <Link
             href="/urunler"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-rose-900 text-white rounded-lg hover:bg-rose-800 transition-colors text-sm"
+            className="mt-8 inline-flex items-center gap-2 border border-[#5C4638] px-6 py-3 text-[10px] tracking-[0.24em] uppercase text-[#5C4638] transition hover:bg-[#5C4638] hover:text-[#F8F1E9]"
           >
             Alışverişe Başla
+            <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
-          {ordersList.map((order: any) => {
-            const status = statusConfig[order.status?.status || 'PENDING'] || statusConfig.PENDING;
+          {ordersList.map((order: {
+            id: string;
+            orderNumber?: string;
+            createdAt: string;
+            totalPayAmount?: number;
+            status?: { status?: string };
+            items?: { quantity: number }[];
+          }) => {
+            const status = statusConfig[order.status?.status || "PENDING"] || statusConfig.PENDING;
             const StatusIcon = status.icon;
 
             return (
               <Link
                 key={order.id}
                 href={`/hesabim/siparislerim/${order.id}`}
-                className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-colors"
+                className="block overflow-hidden rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] transition hover:border-[#A17E65]/50 hover:shadow-[0_4px_20px_-8px_rgba(92,70,56,0.1)]"
               >
-                <div className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <Package className="w-6 h-6 text-gray-600" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#D9C5B0]/60 bg-[#F8F1E9]">
+                        <Package className="h-5 w-5 text-[#A17E65]" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-[#5C4638]">
                           Sipariş #{order.orderNumber || order.id.slice(-8)}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                        <p className="mt-0.5 text-xs text-[#8B6B57]">
+                          {new Date(order.createdAt).toLocaleDateString("tr-TR")}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${status.color}`}>
-                        <StatusIcon className="w-3.5 h-3.5" />
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] tracking-[0.12em] uppercase ${status.className}`}
+                      >
+                        <StatusIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
                         {status.label}
                       </span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {(order.totalPayAmount as number)?.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                      <span className="font-mono text-sm tabular-nums text-[#5C4638]">
+                        {(order.totalPayAmount as number)?.toLocaleString("tr-TR", {
+                          style: "currency",
+                          currency: "TRY",
+                        })}
                       </span>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="h-5 w-5 text-[#D9C5B0]" strokeWidth={1.5} />
                     </div>
                   </div>
 
-                  {/* Order Items Preview */}
                   {order.items && order.items.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-4 border-t border-[#D9C5B0]/30 pt-4">
                       <div className="flex items-center gap-3">
                         <div className="flex -space-x-2">
-                          {order.items.slice(0, 3).map((item: any, idx: number) => (
+                          {order.items.slice(0, 3).map((item, idx) => (
                             <div
                               key={idx}
-                              className="w-10 h-10 rounded-lg bg-gray-200 border-2 border-white flex items-center justify-center text-xs text-gray-600"
+                              className="flex h-10 w-10 items-center justify-center rounded-sm border-2 border-[#FDFAF6] bg-[#F5EDE4] text-xs text-[#8B6B57]"
                             >
                               {item.quantity}x
                             </div>
                           ))}
                         </div>
-                        <p className="text-sm text-gray-600">
-                          {order.items.length} ürün
-                        </p>
+                        <p className="text-sm text-[#8B6B57]">{order.items.length} ürün</p>
                       </div>
                     </div>
                   )}

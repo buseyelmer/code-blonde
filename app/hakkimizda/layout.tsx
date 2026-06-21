@@ -1,19 +1,18 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { SITE_SLOGAN } from '@/core/constant/site.constant';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buluticgiyim.com';
 
 export const metadata: Metadata = {
   title: 'Hakkımızda',
-  description:
-    'Code Blonde hakkında daha fazla bilgi edinin. Nude tonlarda premium kozmetik markamızın hikayesi, değerleri ve vizyonu.',
+  description: `Code Blonde hakkında daha fazla bilgi edinin. ${SITE_SLOGAN}`,
   alternates: {
     canonical: `${siteUrl}/hakkimizda`,
   },
   openGraph: {
     title: 'Hakkımızda | Code Blonde',
-    description:
-      'Code Blonde — doğal güzelliğin kodu. Nude tonlarda premium kozmetik deneyimi.',
+    description: SITE_SLOGAN,
     url: `${siteUrl}/hakkimizda`,
   },
 };
@@ -23,8 +22,7 @@ const aboutSchema = {
   '@type': 'AboutPage',
   name: 'Hakkımızda – Code Blonde',
   url: `${siteUrl}/hakkimizda`,
-  description:
-    'Code Blonde, nude tonlarda premium kozmetik sunan bir güzellik markasıdır.',
+  description: SITE_SLOGAN,
   mainEntity: {
     '@type': 'Organization',
     name: 'Code Blonde',

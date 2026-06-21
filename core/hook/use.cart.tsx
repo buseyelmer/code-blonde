@@ -9,9 +9,10 @@ export function useCart() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  const addToCart = (product: Product, shade: Shade) => {
-    setAddedItems((prev) => [...prev, { product, shade }]);
-    setCartCount((prev) => prev + 1);
+  const addToCart = (product: Product, shade: Shade, quantity = 1) => {
+    const entries = Array.from({ length: quantity }, () => ({ product, shade }));
+    setAddedItems((prev) => [...prev, ...entries]);
+    setCartCount((prev) => prev + quantity);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
   };

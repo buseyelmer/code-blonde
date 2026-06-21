@@ -126,34 +126,45 @@ export interface Product {
     name: string;
     hex: string;
     tone: string;
+    productId: number;
+    shadeIndex: number;
   }
+
   export const NUDE_TONES: NudeTone[] = [
-    { name: "Poudre", hex: "#F8F1E9", tone: "Açık" },
-    { name: "Lait", hex: "#EDE0D1", tone: "Açık" },
-    { name: "Sable", hex: "#D9C5B0", tone: "Açık-Orta" },
-    { name: "Pêche", hex: "#E8C9B8", tone: "Açık-Orta" },
-    { name: "Rose Thé", hex: "#C9A99A", tone: "Orta" },
-    { name: "Champagne", hex: "#EDE0D1", tone: "Açık" },
-    { name: "Biscuit", hex: "#D9C5B0", tone: "Açık-Orta" },
-    { name: "Grège", hex: "#C9A99A", tone: "Orta" },
-    { name: "Café Crème", hex: "#B89A7E", tone: "Orta" },
-    { name: "Miel", hex: "#A17E65", tone: "Orta-Koyu" },
-    { name: "Terre", hex: "#8B6B57", tone: "Orta-Koyu" },
-    { name: "Noix", hex: "#5C4638", tone: "Koyu" },
-    { name: "Ivoire", hex: "#EDE0D1", tone: "Açık" },
-    { name: "Beige Doré", hex: "#D9C5B0", tone: "Açık-Orta" },
-    { name: "Ambre", hex: "#A17E65", tone: "Orta-Koyu" },
-    { name: "Sienne", hex: "#B89A7E", tone: "Orta" },
+    { name: "Poudre", hex: "#F8F1E9", tone: "Açık", productId: 1, shadeIndex: 0 },
+    { name: "Lait", hex: "#EDE0D1", tone: "Açık", productId: 2, shadeIndex: 1 },
+    { name: "Sable", hex: "#D9C5B0", tone: "Açık-Orta", productId: 1, shadeIndex: 1 },
+    { name: "Pêche", hex: "#E8C9B8", tone: "Açık-Orta", productId: 4, shadeIndex: 0 },
+    { name: "Rose Thé", hex: "#C9A99A", tone: "Orta", productId: 4, shadeIndex: 1 },
+    { name: "Champagne", hex: "#EDE0D1", tone: "Açık", productId: 3, shadeIndex: 0 },
+    { name: "Biscuit", hex: "#D9C5B0", tone: "Açık-Orta", productId: 4, shadeIndex: 2 },
+    { name: "Grège", hex: "#C9A99A", tone: "Orta", productId: 5, shadeIndex: 1 },
+    { name: "Café Crème", hex: "#B89A7E", tone: "Orta", productId: 1, shadeIndex: 3 },
+    { name: "Miel", hex: "#A17E65", tone: "Orta-Koyu", productId: 3, shadeIndex: 2 },
+    { name: "Terre", hex: "#8B6B57", tone: "Orta-Koyu", productId: 4, shadeIndex: 3 },
+    { name: "Noix", hex: "#5C4638", tone: "Koyu", productId: 5, shadeIndex: 3 },
+    { name: "Ivoire", hex: "#EDE0D1", tone: "Açık", productId: 2, shadeIndex: 0 },
+    { name: "Beige Doré", hex: "#D9C5B0", tone: "Açık-Orta", productId: 2, shadeIndex: 2 },
+    { name: "Ambre", hex: "#A17E65", tone: "Orta-Koyu", productId: 5, shadeIndex: 2 },
+    { name: "Sienne", hex: "#B89A7E", tone: "Orta", productId: 2, shadeIndex: 3 },
   ];
+
+  export function resolveToneProduct(tone: NudeTone) {
+    const product = PRODUCTS.find((p) => p.id === tone.productId);
+    if (!product) return null;
+    const shade = product.shades[tone.shadeIndex];
+    if (!shade) return null;
+    return { product, shade, shadeIndex: tone.shadeIndex };
+  }
 
   export interface PhilosophyItem {
     title: string;
     desc: string;
   }
   export const PHILOSOPHY: PhilosophyItem[] = [
-    { title: "Teni onurlandıran formüller", desc: "Her ürün cildin doğal ritmini bozmadan, onunla birlikte çalışır." },
-    { title: "Nude'un 40'dan fazla tonu", desc: "Her ten rengine özel geliştirilmiş, asla gri veya turuncu düşmeyen nüanslar." },
-    { title: "Minimal ama lüks ambalaj", desc: "Tekrar doldurulabilir, zamansız tasarımlar. Güzellik rutininin bir objesi." },
+    { title: "Cildinizin ritmine saygı", desc: "Saç, cilt ve vücut bakımında abartısız formüller — günlük ritualinize doğal uyum sağlar." },
+    { title: "Her ihtiyaca özel çözüm", desc: "Parfümden peelinge, saç serumundan ağdaya; geniş ürün yelpazesiyle bütünsel bakım deneyimi." },
+    { title: "Zamansız ve şeffaf güzellik", desc: "Vegan, cruelty-free içerikler; sade ambalaj ve güvenilir laboratuvar standartlarıyla Code Blonde güvencesi." },
   ];
 
   export interface Ingredient {
@@ -175,9 +186,27 @@ export interface Product {
     rating: number;
   }
   export const TESTIMONIALS: Testimonial[] = [
-    { quote: "Bu nude tonlar tenime sanki doğuştan aitmiş gibi duruyor. En doğal ve zarif makyajım.", name: "Defne A.", role: "İç Mimar", rating: 5 },
-    { quote: "Fondötenin dokusu inanılmaz. Cildim nefes alıyor, makyaj yapmadığım halde aydınlık görünüyorum.", name: "Lara K.", role: "Moda Editörü", rating: 5 },
-    { quote: "Velvet Nude ruj serisi favorim. Gün boyu tazeliğini koruyor, dudaklarım kurutmuyor.", name: "Selin M.", role: "Dermatolog", rating: 5 },
+    {
+      quote:
+        "Code Blonde saç kremi dökülme sorunumu belirgin şekilde azalttı. Kokusu zarif, yapış yapış his bırakmıyor — artık vazgeçilmezim.",
+      name: "Ayşe K.",
+      role: "Sadık Müşteri",
+      rating: 5,
+    },
+    {
+      quote:
+        "Peeling ürünlerinin dokusu ve kokusu harika. Code Blonde ciltte tahriş etmeden arındırıyor; her duş sonrası pürüzsüz bir his.",
+      name: "Melis T.",
+      role: "Güzellik Bloggerı",
+      rating: 5,
+    },
+    {
+      quote:
+        "Parfüm koleksiyonu beklediğimden çok daha kalıcı. Code Blonde hem şık hem sade — günlük kullanım için tam isabet.",
+      name: "Zeynep D.",
+      role: "Moda Danışmanı",
+      rating: 5,
+    },
   ];
 
 export const TRUST_ITEMS = ["Cruelty Free", "Vegan Formül", "Parabensiz", "Fransız Laboratuvar", "Tekrar Doldurulabilir"];

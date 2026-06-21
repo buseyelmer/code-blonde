@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../node_modules/@raxonltd/raxon-core/dist/**/*.{js,mjs}";
+@source "../node_modules/rizzui/dist/**/*.{js,mjs}";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -23,4 +26,116 @@ body {
   background: #F8F1E9;
   color: #5C4638;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Raxon ödeme — site header kullanılır, paket header'ı gizlenir */
+.checkout-page header.border-b.border-gray-100 {
+  display: none !important;
+}
+
+.checkout-page .min-h-screen.overflow-x-hidden {
+  min-height: auto !important;
+  overflow-x: clip !important;
+  background-color: #f8f1e9 !important;
+}
+
+.checkout-page .mx-auto.max-w-7xl {
+  width: 100%;
+  max-width: 80rem;
+}
+
+.checkout-page .md\:flex-row {
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .checkout-page .flex.flex-col.gap-10 {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2.5rem;
+  }
+
+  .checkout-page .min-w-0.flex-1.rounded-2xl {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .checkout-page aside.md\:w-96 {
+    width: 24rem;
+    flex-shrink: 0;
+  }
+}
+
+.checkout-page .min-h-screen.bg-gray-50 {
+  background-color: #f8f1e9 !important;
+}
+
+.checkout-page .bg-\[\#CF0A2C\] {
+  background-color: #5c4638 !important;
+}
+
+.checkout-page .text-\[\#CF0A2C\] {
+  color: #5c4638 !important;
+}
+
+.checkout-page .hover\:bg-\[\#a80824\]:hover {
+  background-color: #3f2f25 !important;
+}
+
+.checkout-page .bg-\[\#CF0A2C\]\/10 {
+  background-color: rgb(92 70 56 / 0.1) !important;
+}
+
+.checkout-page .hover\:text-\[\#CF0A2C\]:hover {
+  color: #5c4638 !important;
+}
+
+.checkout-page .focus\:border-\[\#CF0A2C\]:focus {
+  border-color: #5c4638 !important;
+}
+
+.checkout-page .focus\:ring-\[\#CF0A2C\]\/25:focus {
+  --tw-ring-color: rgb(92 70 56 / 0.25) !important;
+}
+
+/* Raxon özet paneli gizlenir; site özeti kullanılır */
+.checkout-page aside.md\:w-96 {
+  display: none !important;
+}
+
+.checkout-page__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem 2.5rem;
+}
+
+.checkout-page__main .mx-auto.max-w-7xl {
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .checkout-page__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    align-items: start;
+    gap: 2.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .checkout-page__summary {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .checkout-page__main {
+    grid-column: 1;
+    grid-row: 1;
+  }
 }

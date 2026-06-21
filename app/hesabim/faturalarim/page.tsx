@@ -5,11 +5,13 @@ import { FileText, Download, Calendar, ArrowRight, Loader2 } from 'lucide-react'
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-const statusConfig: Record<string, { label: string; color: string }> = {
-  PAID: { label: 'Ödendi', color: 'bg-green-100 text-green-800' },
-  PENDING: { label: 'Bekliyor', color: 'bg-yellow-100 text-yellow-800' },
-  CANCELLED: { label: 'İptal', color: 'bg-red-100 text-red-800' },
-  ISSUED: { label: 'Kesildi', color: 'bg-blue-100 text-blue-800' },
+import { AccountPageHeader, AccountSpinner, accountLabelClass } from "@/core/component/account/account.ui";
+
+const statusConfig: Record<string, { label: string; className: string }> = {
+  PAID: { label: "Ödendi", className: "border-[#5C4638]/30 bg-[#EDE0D1]/60 text-[#5C4638]" },
+  PENDING: { label: "Bekliyor", className: "border-[#D9C5B0] bg-[#F8F1E9] text-[#8B6B57]" },
+  CANCELLED: { label: "İptal", className: "border-[#D9C5B0] bg-[#F8F1E9] text-[#8B6B57]/70" },
+  ISSUED: { label: "Kesildi", className: "border-[#A17E65]/40 bg-[#F5EDE4] text-[#5C4638]" },
 };
 
 export default function FaturalarimPage() {
@@ -37,106 +39,84 @@ export default function FaturalarimPage() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-900" />
-      </div>
-    );
-  }
+  if (isLoading) return <AccountSpinner />;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl text-gray-900 font-serif font-bold">
-          Faturalarım
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Tüm faturalarınızı görüntüleyin ve indirin
-        </p>
-      </div>
+    <div className="space-y-8">
+      <AccountPageHeader
+        title="Faturalarım"
+        subtitle="Tüm faturalarınızı görüntüleyin ve indirin"
+      />
 
-      {/* Invoices List */}
       {invoices.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz Faturanız Yok</h3>
-          <p className="text-sm text-gray-500 mb-6">Siparişlerinizin faturaları burada görünecek.</p>
+        <div className="rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] px-6 py-16 text-center">
+          <FileText className="mx-auto mb-4 h-12 w-12 text-[#D9C5B0]" strokeWidth={1.25} />
+          <h2 className="font-serif text-xl text-[#5C4638]">Henüz faturanız yok</h2>
+          <p className="mt-2 text-sm text-[#8B6B57]">Siparişlerinizin faturaları burada görünecek.</p>
           <Link
             href="/urunler"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-rose-900 text-white rounded-lg hover:bg-rose-800 transition-colors text-sm"
+            className="mt-8 inline-flex items-center gap-2 border border-[#5C4638] px-6 py-3 text-[10px] tracking-[0.24em] uppercase text-[#5C4638] transition hover:bg-[#5C4638] hover:text-[#F8F1E9]"
           >
             Alışverişe Başla
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-hidden rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6]">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="w-full min-w-[640px]">
+              <thead className="border-b border-[#D9C5B0]/40 bg-[#F8F1E9]/80">
                 <tr>
-                  <th className="text-left px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    Fatura No
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    Sipariş
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    Tarih
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    Tutar
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    Durum
-                  </th>
-                  <th className="text-right px-6 py-4 text-xs uppercase tracking-[0.15em] text-gray-500 font-medium">
-                    İşlem
-                  </th>
+                  <th className={`px-5 py-4 text-left sm:px-6 ${accountLabelClass}`}>Fatura No</th>
+                  <th className={`px-5 py-4 text-left sm:px-6 ${accountLabelClass}`}>Sipariş</th>
+                  <th className={`px-5 py-4 text-left sm:px-6 ${accountLabelClass}`}>Tarih</th>
+                  <th className={`px-5 py-4 text-left sm:px-6 ${accountLabelClass}`}>Tutar</th>
+                  <th className={`px-5 py-4 text-left sm:px-6 ${accountLabelClass}`}>Durum</th>
+                  <th className={`px-5 py-4 text-right sm:px-6 ${accountLabelClass}`}>İşlem</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#D9C5B0]/30">
                 {invoices.map((invoice) => {
                   const status = statusConfig[invoice.status] || statusConfig.PENDING;
                   
                   return (
-                    <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
+                    <tr key={invoice.id} className="transition hover:bg-[#F8F1E9]/50">
+                      <td className="px-5 py-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {invoice.invoiceNumber}
-                          </span>
+                          <FileText className="h-4 w-4 text-[#A17E65]" strokeWidth={1.5} />
+                          <span className="text-sm font-medium text-[#5C4638]">{invoice.invoiceNumber}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-600">
-                          {invoice.order?.[0]?.orderNumber || '-'}
-                        </span>
+                      <td className="px-5 py-4 text-sm text-[#8B6B57] sm:px-6">
+                        {invoice.order?.[0]?.orderNumber || "-"}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4" />
-                          {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('tr-TR') : '-'}
+                      <td className="px-5 py-4 sm:px-6">
+                        <div className="flex items-center gap-2 text-sm text-[#8B6B57]">
+                          <Calendar className="h-4 w-4" strokeWidth={1.5} />
+                          {invoice.invoiceDate
+                            ? new Date(invoice.invoiceDate).toLocaleDateString("tr-TR")
+                            : "-"}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm font-medium text-gray-900">
-                          {(invoice.totalPayAmount || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
-                        </span>
+                      <td className="px-5 py-4 font-mono text-sm tabular-nums text-[#5C4638] sm:px-6">
+                        {(invoice.totalPayAmount || 0).toLocaleString("tr-TR", {
+                          style: "currency",
+                          currency: "TRY",
+                        })}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                      <td className="px-5 py-4 sm:px-6">
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] tracking-[0.12em] uppercase ${status.className}`}
+                        >
                           {status.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-5 py-4 text-right sm:px-6">
                         <button
+                          type="button"
                           onClick={() => handleDownload(invoice.id, invoice.invoiceNumber)}
                           disabled={downloadMutation.isPending}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#D9C5B0] px-3 py-1.5 text-xs text-[#5C4638] transition hover:border-[#5C4638] disabled:opacity-50"
                         >
                           {downloadMutation.isPending && downloadMutation.variables === invoice.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

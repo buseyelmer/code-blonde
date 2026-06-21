@@ -1,35 +1,28 @@
-'use client';
+"use client";
 
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
-import { LoginType } from '@raxonltd/raxon-core/interface/prisma.interface';
-import Link from 'next/link';
-import { 
-  User, 
-  ShoppingBag, 
-  Heart, 
-  MapPin, 
-  FileText, 
-  LogOut,
-  ChevronRight,
-  Settings
-} from 'lucide-react';
-import { useAuth } from '@raxonltd/raxon-core/hook';
-import { useRaxon } from '@raxonltd/raxon-core';
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { LoginType } from "@raxonltd/raxon-core/interface/prisma.interface";
+import Link from "next/link";
+import { User, ShoppingBag, Heart, MapPin, FileText, LogOut, ChevronRight } from "lucide-react";
+import { useAuth } from "@raxonltd/raxon-core/hook";
+import { useRaxon } from "@raxonltd/raxon-core";
+import { AccountSpinner } from "@/core/component/account/account.ui";
 
 const menuItems = [
-  { href: '/hesabim', label: 'Hesabım', icon: User },
-  { href: '/hesabim/siparislerim', label: 'Siparişlerim', icon: ShoppingBag },
-  { href: '/hesabim/favorilerim', label: 'Favorilerim', icon: Heart },
-  { href: '/hesabim/adreslerim', label: 'Adreslerim', icon: MapPin },
-  { href: '/hesabim/faturalarim', label: 'Faturalarım', icon: FileText },
-];
+  { href: "/hesabim", label: "Hesabım", icon: User, exact: true },
+  { href: "/hesabim/siparislerim", label: "Siparişlerim", icon: ShoppingBag },
+  { href: "/hesabim/favorilerim", label: "Favorilerim", icon: Heart },
+  { href: "/hesabim/adreslerim", label: "Adreslerim", icon: MapPin },
+  { href: "/hesabim/faturalarim", label: "Faturalarım", icon: FileText },
+] as const;
 
-export default function ProfilLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function isMenuActive(pathname: string, href: string, exact?: boolean) {
+  if (exact) return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export default function ProfilLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, profile } = useRaxon();
   const router = useRouter();
   const pathname = usePathname();
@@ -37,14 +30,14 @@ export default function ProfilLayout({
 
   useEffect(() => {
     if (!isLoading && (!isAuthenticated || profile?.loginType === LoginType.GUEST)) {
-      router.push('/guvenlik/giris-yap');
+      router.push("/guvenlik/giris-yap");
     }
   }, [isAuthenticated, isLoading, profile, router]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full" />
+      <div className="min-h-[60vh] bg-[#F8F1E9]">
+        <AccountSpinner />
       </div>
     );
   }
@@ -53,68 +46,67 @@ export default function ProfilLayout({
     return null;
   }
 
+  const initials = `${profile?.firstName?.[0] ?? ""}${profile?.lastName?.[0] ?? ""}`.toUpperCase();
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 md:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              {/* Profile Header */}
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-rose-900 flex items-center justify-center text-white text-lg font-medium">
-                    {profile?.firstName?.[0]}{profile?.lastName?.[0]}
+    <div className="bg-[#F8F1E9] pb-16 pt-4 sm:pt-6 lg:pb-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="lg:flex lg:items-start lg:gap-10 xl:gap-14">
+          <aside className="mb-6 lg:mb-0 lg:w-72 lg:shrink-0 xl:w-80">
+            <div className="overflow-hidden rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] shadow-[0_1px_3px_rgba(92,70,56,0.04)] lg:sticky lg:top-28">
+              <div className="border-b border-[#D9C5B0]/40 px-4 py-4 sm:px-6 sm:py-5">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#5C4638] font-serif text-base text-[#F8F1E9] sm:h-14 sm:w-14 sm:text-lg">
+                    {initials || "CB"}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-serif text-base text-[#5C4638] sm:text-lg">
                       {profile?.firstName} {profile?.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">{profile?.email}</p>
+                    </h2>
+                    <p className="truncate text-sm text-[#8B6B57]">{profile?.email}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Menu */}
-              <nav className="p-2">
+              <nav className="border-b border-[#D9C5B0]/30 p-2" aria-label="Hesap menüsü">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href;
+                  const active = isMenuActive(pathname, item.href, item.exact);
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive 
-                          ? 'bg-rose-900 text-white' 
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-rose-900'
+                      className={`mb-0.5 flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition sm:px-4 sm:py-3 ${
+                        active
+                          ? "bg-[#5C4638] text-[#F8F1E9]"
+                          : "text-[#8B6B57] hover:bg-[#F8F1E9] hover:text-[#5C4638]"
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span className="text-sm font-medium flex-1">{item.label}</span>
-                      <ChevronRight className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <span className="min-w-0 flex-1 tracking-wide">{item.label}</span>
+                      <ChevronRight
+                        className={`hidden h-4 w-4 shrink-0 sm:block ${active ? "text-[#F8F1E9]/70" : "text-[#D9C5B0]"}`}
+                        strokeWidth={1.5}
+                      />
                     </Link>
                   );
                 })}
               </nav>
 
-              {/* Logout */}
-              <div className="p-2 border-t border-gray-100">
+              <div className="p-2">
                 <button
+                  type="button"
                   onClick={logout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                  className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-sm text-[#A17E65] transition hover:bg-[#F8F1E9] hover:text-[#5C4638]"
                 >
-                  <LogOut className="w-5 h-5" />
-                  <span className="text-sm font-medium">Çıkış Yap</span>
+                  <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                  <span>Çıkış Yap</span>
                 </button>
               </div>
             </div>
           </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
-            {children}
-          </main>
+          <main className="min-w-0 flex-1">{children}</main>
         </div>
       </div>
     </div>

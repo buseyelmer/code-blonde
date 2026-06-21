@@ -1,82 +1,64 @@
 "use client";
+
 import { HOME_DATA } from "@/core/constant/home.constant";
-import type { Product } from "@/core/constant/home.constant";
-import { useState } from "react";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useCart } from "@/core/hook/use.cart";
 
-import { 
-  SectionHomeHero, SectionHomeCollection, SectionHomeProducts, 
-  SectionHomePalette, SectionHomePhilosophy, SectionHomeStory, 
-  SectionHomeTestimonials, SectionHomeNewsletter 
+import {
+  SectionHomeHero,
+  SectionHomeValues,
+  SectionHomeCollection,
+  SectionHomePicks,
+  SectionHomeRitual,
+  SectionHomePalette,
+  SectionHomeProducts,
+  SectionHomeStory,
+  SectionHomeTestimonials,
 } from "@/core/theme/section/home";
 
 import CartDrawer from "@/core/component/cart.drawer";
-import ProductModal from "@/core/component/product.modal";
-
 
 export default function Home() {
-  const { 
-    addedItems, cartCount, isCartOpen, setIsCartOpen, 
-    isAdded, addToCart, removeFromCart, totalPrice 
+  const {
+    addedItems,
+    cartCount,
+    isCartOpen,
+    setIsCartOpen,
+    removeFromCart,
+    totalPrice,
   } = useCart();
-
-  const [activeCategory, setActiveCategory] = useState("Tümü");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedShadeIndex, setSelectedShadeIndex] = useState(0);
-  const [selectedTone, setSelectedTone] = useState<number | null>(null);
-  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
 
   const { branch } = useRaxon();
   branch?.socialMediaLinks;
 
-  const currentShade = selectedProduct ? selectedProduct.shades[selectedShadeIndex] : null;
-
   return (
-    <div className='min-h-screen bg-[#F8F1E9] text-[#5C4638] overflow-x-hidden selection:bg-[#C9A99A] selection:text-[#F8F1E9]'>
-      <div className='border-y border-[#D9C5B0]/50 bg-[#EDE0D1]/60 py-4'>
-        <div className='max-w-6xl mx-auto px-8 flex flex-wrap justify-center items-center gap-x-14 gap-y-2 text-[11px] tracking-[2.5px] text-[#8B6B57]/80 font-light'>
-          {(HOME_DATA?.TRUST_ITEMS ?? []).map((item) => <div key={item}>{item}</div>)}
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
+      <div className="border-y border-[#D9C5B0]/50 bg-[#EDE0D1]/60 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-14 gap-y-2 px-8 text-[11px] font-light tracking-[2.5px] text-[#8B6B57]/80">
+          {(HOME_DATA?.TRUST_ITEMS ?? []).map((item) => (
+            <div key={item}>{item}</div>
+          ))}
         </div>
       </div>
 
       <SectionHomeHero />
+      <SectionHomeValues />
       <SectionHomeCollection />
-      
-      <SectionHomeProducts 
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        setSelectedProduct={setSelectedProduct}
-        hoveredProduct={hoveredProduct}
-        setHoveredProduct={setHoveredProduct}
-      />
-
-      <SectionHomePalette selectedTone={selectedTone} setSelectedTone={setSelectedTone} />
+      <SectionHomePicks />
+      <SectionHomeRitual />
+      <SectionHomeProducts />
       <SectionHomeStory />
-      <SectionHomePhilosophy />
       <SectionHomeTestimonials />
-      <SectionHomeNewsletter />
+      <SectionHomePalette />
 
-      {selectedProduct && currentShade && (
-        <ProductModal 
-          product={selectedProduct} 
-          currentShade={currentShade} 
-          onClose={() => { setSelectedProduct(null); setSelectedShadeIndex(0); }} 
-          onAddToCart={() => addToCart(selectedProduct, currentShade)} 
-          isAdded={isAdded} 
-          setIsCartOpen={setIsCartOpen} 
-        />
-      )}
-
-      <CartDrawer 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        items={addedItems} 
-        onRemove={removeFromCart} 
-        totalPrice={totalPrice} 
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={addedItems}
+        onRemove={removeFromCart}
+        totalPrice={totalPrice}
         cartCount={cartCount}
       />
-      
     </div>
   );
 }

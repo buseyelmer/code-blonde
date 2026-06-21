@@ -1,93 +1,121 @@
 "use client";
 
-import { HOME_DATA, Product } from "@/core/constant/home.constant";
-import ProductVisual from "@/core/component/product.visual";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { useRaxon } from "@raxonltd/raxon-core";
+import { useProduct } from "@raxonltd/raxon-core/hook";
+import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
+import type { Category } from "@raxonltd/raxon-core/interface/prisma.interface";
+import ItemListingProduct, { ProductListingSkeleton } from "@/core/theme/item/item.listing.product";
+import { sortProductsByPopularity } from "@/core/util/product.price";
+import { takeProductsWithListingImages } from "@/core/util/product.image";
+import "@/core/util/util";
 
-interface Props {
-  activeCategory: string;
-  setActiveCategory: (cat: string) => void;
-  setSelectedProduct: (p: Product) => void;
-  hoveredProduct: number | null;
-  setHoveredProduct: (id: number | null) => void;
+const PRODUCT_COUNT = 12;
+const FETCH_AMOUNT = 80;
+
+function getCategoryName(category: Category) {
+  if (Array.isArray(category.name)) return category.name.getName();
+  if (typeof category.name === "string") return category.name;
+  return category.code ?? "Kategori";
 }
 
-export default function SectionHomeProducts({ 
-  activeCategory, 
-  setActiveCategory, 
-  setSelectedProduct, 
-  hoveredProduct, 
-  setHoveredProduct 
-}: Props) {
-  
-  const products = HOME_DATA?.PRODUCTS ?? [];
+export default function SectionHomeProducts() {
+  const { category = [] } = useRaxon();
+  const topCategories = useMemo(() => category.filter((c) => !c.parentId), [category]);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
-  const filteredProducts = activeCategory === "Tümü"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const { data, isLoading, isFetching } = useProduct().fetch({
+    materialType: "product",
+    status: Status.PUBLISHED,
+    categoryId: activeCategoryId ?? undefined,
+    order: { column: "createdAt", direction: "desc" },
+    page: 1,
+    amount: FETCH_AMOUNT,
+  });
+
+  const products = useMemo(() => {
+    const sorted = sortProductsByPopularity(data?.data ?? []);
+    return takeProductsWithListingImages(sorted, PRODUCT_COUNT);
+  }, [data?.data]);
+  const showSkeleton = isLoading && products.length === 0;
 
   return (
-    <section id='urunler' className='py-20 lg:py-28 bg-[#F5EDE4]/30'>
-      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
-        <div className='mb-14 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end'>
+    <section id="urunler" className="bg-[#F5EDE4]/30 py-16 sm:py-14 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col items-start justify-between gap-5 sm:mb-10 md:flex-row md:items-end">
           <div>
-            <p className='text-xs tracking-[0.3em] uppercase text-[#A17E65]'>Ürünler</p>
-            <h2 className='mt-3 font-serif text-4xl text-[#5C4638] lg:text-5xl'>En Sevilenler</h2>
+            <p className="text-[10px] tracking-[0.38em] uppercase text-[#A17E65]">Ürünler</p>
+            <h2 className="mt-2 font-serif text-3xl tracking-tight text-[#5C4638] sm:text-4xl lg:text-5xl">
+              En Sevilenler
+            </h2>
           </div>
-          <p className='max-w-xs text-sm text-[#8B6B57]'>Teninizle bütünleşen, doğal görünümlü formüller</p>
+          <p className="max-w-xs text-sm leading-relaxed text-[#8B6B57]">
+            Teninizle bütünleşen, doğal görünümlü formüller
+          </p>
         </div>
 
-        <div className='flex flex-wrap justify-center gap-2 mb-12'>
- 
-  {HOME_DATA?.CATEGORIES?.map((cat) => (
-    <button
-      key={cat}
-      onClick={() => setActiveCategory(cat)}
-      className={`px-4 py-2 rounded-full transition-all ${
-        activeCategory === cat 
-          ? "bg-[#5C4638] text-white" 
-          : "bg-[#EDE0D1] text-[#5C4638] hover:bg-[#D9C5B0]"
-      }`}
-    >
-      {cat}
-    </button>
-  ))}
-</div>
+        {topCategories.length > 0 && (
+          <div className="-mx-4 mb-8 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <div className="flex w-max min-w-0 gap-2 pb-1 sm:flex-wrap sm:w-full">
+              <button
+                type="button"
+                onClick={() => setActiveCategoryId(null)}
+                className={`shrink-0 border px-4 py-2 text-[10px] uppercase tracking-[0.2em] transition-all duration-200 sm:px-5 sm:py-2.5 ${
+                  activeCategoryId === null
+                    ? "border-[#5C4638] bg-[#5C4638] text-[#F8F1E9]"
+                    : "border-[#D9C5B0] bg-[#FDFAF6]/90 text-[#5C4638] hover:border-[#A17E65] hover:bg-[#F5EDE4]/80"
+                }`}
+              >
+                Tümü
+              </button>
+              {topCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategoryId(cat.id)}
+                  className={`shrink-0 border px-4 py-2 text-[10px] uppercase tracking-[0.2em] transition-all duration-200 sm:px-5 sm:py-2.5 ${
+                    activeCategoryId === cat.id
+                      ? "border-[#5C4638] bg-[#5C4638] text-[#F8F1E9]"
+                      : "border-[#D9C5B0] bg-[#FDFAF6]/90 text-[#5C4638] hover:border-[#A17E65] hover:bg-[#F5EDE4]/80"
+                  }`}
+                >
+                  {getCategoryName(cat)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {filteredProducts.map((product) => (
-            <button
-              key={product.id}
-              onClick={() => setSelectedProduct(product)}
-              onMouseEnter={() => setHoveredProduct(product.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
-              className='group text-left bg-white rounded-3xl overflow-hidden border border-[#EDE0D1] hover:border-[#C9A99A] transition-all duration-300 flex flex-col shadow-sm hover:shadow-xl'>
-              <div className='relative h-80 flex items-center justify-center overflow-hidden' style={{ background: `linear-gradient(145deg, ${HOME_DATA?.palette?.cream ?? '#F8F1E9'}, ${HOME_DATA?.palette?.warmBeige ?? '#EDE0D1'})` }}>
-                {product.badge && <span className='absolute left-4 top-4 z-10 rounded-full bg-[#5C4638] px-3 py-1 text-[10px] tracking-widest uppercase text-[#F8F1E9]'>{product.badge}</span>}
-                
-                <ProductVisual shadeHex={product.shades[0].hex} volume={product.volume} />
+        {showSkeleton ? (
+          <div className="grid grid-cols-2 gap-4 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+            <ProductListingSkeleton count={8} />
+          </div>
+        ) : products.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="font-serif text-xl text-[#5C4638]">Bu kategoride ürün bulunamadı</p>
+          </div>
+        ) : (
+          <div
+            className={`grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 transition-opacity duration-300 ${
+              isFetching ? "opacity-70" : "opacity-100"
+            }`}
+          >
+            {products.map((product, index) => (
+              <ItemListingProduct key={product.id} product={product} index={index} />
+            ))}
+          </div>
+        )}
 
-                <div className={`absolute inset-0 bg-[#5C4638]/0 group-hover:bg-[#5C4638]/5 transition-all duration-500 flex items-end justify-center pb-6 ${hoveredProduct === product.id ? "opacity-100" : "opacity-0"}`}>
-                  <span className='bg-[#5C4638] text-[#F8F1E9] px-6 py-2 rounded-full text-xs tracking-[2px]'>İNCELE</span>
-                </div>
-              </div>
-
-              <div className='p-7 flex-1 flex flex-col'>
-                <div className='flex items-baseline justify-between'>
-                  <div>
-                    <div className='text-[10px] tracking-[2.5px] text-[#A17E65]'>{product.category.toUpperCase()}</div>
-                    <div className='font-serif text-[22px] tracking-[-0.3px] text-[#5C4638] mt-0.5 leading-none'>{product.name}</div>
-                  </div>
-                  <div className='font-mono text-sm text-[#A17E65] tabular-nums tracking-tighter'>₺{product.price}</div>
-                </div>
-                <p className='mt-auto pt-5 text-[13px] leading-snug tracking-tight text-[#8B6B57] pr-2'>{product.description}</p>
-                <div className='flex gap-1.5 mt-6'>
-                  {product.shades.slice(0, 4).map((shade, i) => (
-                    <div key={i} className='w-5 h-5 rounded-full border border-white/70 shadow-sm' style={{ backgroundColor: shade.hex }} title={shade.name} />
-                  ))}
-                </div>
-              </div>
-            </button>
-          ))}
+        <div className="mt-10 flex justify-end sm:mt-12">
+          <Link
+            href="/urunler"
+            className="group inline-flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[#5C4638] transition-colors hover:text-[#A17E65]"
+          >
+            Tümünü Gör
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
+          </Link>
         </div>
       </div>
     </section>
