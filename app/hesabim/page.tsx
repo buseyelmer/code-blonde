@@ -363,8 +363,7 @@ export default function ProfilPage() {
       {emailVerification.isOpen && (
         <AccountModal
           title="E-posta Doğrulama"
-          subtitle={profile?.email}
-          onClose={() => setEmailVerification({ isOpen: false, code: "", step: "send" })}
+          subtitle={profile?.phoneNumber ?? undefined}          onClose={() => setEmailVerification({ isOpen: false, code: "", step: "send" })}
         >
           {emailVerification.step === "send" ? (
             <>
