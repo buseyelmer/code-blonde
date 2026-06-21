@@ -1,3 +1,5 @@
+"use client";
+
 import { useOrder } from "@raxonltd/raxon-core/hook";
 import { Order, TrackingCode } from "@raxonltd/raxon-core/interface/prisma.interface";
 import { MapPin, Truck } from "lucide-react";

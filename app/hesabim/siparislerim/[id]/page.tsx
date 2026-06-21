@@ -1,3 +1,5 @@
+"use client";
+
 import { useInvoice, useOrder } from "@raxonltd/raxon-core/hook";
 import { OrderItem } from "@raxonltd/raxon-core/interface/prisma.interface";
 import { Package } from "lucide-react";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useOrder } from "@raxonltd/raxon-core/hook";
 import { CreditCard, FileText } from "lucide-react";
 import { useParams } from "next/navigation";
