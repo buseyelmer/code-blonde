@@ -78,19 +78,22 @@ export function enrichCartPricing(
         pay: subtotal,
       },
       discount: {
+        ...cart.info?.discount,
         total: discountPay,
         tax: cart.info?.discount?.tax ?? 0,
         pay: discountPay,
       },
+      delivery: {
+        ...cart.info?.delivery,
+        remainingAmount: cart.info?.delivery?.remainingAmount ?? 0,
+        total: deliveryPay,
+        tax: cart.info?.delivery?.tax ?? 0,
+        pay: deliveryPay,
+      },
       payPrice: {
-        total: total,
+        total,
         tax: cart.info?.payPrice?.tax ?? 0,
         pay: total,
-        delivery: deliveryPay,
-        discount: discountPay,
-        deposit: cart.info?.payPrice?.deposit ?? 0,
-        promotion: cart.info?.payPrice?.promotion ?? 0,
-        campaign: cart.info?.payPrice?.campaign ?? 0,
       },
     },
   };

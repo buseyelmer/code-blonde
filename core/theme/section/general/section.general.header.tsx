@@ -5,7 +5,7 @@ import type { Category } from "@raxonltd/raxon-core/interface/prisma.interface";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Heart, LogIn, Search, ShoppingBag, User, UserPlus } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import SiteLogo from "@/core/component/site.logo";
 import { findCategoryByKeywords } from "@/core/constant/footer.constant";
 
@@ -139,14 +139,74 @@ function NavLink({
   );
 }
 
+function DesktopCategoryNav({
+  pathname,
+  mainNavCategories,
+  extraNavCategory,
+}: {
+  pathname: string;
+  mainNavCategories: Category[];
+  extraNavCategory: Category | null;
+}) {
+  const searchParams = useSearchParams();
+  const activeCategoryId = searchParams.get("categoryId");
+
+  return (
+    <nav className="hidden border-t border-[#D9C5B0]/35 pb-3.5 pt-3 lg:block" aria-label="Kategoriler">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4 xl:gap-x-5">
+        {STATIC_LINKS.slice(0, 2).map((link) => (
+          <NavLink
+            key={link.href}
+            href={link.href}
+            label={link.label}
+            active={isLinkActive(pathname, link.href)}
+            compact
+          />
+        ))}
+
+        {(mainNavCategories.length > 0 || extraNavCategory) && (
+          <span className="hidden h-3 w-px shrink-0 bg-[#D9C5B0] sm:block" aria-hidden />
+        )}
+
+        {mainNavCategories.map((cat) => {
+          const href = `/urunler?categoryId=${cat.id}`;
+          const active = pathname === "/urunler" && activeCategoryId === cat.id;
+          return (
+            <NavLink key={cat.id} href={href} label={getCategoryName(cat)} active={active} compact />
+          );
+        })}
+
+        {extraNavCategory && (
+          <NavLink
+            href={`/urunler?categoryId=${extraNavCategory.id}`}
+            label={getCategoryName(extraNavCategory)}
+            active={pathname === "/urunler" && activeCategoryId === extraNavCategory.id}
+            compact
+          />
+        )}
+
+        <span className="hidden h-3 w-px shrink-0 bg-[#D9C5B0] sm:block" aria-hidden />
+
+        {STATIC_LINKS.slice(2).map((link) => (
+          <NavLink
+            key={link.href}
+            href={link.href}
+            label={link.label}
+            active={isLinkActive(pathname, link.href)}
+            compact
+          />
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 export default function SectionGeneralHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activeCategoryId = searchParams.get("categoryId");
 
   const { cart, category = [], modalAuthRef, isAuthenticated } = useRaxon();
 
@@ -220,7 +280,13 @@ export default function SectionGeneralHeader() {
 
           <div className="pointer-events-none absolute inset-x-4 top-1/2 hidden -translate-y-1/2 justify-center sm:inset-x-6 lg:flex lg:inset-x-8">
             <div className="pointer-events-auto w-full max-w-2xl xl:max-w-3xl">
-              <HeaderSearch />
+              <Suspense
+                fallback={
+                  <div className="h-11 w-full rounded-full border border-[#D9C5B0]/60 bg-white/50" aria-hidden />
+                }
+              >
+                <HeaderSearch />
+              </Suspense>
             </div>
           </div>
 
@@ -282,65 +348,22 @@ export default function SectionGeneralHeader() {
 
         {/* Mobil arama */}
         <div className="pb-3 lg:hidden">
-          <HeaderSearch />
+          <Suspense
+            fallback={
+              <div className="h-11 w-full rounded-full border border-[#D9C5B0]/60 bg-white/50" aria-hidden />
+            }
+          >
+            <HeaderSearch />
+          </Suspense>
         </div>
 
-        {/* Alt satır: kategoriler — flex-wrap, scrollbar yok */}
-        <nav
-          className="hidden border-t border-[#D9C5B0]/35 pb-3.5 pt-3 lg:block"
-          aria-label="Kategoriler"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4 xl:gap-x-5">
-            {STATIC_LINKS.slice(0, 2).map((link) => (
-              <NavLink
-                key={link.href}
-                href={link.href}
-                label={link.label}
-                active={staticLinkActive(link.href)}
-                compact
-              />
-            ))}
-
-            {(mainNavCategories.length > 0 || extraNavCategory) && (
-              <span className="hidden h-3 w-px shrink-0 bg-[#D9C5B0] sm:block" aria-hidden />
-            )}
-
-            {mainNavCategories.map((cat) => {
-              const href = `/urunler?categoryId=${cat.id}`;
-              const active = pathname === "/urunler" && activeCategoryId === cat.id;
-              return (
-                <NavLink
-                  key={cat.id}
-                  href={href}
-                  label={getCategoryName(cat)}
-                  active={active}
-                  compact
-                />
-              );
-            })}
-
-            {extraNavCategory && (
-              <NavLink
-                href={`/urunler?categoryId=${extraNavCategory.id}`}
-                label={getCategoryName(extraNavCategory)}
-                active={pathname === "/urunler" && activeCategoryId === extraNavCategory.id}
-                compact
-              />
-            )}
-
-            <span className="hidden h-3 w-px shrink-0 bg-[#D9C5B0] sm:block" aria-hidden />
-
-            {STATIC_LINKS.slice(2).map((link) => (
-              <NavLink
-                key={link.href}
-                href={link.href}
-                label={link.label}
-                active={staticLinkActive(link.href)}
-                compact
-              />
-            ))}
-          </div>
-        </nav>
+        <Suspense fallback={null}>
+          <DesktopCategoryNav
+            pathname={pathname}
+            mainNavCategories={mainNavCategories}
+            extraNavCategory={extraNavCategory}
+          />
+        </Suspense>
       </div>
 
       {menuOpen && (

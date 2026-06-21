@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -57,7 +57,7 @@ function getPriceBounds(priceRange: ListingFilters["priceRange"]) {
   };
 }
 
-export default function UrunlerPage() {
+function UrunlerPageContent() {
   const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<ListingFilters>(DEFAULT_FILTERS);
@@ -274,5 +274,19 @@ export default function UrunlerPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UrunlerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center bg-[#F8F1E9]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D9C5B0] border-t-[#5C4638]" />
+        </div>
+      }
+    >
+      <UrunlerPageContent />
+    </Suspense>
   );
 }

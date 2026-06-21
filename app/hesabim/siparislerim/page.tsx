@@ -4,7 +4,30 @@ import { useOrder } from "@raxonltd/raxon-core/hook";
 import { Package, Truck, CheckCircle, Clock, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import type { Order } from "@raxonltd/raxon-core/interface/prisma.interface";
 import { AccountPageHeader, AccountSpinner } from "@/core/component/account/account.ui";
+
+function resolveOrderListStatusKey(order: Order): string {
+  const deliveryMap: Record<string, string> = {
+    IN_PROGRESS: "PROCESSING",
+    COMPLETED: "DELIVERED",
+  };
+  if (order.deliveryStatus) {
+    return deliveryMap[order.deliveryStatus] ?? order.deliveryStatus;
+  }
+
+  const dict = order.status?.name;
+  if (Array.isArray(dict) && dict[0]) {
+    const code = dict[0].code || dict[0].value;
+    if (code && code !== "----") return code;
+  }
+  if (dict && typeof dict === "object" && "getName" in dict && typeof dict.getName === "function") {
+    const name = dict.getName();
+    if (name) return name;
+  }
+
+  return "PENDING";
+}
 
 const statusConfig: Record<string, { label: string; className: string; icon: LucideIcon }> = {
   PENDING: {
@@ -63,15 +86,8 @@ export default function SiparislerimPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {ordersList.map((order: {
-            id: string;
-            orderNumber?: string;
-            createdAt: string;
-            totalPayAmount?: number;
-            status?: { status?: string };
-            items?: { quantity: number }[];
-          }) => {
-            const status = statusConfig[order.status?.status || "PENDING"] || statusConfig.PENDING;
+          {ordersList.map((order: Order) => {
+            const status = statusConfig[resolveOrderListStatusKey(order)] || statusConfig.PENDING;
             const StatusIcon = status.icon;
 
             return (
@@ -104,7 +120,7 @@ export default function SiparislerimPage() {
                         {status.label}
                       </span>
                       <span className="font-mono text-sm tabular-nums text-[#5C4638]">
-                        {(order.totalPayAmount as number)?.toLocaleString("tr-TR", {
+                        {(order.totalPayAmount ?? 0).toLocaleString("tr-TR", {
                           style: "currency",
                           currency: "TRY",
                         })}
