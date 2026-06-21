@@ -6,7 +6,7 @@ export default function SectionHomeHero() {
       ];
       
   return <>
-        <section className='relative min-h-[100dvh] overflow-hidden pt-24 lg:pt-28'>
+        <section className='relative min-h-[100dvh] overflow-hidden pt-4 lg:pt-8'>
         <div className='absolute inset-0 bg-[radial-gradient(#D9C5B0_0.6px,transparent_1px)] bg-[length:5px_5px] opacity-25' />
         <div className='absolute -right-32 top-20 h-[500px] w-[500px] rounded-full bg-[#D9C5B0]/25 blur-3xl' />
         <div className='absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-[#C9A99A]/15 blur-3xl' />

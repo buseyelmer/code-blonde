@@ -5,14 +5,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buluticgiyim.com';
 export const metadata: Metadata = {
   title: 'Blog & Rehber',
   description:
-    'Ürün bakımı, moda trendleri ve alışveriş rehberi. Bulut İç Giyim blog yazılarıyla daha bilinçli alışveriş yapın.',
+    'Ton seçimi, ürün bakımı ve nude makyaj ipuçları. Code Blonde blog yazılarıyla daha bilinçli alışveriş yapın.',
   alternates: {
     canonical: `${siteUrl}/blog`,
   },
   openGraph: {
-    title: 'Blog & Rehber | Bulut İç Giyim',
+    title: 'Blog & Rehber | Code Blonde',
     description:
-      'Ürün bakımı, moda trendleri ve alışveriş rehberi. Bulut İç Giyim blog yazılarını keşfedin.',
+      'Ton seçimi, ürün bakımı ve nude makyaj ipuçları. Code Blonde blog yazılarını keşfedin.',
     url: `${siteUrl}/blog`,
   },
 };

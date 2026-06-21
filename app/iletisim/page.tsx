@@ -10,6 +10,7 @@ import { Mail, Phone, MapPin, Clock, ArrowRight, CheckCircle2, ChevronRight, Sen
 import { useFormSubmit } from '@raxonltd/raxon-core/hook';
 import { useRaxon } from '@raxonltd/raxon-core';
 import toast from 'react-hot-toast';
+import { HOME_DATA } from '@/core/constant/home.constant';
 
 const contactFormSchema = z.object({
   firstName: z.string().min(2, 'Ad en az 2 karakter olmalıdır'),
@@ -22,9 +23,11 @@ const contactFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
-const labelClass = 'mb-2 block text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500';
-const fieldOk = 'w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-all focus:border-rose-900 focus:outline-none focus:ring-1 focus:ring-rose-900';
-const fieldErr = 'w-full rounded-lg border border-red-500 bg-white px-4 py-3 text-gray-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500';
+const labelClass = 'mb-2 block text-[11px] font-medium uppercase tracking-[0.22em] text-[#A17E65]';
+const fieldOk =
+  'w-full rounded-xl border border-[#D9C5B0]/60 bg-[#F8F1E9] px-4 py-3 text-[#5C4638] placeholder:text-[#8B6B57]/50 transition-all focus:border-[#C9A99A] focus:outline-none focus:ring-1 focus:ring-[#C9A99A]';
+const fieldErr =
+  'w-full rounded-xl border border-red-400 bg-[#F8F1E9] px-4 py-3 text-[#5C4638] focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400';
 
 interface WorkingHoursSchedule {
   active: boolean;
@@ -92,8 +95,8 @@ export default function ContactPage() {
     const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     return dayOrder
-      .filter(day => day in workingHours && workingHours[day]?.active)
-      .map(day => {
+      .filter((day) => day in workingHours && workingHours[day]?.active)
+      .map((day) => {
         const schedule = workingHours[day] as WorkingHoursSchedule;
         return {
           day: dayTranslations[day],
@@ -134,39 +137,52 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav className="mb-6 flex flex-wrap items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500">
-          <Link href="/" className="transition-colors hover:text-rose-900">
-            Ana Sayfa
-          </Link>
-          <ChevronRight className="h-4 w-4 shrink-0" />
-          <span className="text-gray-900">İletişim</span>
-        </nav>
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
+      <div className="border-b border-[#D9C5B0]/50 bg-[#EDE0D1]/60 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-14 gap-y-2 px-8 text-[11px] font-light tracking-[2.5px] text-[#8B6B57]/80">
+          {(HOME_DATA?.TRUST_ITEMS ?? []).map((item) => (
+            <div key={item}>{item}</div>
+          ))}
+        </div>
+      </div>
 
-        <div className="mb-10 lg:mb-12">
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Bize ulaşın</h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600 sm:text-base">
-            Sorularınız, önerileriniz veya destek talepleriniz için formu doldurun veya doğrudan iletişim kanallarımızı kullanın.
+      <div className="border-b border-[#D9C5B0]/50 bg-[#EDE0D1]/60">
+        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57]">
+            <Link href="/" className="transition-colors hover:text-[#5C4638]">
+              Ana Sayfa
+            </Link>
+            <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="text-[#5C4638]">İletişim</span>
+          </nav>
+          <p className="text-xs tracking-[0.3em] uppercase text-[#A17E65]">Code Blonde</p>
+          <h1 className="mt-3 font-serif text-4xl text-[#5C4638] sm:text-5xl">
+            Bize <span className="italic text-[#A17E65]">ulaşın</span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#8B6B57] sm:text-base">
+            Sorularınız, önerileriniz veya destek talepleriniz için formu doldurun veya doğrudan iletişim kanallarımızı
+            kullanın.
           </p>
         </div>
+      </div>
 
+      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-6 sm:p-8">
-            <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500">Mesaj gönderin</p>
-            <h2 className="mb-6 text-xl font-bold text-gray-900 sm:text-2xl">İletişim formu</h2>
+          <div className="rounded-2xl border border-[#D9C5B0]/40 bg-[#F5EDE4]/30 p-6 sm:p-8">
+            <p className="text-xs tracking-[0.3em] uppercase text-[#A17E65]">Mesaj gönderin</p>
+            <h2 className="mt-2 font-serif text-2xl text-[#5C4638] sm:text-3xl">İletişim formu</h2>
 
             {submitted && (
-              <div className="mb-6 flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4">
-                <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-rose-900" strokeWidth={1.5} />
+              <div className="mt-6 flex items-start gap-4 rounded-xl border border-[#C9A99A]/50 bg-[#EDE0D1]/60 p-4">
+                <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-[#A17E65]" strokeWidth={1.5} />
                 <div>
-                  <h3 className="font-semibold text-gray-900">Mesajınız gönderildi</h3>
-                  <p className="mt-1 text-sm text-gray-600">En kısa sürede size dönüş yapacağız.</p>
+                  <h3 className="font-medium text-[#5C4638]">Mesajınız gönderildi</h3>
+                  <p className="mt-1 text-sm text-[#8B6B57]">En kısa sürede size dönüş yapacağız.</p>
                 </div>
               </div>
             )}
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <label htmlFor="firstName" className={labelClass}>
@@ -273,16 +289,16 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={mutation.isPending || form.formState.isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-rose-900 px-8 py-4 text-sm font-medium uppercase tracking-wide text-white shadow-md transition hover:bg-rose-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-rose-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5C4638] px-8 py-4 text-xs tracking-[0.2em] uppercase text-[#F8F1E9] transition-all hover:bg-[#4A382C] focus:outline-none focus:ring-2 focus:ring-[#C9A99A] focus:ring-offset-2 focus:ring-offset-[#F5EDE4] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {mutation.isPending || form.formState.isSubmitting ? (
                   <>
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#F8F1E9] border-t-transparent" />
                     <span>Gönderiliyor…</span>
                   </>
                 ) : (
                   <>
-                    <Send className="h-5 w-5" strokeWidth={1.5} />
+                    <Send className="h-4 w-4" strokeWidth={1.5} />
                     <span>Mesaj gönder</span>
                   </>
                 )}
@@ -290,27 +306,27 @@ export default function ContactPage() {
             </form>
           </div>
 
-          <div className="space-y-10">
+          <div className="space-y-8">
             <div>
-              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500">İletişim yöntemleri</p>
+              <p className="mb-4 text-xs tracking-[0.3em] uppercase text-[#A17E65]">İletişim yöntemleri</p>
               <div className="space-y-3">
-                {contactMethods.map(method => {
+                {contactMethods.map((method) => {
                   const Icon = method.icon;
                   return (
                     <a
                       key={method.id}
                       href={method.link}
-                      className="group flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-rose-900/40 hover:bg-rose-50/30"
+                      className="group flex items-start gap-4 rounded-2xl border border-[#D9C5B0]/40 bg-[#F5EDE4]/30 p-5 transition-colors hover:border-[#C9A99A]/60 hover:bg-[#EDE0D1]/50"
                     >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition-colors group-hover:border-rose-900 group-hover:text-rose-900">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#C9A99A]/50 text-[#A17E65] transition-colors group-hover:border-[#A17E65] group-hover:bg-[#EDE0D1]">
                         <Icon className="h-5 w-5" strokeWidth={1.5} />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-gray-900">{method.title}</h3>
-                        <p className="mt-0.5 text-sm text-gray-700">{method.value}</p>
-                        <p className="mt-1 text-xs text-gray-500">{method.description}</p>
+                        <h3 className="font-medium text-[#5C4638]">{method.title}</h3>
+                        <p className="mt-0.5 text-sm text-[#8B6B57]">{method.value}</p>
+                        <p className="mt-1 text-xs text-[#A17E65]">{method.description}</p>
                       </div>
-                      <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-gray-400 transition-all group-hover:translate-x-0.5 group-hover:text-rose-900" />
+                      <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-[#C9A99A] transition-all group-hover:translate-x-0.5 group-hover:text-[#A17E65]" />
                     </a>
                   );
                 })}
@@ -318,25 +334,25 @@ export default function ContactPage() {
             </div>
 
             {workingHoursList.length > 0 && (
-              <div className="border-t border-gray-200 pt-8">
+              <div className="rounded-2xl border border-[#D9C5B0]/40 bg-[#F5EDE4]/30 p-6">
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-600">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#C9A99A]/50 text-[#A17E65]">
                     <Clock className="h-5 w-5" strokeWidth={1.5} />
                   </span>
-                  <h3 className="font-semibold text-gray-900">Çalışma saatleri</h3>
+                  <h3 className="font-medium text-[#5C4638]">Çalışma saatleri</h3>
                 </div>
                 <div className="space-y-2">
                   {workingHoursList.map((schedule, index) => (
                     <div key={index} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">{schedule.day}</span>
-                      <span className="font-medium tabular-nums text-gray-900">{schedule.hours}</span>
+                      <span className="text-[#8B6B57]">{schedule.day}</span>
+                      <span className="font-medium tabular-nums text-[#5C4638]">{schedule.hours}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-gray-100 bg-gray-100">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-[#D9C5B0]/40 bg-[#EDE0D1]">
               <Image
                 src="/store/2.png"
                 alt="Ofis"
@@ -344,19 +360,19 @@ export default function ContactPage() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#5C4638]/40 to-transparent" />
             </div>
           </div>
         </div>
 
-        <div className="mt-14 border-t border-gray-200 pt-12 text-center sm:mt-20 sm:pt-16">
-          <p className="mb-6 text-base text-gray-600">Ürünlerimizi incelemek ister misiniz?</p>
+        <div className="mt-16 rounded-2xl bg-[#5C4638] px-8 py-12 text-center text-[#F8F1E9] sm:px-12">
+          <p className="text-sm text-[#E8D5C4]">Ürünlerimizi incelemek ister misiniz?</p>
           <Link
             href="/urunler"
-            className="group inline-flex items-center gap-2 rounded-lg bg-rose-900 px-8 py-4 text-sm font-medium uppercase tracking-wide text-white shadow-md transition hover:bg-rose-800 hover:shadow-lg"
+            className="group mt-6 inline-flex items-center gap-2 rounded-full bg-[#F8F1E9] px-8 py-4 text-xs tracking-[0.2em] uppercase text-[#5C4638] transition-all hover:scale-[1.02]"
           >
             Ürünlere git
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
       </div>

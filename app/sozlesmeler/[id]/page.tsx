@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ArrowRight } from 'lucide-react';
+import { HOME_DATA } from '@/core/constant/home.constant';
 
 interface SozlesmelerPageProps {
   params: Promise<{
@@ -15,6 +16,15 @@ const sozlesmeBasliklari: Record<string, string> = {
   'kargo-teslimat': 'Kargo & Teslimat',
   'iade-degisim': 'İade & Değişim',
   'cerez-politikasi': 'Çerez Politikası',
+};
+
+const sozlesmeAciklamalari: Record<string, string> = {
+  'mesafeli-satis': 'Uzaktan satış yöntemiyle yapılan alışverişlere ilişkin hak ve yükümlülükler.',
+  'gizlilik-sozlesmesi': 'Kişisel verilerinizin nasıl toplandığı, kullanıldığı ve korunduğu hakkında bilgiler.',
+  'kullanim-sartlari': 'Web sitemizin kullanımına ilişkin kurallar ve sorumluluklar.',
+  'kargo-teslimat': 'Siparişlerinizin kargoya verilmesi ve teslimat süreçleri hakkında bilgiler.',
+  'iade-degisim': 'Ürün iade ve değişim koşulları ile süreç adımları.',
+  'cerez-politikasi': 'Web sitemizde kullanılan çerezler ve yönetim seçenekleri.',
 };
 
 const sozlesmeIcerikleri: Record<string, string[]> = {
@@ -234,6 +244,8 @@ const sozlesmeIcerikleri: Record<string, string[]> = {
   ],
 };
 
+const digerSozlesmeler = Object.entries(sozlesmeBasliklari).map(([slug, title]) => ({ slug, title }));
+
 export default async function SozlesmelerPage({ params }: SozlesmelerPageProps) {
   const { id } = await params;
 
@@ -242,49 +254,112 @@ export default async function SozlesmelerPage({ params }: SozlesmelerPageProps) 
   }
 
   const baslik = sozlesmeBasliklari[id];
+  const aciklama = sozlesmeAciklamalari[id];
   const icerik = sozlesmeIcerikleri[id];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav className="mb-6 flex flex-wrap items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.22em] text-gray-500">
-          <Link href="/" className="transition-colors hover:text-rose-900">
-            Ana Sayfa
-          </Link>
-          <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-          <span className="line-clamp-2 text-gray-900">{baslik}</span>
-        </nav>
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
+      <div className="border-b border-[#D9C5B0]/50 bg-[#EDE0D1]/60 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-14 gap-y-2 px-8 text-[11px] font-light tracking-[2.5px] text-[#8B6B57]/80">
+          {(HOME_DATA?.TRUST_ITEMS ?? []).map((item) => (
+            <div key={item}>{item}</div>
+          ))}
+        </div>
+      </div>
 
-        <div className="mx-auto max-w-4xl rounded-xl border border-gray-100 bg-gray-50/50 p-6 sm:p-8 md:p-10">
-          <h1 className="border-b border-gray-200 pb-4 text-2xl font-bold text-gray-900 sm:text-3xl">{baslik}</h1>
+      <div className="border-b border-[#D9C5B0]/50 bg-[#EDE0D1]/60">
+        <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8 lg:py-16">
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57]">
+            <Link href="/" className="transition-colors hover:text-[#5C4638]">
+              Ana Sayfa
+            </Link>
+            <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="text-[#5C4638]">{baslik}</span>
+          </nav>
+          <p className="text-xs tracking-[0.3em] uppercase text-[#A17E65]">Yasal Bilgiler</p>
+          <h1 className="mt-3 font-serif text-4xl text-[#5C4638] sm:text-5xl">{baslik}</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#8B6B57] sm:text-base">{aciklama}</p>
+        </div>
+      </div>
 
-          <div className="prose prose-lg max-w-none pt-8">
-            <div className="space-y-4 leading-relaxed text-gray-700">
-              {icerik.map((paragraf, index) => {
-                if (paragraf === '') {
-                  return <div key={index} className="h-4" />;
-                }
+      <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-4 lg:gap-12">
+          <aside className="lg:col-span-1">
+            <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.25em] text-[#A17E65]">Diğer sözleşmeler</p>
+            <nav className="space-y-1">
+              {digerSozlesmeler.map(({ slug, title }) => (
+                <Link
+                  key={slug}
+                  href={`/sozlesmeler/${slug}`}
+                  className={`block rounded-xl px-4 py-3 text-sm transition-colors ${
+                    slug === id
+                      ? 'border border-[#C9A99A]/60 bg-[#F5EDE4]/60 font-medium text-[#5C4638]'
+                      : 'text-[#8B6B57] hover:bg-[#EDE0D1]/50 hover:text-[#5C4638]'
+                  }`}
+                >
+                  {title}
+                </Link>
+              ))}
+            </nav>
+          </aside>
 
-                if (paragraf.match(/^\d+\./)) {
+          <article className="lg:col-span-3">
+            <div className="rounded-2xl border border-[#D9C5B0]/40 bg-[#F5EDE4]/30 p-6 sm:p-8 md:p-10">
+              <div className="space-y-4 leading-relaxed text-[#8B6B57]">
+                {icerik.map((paragraf, index) => {
+                  if (paragraf === '') {
+                    return <div key={index} className="h-2" />;
+                  }
+
+                  if (paragraf.match(/^\d+\./)) {
+                    return (
+                      <h2
+                        key={index}
+                        className="mt-8 border-b border-[#D9C5B0]/40 pb-3 font-serif text-xl text-[#5C4638] first:mt-0 sm:text-2xl"
+                      >
+                        {paragraf}
+                      </h2>
+                    );
+                  }
+
+                  if (paragraf.startsWith('- ')) {
+                    return (
+                      <p key={index} className="border-l-2 border-[#C9A99A]/50 pl-4 text-sm sm:text-base">
+                        {paragraf}
+                      </p>
+                    );
+                  }
+
                   return (
-                    <h2 key={index} className="mt-8 border-b border-gray-100 pb-2 text-lg font-semibold text-gray-900 first:mt-0 sm:text-xl">
+                    <p key={index} className="text-sm sm:text-base">
                       {paragraf}
-                    </h2>
+                    </p>
                   );
-                }
+                })}
+              </div>
 
-                return (
-                  <p key={index} className="text-base sm:text-lg">
-                    {paragraf}
-                  </p>
-                );
-              })}
+              <div className="mt-10 border-t border-[#D9C5B0]/40 pt-6 text-xs tracking-wide text-[#A17E65]">
+                <p>
+                  Son güncelleme:{' '}
+                  {new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-10 border-t border-gray-200 pt-8 text-sm text-gray-500">
-            <p>Son güncelleme: {new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </div>
+            <div className="mt-10 flex flex-col items-start gap-4 rounded-2xl border border-[#D9C5B0]/40 bg-[#EDE0D1]/40 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+              <div>
+                <p className="text-sm text-[#8B6B57]">Sorularınız mı var?</p>
+                <p className="mt-1 font-medium text-[#5C4638]">Müşteri hizmetlerimiz size yardımcı olmaktan mutluluk duyar.</p>
+              </div>
+              <Link
+                href="/iletisim"
+                className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-[#C9A99A] px-6 py-3 text-xs tracking-[0.2em] uppercase text-[#5C4638] transition-all hover:border-[#5C4638] hover:bg-[#F5EDE4]"
+              >
+                İletişime geçin
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </article>
         </div>
       </div>
     </div>

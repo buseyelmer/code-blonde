@@ -6,14 +6,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buluticgiyim.com';
 export const metadata: Metadata = {
   title: 'Hakkımızda',
   description:
-    '2010 yılından bu yana kadın giyiminde öncü olan Bulut İç Giyim hakkında daha fazla bilgi edinin. Misyon, vizyon ve değerlerimizi keşfedin.',
+    'Code Blonde hakkında daha fazla bilgi edinin. Nude tonlarda premium kozmetik markamızın hikayesi, değerleri ve vizyonu.',
   alternates: {
     canonical: `${siteUrl}/hakkimizda`,
   },
   openGraph: {
-    title: 'Hakkımızda | Bulut İç Giyim',
+    title: 'Hakkımızda | Code Blonde',
     description:
-      '2010 yılından bu yana kadın giyiminde öncü olan Bulut İç Giyim hakkında daha fazla bilgi edinin.',
+      'Code Blonde — doğal güzelliğin kodu. Nude tonlarda premium kozmetik deneyimi.',
     url: `${siteUrl}/hakkimizda`,
   },
 };
@@ -21,24 +21,14 @@ export const metadata: Metadata = {
 const aboutSchema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: 'Hakkımızda – Bulut İç Giyim',
+  name: 'Hakkımızda – Code Blonde',
   url: `${siteUrl}/hakkimizda`,
   description:
-    '2010 yılında kurulan Bulut İç Giyim, İstanbul merkezli bir kadın giyim markasıdır. Kalite, konfor ve stil odaklı koleksiyonlarıyla öne çıkmaktadır.',
+    'Code Blonde, nude tonlarda premium kozmetik sunan bir güzellik markasıdır.',
   mainEntity: {
-    '@type': 'ClothingStore',
-    name: 'Bulut İç Giyim',
+    '@type': 'Organization',
+    name: 'Code Blonde',
     url: siteUrl,
-    foundingDate: '2010',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'İstanbul',
-      addressCountry: 'TR',
-    },
-    numberOfEmployees: {
-      '@type': 'QuantitativeValue',
-      minValue: 10,
-    },
   },
 };
 

@@ -1,19 +1,19 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buluticgiyim.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://codeblonde.com';
 
 export const metadata: Metadata = {
   title: 'İletişim',
   description:
-    'Bulut İç Giyim ile iletişime geçin. Sorularınız, önerileriniz ve destek talepleriniz için bize ulaşın.',
+    'Code Blonde ile iletişime geçin. Sorularınız, önerileriniz ve destek talepleriniz için bize ulaşın.',
   alternates: {
     canonical: `${siteUrl}/iletisim`,
   },
   openGraph: {
-    title: 'İletişim | Bulut İç Giyim',
+    title: 'İletişim | Code Blonde',
     description:
-      'Bulut İç Giyim ile iletişime geçin. Sorularınız, önerileriniz ve destek talepleriniz için bize ulaşın.',
+      'Code Blonde ile iletişime geçin. Sorularınız, önerileriniz ve destek talepleriniz için bize ulaşın.',
     url: `${siteUrl}/iletisim`,
   },
 };
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
 const contactSchema = {
   '@context': 'https://schema.org',
   '@type': 'ContactPage',
-  name: 'İletişim – Bulut İç Giyim',
+  name: 'İletişim – Code Blonde',
   url: `${siteUrl}/iletisim`,
-  description: 'Bulut İç Giyim iletişim sayfası. Sorularınız için bize ulaşın.',
+  description: 'Code Blonde iletişim sayfası. Sorularınız için bize ulaşın.',
   mainEntity: {
-    '@type': 'ClothingStore',
-    name: 'Bulut İç Giyim',
+    '@type': 'Store',
+    name: 'Code Blonde',
     url: siteUrl,
     address: {
       '@type': 'PostalAddress',
