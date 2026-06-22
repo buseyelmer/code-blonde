@@ -129,7 +129,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-16">
           <div className="space-y-6">
             {cartLoading ? (
-              <div className="flex flex-col items-center justify-center rounded-3xl border border-[#D9C5B0]/50 bg-white/30 py-32">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-[#EDE0D1] bg-white py-32">
                 <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-[#D9C5B0] border-t-[#5C4638]" />
                 <p className="mt-6 text-xs uppercase tracking-[0.2em] text-[#A17E65]">Yükleniyor...</p>
               </div>
@@ -143,10 +143,13 @@ export default function CartPage() {
                   const imageUrl = buildStorageImageUrl(getBasketItemImagePath(item, product));
 
                   return (
-                    <div key={item.id} className="group flex gap-5 rounded-2xl border border-[#EDE0D1] bg-white p-5 transition-all duration-300 hover:border-[#C9A99A] hover:shadow-lg sm:gap-6">
+                    <div
+                      key={item.id}
+                      className="group flex gap-4 rounded-2xl border border-[#EDE0D1] bg-white p-4 transition-all duration-300 hover:border-[#C9A99A] hover:shadow-lg sm:items-center sm:gap-5 sm:p-5"
+                    >
                       <Link
                         href={item.productId ? `/urunler/${item.productId}` : '#'}
-                        className="relative h-32 w-28 shrink-0 overflow-hidden rounded-xl bg-[#F8F1E9] sm:h-36 sm:w-32"
+                        className="relative aspect-[7/8] h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-[#F8F1E9] sm:h-[4.5rem] sm:w-16"
                       >
                         {imageUrl ? (
                           <Image
@@ -154,67 +157,90 @@ export default function CartPage() {
                             alt={productName}
                             fill
                             unoptimized
-                            sizes="128px"
+                            sizes="64px"
                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-[#F8F1E9]">
-                            <ShoppingBag className="h-10 w-10 text-[#D9C5B0]" strokeWidth={1} />
+                            <ShoppingBag className="h-6 w-6 text-[#D9C5B0] sm:h-7 sm:w-7" strokeWidth={1} />
                           </div>
                         )}
                       </Link>
 
-                      <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
-                        <div>
-                          <div className="flex items-start justify-between gap-4">
-                            <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="block">
-                              <h3 className="line-clamp-2 font-serif text-xl leading-tight text-[#5C4638] transition-colors hover:text-[#A17E65]">
+                      <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                        <div className="flex min-w-0 flex-1 flex-col gap-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <Link href={item.productId ? `/urunler/${item.productId}` : '#'} className="min-w-0">
+                              <h3 className="line-clamp-2 font-serif text-lg leading-tight text-[#5C4638] transition-colors hover:text-[#A17E65] sm:text-xl">
                                 {productName}
                               </h3>
+                              {variantLine ? (
+                                <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-[#A17E65] sm:mt-2 sm:text-[11px]">
+                                  {variantLine}
+                                </p>
+                              ) : null}
                             </Link>
                             <button
                               type="button"
                               onClick={() => handleRemoveItem(item)}
                               disabled={isRemovePending}
-                              className="text-[#A17E65] transition-colors hover:text-[#5C4638] disabled:opacity-30"
+                              className="shrink-0 text-[#A17E65] transition-colors hover:text-[#5C4638] disabled:opacity-30"
                               title="Ürünü kaldır"
                             >
                               <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                             </button>
                           </div>
-                          {variantLine ? (
-                            <p className="mt-2 text-[11px] font-medium uppercase tracking-widest text-[#A17E65]">{variantLine}</p>
-                          ) : null}
+
+                          <div className="flex items-center justify-between gap-4 sm:justify-start">
+                            <InputQuantity
+                              quantity={item.quantity}
+                              onChange={(newQuantity) => handleQuantityChange(item, newQuantity)}
+                              disabled={isInsertPending || isRemovePending}
+                              min={1}
+                              max={item.stock > 0 ? item.stock : undefined}
+                              size="sm"
+                              debounceMs={700}
+                            />
+                            <div className="text-right sm:hidden">
+                              {linePay == null ? (
+                                <p className="text-[10px] uppercase tracking-widest text-[#A17E65]">Fiyat bilgisi yok</p>
+                              ) : (
+                                <div className="flex flex-col items-end">
+                                  <div className="flex items-center gap-2">
+                                    {showListStrike ? (
+                                      <span className="text-xs text-[#A17E65]/60 line-through tabular-nums">{listGross.toTry()}</span>
+                                    ) : null}
+                                    <p className="font-mono text-lg tabular-nums text-[#5C4638]">{linePay.toTry()}</p>
+                                  </div>
+                                  {unitPrice != null && unitPrice > 0 ? (
+                                    <p className="mt-0.5 text-[9px] uppercase tracking-widest text-[#A17E65]">
+                                      Birim: {unitPrice.toTry()}
+                                    </p>
+                                  ) : null}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-                          <InputQuantity
-                            quantity={item.quantity}
-                            onChange={(newQuantity) => handleQuantityChange(item, newQuantity)}
-                            disabled={isInsertPending || isRemovePending}
-                            min={1}
-                            max={item.stock > 0 ? item.stock : undefined}
-                            size="sm"
-                          />
-                          <div className="text-right">
-                            {linePay == null ? (
-                              <p className="text-xs uppercase tracking-widest text-[#A17E65]">Fiyat bilgisi yok</p>
-                            ) : (
-                              <div className="flex flex-col items-end">
-                                <div className="flex items-center gap-3">
-                                  {showListStrike ? (
-                                    <span className="text-sm text-[#A17E65]/60 line-through tabular-nums">{listGross.toTry()}</span>
-                                  ) : null}
-                                  <p className="font-mono text-xl tabular-nums text-[#5C4638]">{linePay.toTry()}</p>
-                                </div>
-                                {unitPrice != null && unitPrice > 0 ? (
-                                  <p className="mt-1 text-[10px] uppercase tracking-widest text-[#A17E65]">
-                                    Birim: {unitPrice.toTry()}
-                                  </p>
+                        <div className="hidden shrink-0 text-right sm:block">
+                          {linePay == null ? (
+                            <p className="text-xs uppercase tracking-widest text-[#A17E65]">Fiyat bilgisi yok</p>
+                          ) : (
+                            <div className="flex flex-col items-end">
+                              <div className="flex items-center gap-3">
+                                {showListStrike ? (
+                                  <span className="text-sm text-[#A17E65]/60 line-through tabular-nums">{listGross.toTry()}</span>
                                 ) : null}
+                                <p className="font-mono text-xl tabular-nums text-[#5C4638]">{linePay.toTry()}</p>
                               </div>
-                            )}
-                          </div>
+                              {unitPrice != null && unitPrice > 0 ? (
+                                <p className="mt-1 text-[10px] uppercase tracking-widest text-[#A17E65]">
+                                  Birim: {unitPrice.toTry()}
+                                </p>
+                              ) : null}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -226,8 +252,8 @@ export default function CartPage() {
 
           {cart && cart.items && cart.items.length > 0 && (
             <div className="h-fit lg:sticky lg:top-28">
-              <div className="rounded-[2rem] border border-[#D9C5B0]/50 bg-white/60 p-8 shadow-sm backdrop-blur-sm sm:p-10">
-                <h2 className="mb-8 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#A17E65]">Sipariş özeti</h2>
+              <div className="rounded-2xl border border-[#EDE0D1] bg-white p-6 shadow-sm transition-all duration-300 hover:border-[#C9A99A] sm:p-8">
+                <h2 className="mb-6 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#A17E65] sm:mb-8">Sipariş özeti</h2>
 
                 <div className="mb-8 space-y-4">
                   <div className="flex justify-between text-sm tracking-tight">
@@ -260,7 +286,7 @@ export default function CartPage() {
 
                 <CartPromoCode />
 
-                <div className="flex items-center justify-between border-t border-[#D9C5B0]/40 pb-8 pt-6">
+                <div className="flex items-center justify-between border-t border-[#EDE0D1] pb-6 pt-5 sm:pb-8 sm:pt-6">
                   <span className="text-sm uppercase tracking-[0.2em] text-[#5C4638]">Toplam</span>
                   <span className="font-serif text-3xl tabular-nums text-[#5C4638]">{totalPrice.toTry()}</span>
                 </div>
@@ -280,7 +306,7 @@ export default function CartPage() {
                   </Link>
                 </div>
 
-                <div className="mt-8 flex items-center justify-center gap-4 border-t border-[#D9C5B0]/20 pt-6 text-[9px] uppercase tracking-[0.15em] text-[#A17E65]/70">
+                <div className="mt-6 flex items-center justify-center gap-4 border-t border-[#EDE0D1] pt-5 text-[9px] uppercase tracking-[0.15em] text-[#A17E65]/70 sm:mt-8 sm:pt-6">
                   <span>Güvenli Ödeme</span>
                   <div className="h-1 w-1 rounded-full bg-[#D9C5B0]" />
                   <span>30 Gün İade</span>

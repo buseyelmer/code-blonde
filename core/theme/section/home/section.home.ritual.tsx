@@ -21,6 +21,26 @@ const STEPS = [
   },
 ] as const;
 
+function RitualStep({ item }: { item: (typeof STEPS)[number] }) {
+  const Icon = item.icon;
+
+  return (
+    <div className="flex flex-col items-center text-center md:items-start md:text-left">
+      <div className="mb-5 w-full">
+        <p className="font-mono text-[10px] tracking-[0.3em] text-[#A17E65]/80">Adım {item.step}</p>
+        <div className="mt-3 h-px w-full bg-[#D9C5B0]/50" aria-hidden />
+      </div>
+
+      <div className="mb-5 flex h-12 w-12 shrink-0 items-center justify-center border border-[#D9C5B0]/60 bg-[#F8F1E9]">
+        <Icon className="h-5 w-5 text-[#5C4638]" strokeWidth={1} aria-hidden />
+      </div>
+
+      <h3 className="font-serif text-2xl tracking-tight text-[#5C4638]">{item.title}</h3>
+      <p className="mt-3 max-w-[240px] text-sm leading-relaxed text-[#8B6B57]">{item.description}</p>
+    </div>
+  );
+}
+
 export default function SectionHomeRitual() {
   return (
     <section className="border-y border-[#D9C5B0]/40 bg-[#FDFAF6] py-16 sm:py-14 lg:py-16">
@@ -35,24 +55,9 @@ export default function SectionHomeRitual() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8 lg:gap-14">
-          {STEPS.map((item, index) => (
-            <div key={item.step} className="relative flex flex-col items-center text-center md:items-start md:text-left">
-              {index < STEPS.length - 1 && (
-                <div
-                  className="absolute left-1/2 top-6 hidden h-px w-full -translate-y-1/2 bg-[#D9C5B0]/50 md:left-[calc(50%+2rem)] md:block md:w-[calc(100%-4rem)]"
-                  aria-hidden
-                />
-              )}
-              <p className="mb-4 font-mono text-[10px] tracking-[0.3em] text-[#A17E65]/80">
-                Adım {item.step}
-              </p>
-              <div className="mb-5 flex h-12 w-12 items-center justify-center border border-[#D9C5B0]/60 bg-[#F8F1E9]">
-                <item.icon className="h-5 w-5 text-[#5C4638]" strokeWidth={1} aria-hidden />
-              </div>
-              <h3 className="font-serif text-2xl tracking-tight text-[#5C4638]">{item.title}</h3>
-              <p className="mt-3 max-w-[240px] text-sm leading-relaxed text-[#8B6B57]">{item.description}</p>
-            </div>
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-12 md:grid-cols-3 md:items-start md:gap-8 lg:gap-14">
+          {STEPS.map((item) => (
+            <RitualStep key={item.step} item={item} />
           ))}
         </div>
       </div>

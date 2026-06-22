@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@raxonltd/raxon-core": "^1.1.15",
+    "@raxonltd/raxon-core": "^1.1.16",
     "lodash": "^4.18.1",
     "next": "16.2.9",
     "nuqs": "^2.8.9",

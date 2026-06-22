@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@raxonltd/raxon-core/dist/*": ["./node_modules/@raxonltd/raxon-core/dist/*"]
     }
   },
   "include": [

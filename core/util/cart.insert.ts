@@ -46,17 +46,32 @@ export async function fetchProductDetailForCart(productId: string): Promise<Prod
   }
 }
 
-export async function resolveCartInsertIds(product: Product) {
-  let variantId = getDefaultVariantId(product);
-  let productUnitId = variantId ? null : getDefaultProductUnitId(product);
+export function resolveCartInsertIdsSync(product: Product, options?: { allowProductOnly?: boolean }) {
+  const variantId = getDefaultVariantId(product);
+  const productUnitId = variantId ? null : getDefaultProductUnitId(product);
 
-  if (!variantId && !productUnitId) {
-    const detail = await fetchProductDetailForCart(product.id);
-    if (detail) {
-      variantId = getDefaultVariantId(detail);
-      productUnitId = variantId ? null : getDefaultProductUnitId(detail);
-    }
+  return {
+    variantId,
+    productUnitId,
+    productOnly: options?.allowProductOnly && !variantId && !productUnitId,
+  };
+}
+
+export async function resolveCartInsertIds(product: Product, options?: { allowProductOnly?: boolean }) {
+  const sync = resolveCartInsertIdsSync(product, options);
+  if (sync.variantId || sync.productUnitId || sync.productOnly) {
+    return sync;
   }
 
-  return { variantId, productUnitId };
+  const detail = await fetchProductDetailForCart(product.id);
+  if (!detail) return sync;
+
+  const variantId = getDefaultVariantId(detail);
+  const productUnitId = variantId ? null : getDefaultProductUnitId(detail);
+
+  return {
+    variantId,
+    productUnitId,
+    productOnly: options?.allowProductOnly && !variantId && !productUnitId,
+  };
 }

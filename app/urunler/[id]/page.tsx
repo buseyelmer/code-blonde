@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -10,8 +11,6 @@ import {
   ChevronDown,
   ChevronRight,
   Heart,
-  Minus,
-  Plus,
   ShoppingBag,
   Star,
 } from "lucide-react";
@@ -22,10 +21,12 @@ import ItemListingProduct from "@/core/theme/item/item.listing.product";
 import { getProductPriceInfo, mergeProductListPrice } from "@/core/util/product.price";
 import { useProductCart } from "@/core/hook/use.product.cart";
 import { containsHtmlMarkup, isSameProductText } from "@/core/util/product.html";
-import { getDefaultProductUnitId } from "@/core/util/cart.insert";
+import { getDefaultProductUnitId, getDefaultVariantId } from "@/core/util/cart.insert";
 import { useProductFavorite } from "@/core/hook/use.product.favorite";
 import { buildStorageImageUrl } from "@/core/util/basket.enrichment";
 import { getProductListingImageUrl } from "@/core/util/product.image";
+import { InputQuantity } from "@/core/component/input.quantity";
+import toast from "react-hot-toast";
 import "@/core/util/util";
 
 function resolveImageUrl(relativePath?: string | null): string {
@@ -115,20 +116,26 @@ export default function UrunlerDetayPage() {
   const productId = typeof params.id === "string" ? params.id : "";
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [selectedProductUnitId, setSelectedProductUnitId] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [draftQuantity, setDraftQuantity] = useState(1);
+  const [quantityUiActive, setQuantityUiActive] = useState(false);
 
   const { data: product, isLoading, isError } = useProduct().detail(productId);
   const { data: relatedProducts } = useProduct().related(productId);
   const { cart, addProduct, setProductQuantity, removeItem, isCartBusy } = useProductCart();
 
-  const needsListPrice = Boolean(product && getProductPriceInfo(product).bestPrice === 0);
+  const needsListEnrichment = Boolean(
+    product &&
+      (getProductPriceInfo(product).bestPrice === 0 ||
+        (!product.variant?.length && !product.productUnit?.length)),
+  );
   const { data: listFallback } = useProduct().fetch({
     materialType: "product",
     status: Status.PUBLISHED,
     page: 1,
     amount: 120,
-    enabled: needsListPrice,
+    enabled: needsListEnrichment,
   });
 
   const enrichedProduct = useMemo((): ProductDetail | null => {
@@ -144,16 +151,19 @@ export default function UrunlerDetayPage() {
 
   useEffect(() => {
     setSelectedVariantId(null);
+    setSelectedProductUnitId(null);
     setActiveImageIndex(0);
-    setQuantity(1);
+    setDraftQuantity(1);
+    setQuantityUiActive(false);
   }, [productId]);
 
   useEffect(() => {
-    if (!enrichedProduct?.variant?.length || selectedVariantId) return;
-    const defaultVariant =
-      enrichedProduct.variant.find((v) => v.stock > 0) ?? enrichedProduct.variant[0];
-    if (defaultVariant) setSelectedVariantId(defaultVariant.id);
-  }, [enrichedProduct, selectedVariantId]);
+    if (!enrichedProduct) return;
+
+    const variantId = getDefaultVariantId(enrichedProduct);
+    setSelectedVariantId(variantId);
+    setSelectedProductUnitId(variantId ? null : getDefaultProductUnitId(enrichedProduct));
+  }, [enrichedProduct?.id, productId]);
 
   const selectedVariant = useMemo(() => {
     if (!selectedVariantId || !enrichedProduct?.variant) return null;
@@ -186,12 +196,15 @@ export default function UrunlerDetayPage() {
     return cart?.items?.find((item) => {
       if (item.productId !== enrichedProduct.id) return false;
       if (selectedVariantId) return item.variant?.id === selectedVariantId;
+      if (selectedProductUnitId) return item.productUnit?.id === selectedProductUnitId;
       return !item.variant?.id;
     });
-  }, [cart?.items, enrichedProduct?.id, selectedVariantId]);
+  }, [cart?.items, enrichedProduct?.id, selectedVariantId, selectedProductUnitId]);
 
   const cartQuantity = cartItem?.quantity ?? 0;
   const isInCart = cartQuantity > 0;
+  const showQuantitySelector = quantityUiActive || isInCart;
+  const displayQuantity = isInCart ? cartQuantity : draftQuantity;
   const maxQuantity = stock > 0 ? stock : 10;
 
   const hasVariants = Boolean(enrichedProduct?.variant?.length);
@@ -199,6 +212,62 @@ export default function UrunlerDetayPage() {
   const option2List = hasVariants ? getUniqueOptions(enrichedProduct!, "attributeOption2") : [];
 
   const canAddToCart = Boolean(enrichedProduct?.id && bestPrice > 0 && (!hasVariants || selectedVariantId));
+
+  const getLineIds = useCallback(() => {
+    const productUnitId = selectedVariantId ? null : selectedProductUnitId ?? getDefaultProductUnitId(enrichedProduct!);
+    return {
+      variantId: selectedVariantId,
+      productUnitId,
+    };
+  }, [enrichedProduct, selectedProductUnitId, selectedVariantId]);
+
+  const handleQuantityCommit = useCallback(
+    async (targetQty: number) => {
+      if (!enrichedProduct?.id || !canAddToCart) return;
+
+      const lineIds = getLineIds();
+
+      if (targetQty < 1) {
+        if (cartItem?.id) removeItem(cartItem.id);
+        setQuantityUiActive(false);
+        setDraftQuantity(1);
+        return;
+      }
+
+      if (!cartItem) {
+        const ok = await addProduct(enrichedProduct, targetQty, {
+          ...lineIds,
+          linePay: bestPrice * targetQty,
+        });
+        if (ok) {
+          setDraftQuantity(targetQty);
+          setQuantityUiActive(true);
+        }
+        return;
+      }
+
+      if (targetQty === cartQuantity) return;
+
+      await setProductQuantity(enrichedProduct, cartItem, targetQty, lineIds);
+    },
+    [
+      addProduct,
+      bestPrice,
+      canAddToCart,
+      cartItem,
+      cartQuantity,
+      enrichedProduct,
+      getLineIds,
+      removeItem,
+      setProductQuantity,
+    ],
+  );
+
+  useEffect(() => {
+    if (!isInCart) return;
+    setDraftQuantity(cartQuantity);
+    setQuantityUiActive(true);
+  }, [cartQuantity, isInCart]);
 
   const selectVariant = (optionId: string) => {
     const currentVariant = selectedVariant;
@@ -215,35 +284,42 @@ export default function UrunlerDetayPage() {
     });
     if (matchingVariant) {
       setSelectedVariantId(matchingVariant.id);
+      setSelectedProductUnitId(null);
       setActiveImageIndex(0);
+      setDraftQuantity(1);
+      setQuantityUiActive(false);
     }
   };
 
-  const handleAddToCart = () => {
-    if (!enrichedProduct?.id || !canAddToCart || isCartBusy) return;
-    const productUnitId = !selectedVariantId ? getDefaultProductUnitId(enrichedProduct) : null;
-    void addProduct(enrichedProduct, quantity, {
-      variantId: selectedVariantId,
-      productUnitId,
-      linePay: bestPrice * quantity,
+  const handleAddToCart = async () => {
+    if (!enrichedProduct?.id || !canAddToCart || isCartBusy || showQuantitySelector) return;
+
+    const lineIds = getLineIds();
+
+    flushSync(() => {
+      setQuantityUiActive(true);
+      setDraftQuantity(1);
     });
-  };
 
-  const handleQuantityChange = (delta: number) => {
-    if (!enrichedProduct?.id || isCartBusy || !cartItem) return;
-    const newQty = cartQuantity + delta;
+    try {
+      const ok = await addProduct(enrichedProduct, 1, {
+        ...lineIds,
+        linePay: bestPrice,
+      });
 
-    if (newQty < 1) {
-      removeItem(cartItem.id);
-      return;
+      if (!ok) {
+        setQuantityUiActive(false);
+        setDraftQuantity(1);
+        toast.error("Ürün sepete eklenemedi");
+        return;
+      }
+
+      toast.success("Ürün sepete eklendi");
+    } catch {
+      setQuantityUiActive(false);
+      setDraftQuantity(1);
+      toast.error("Ürün sepete eklenemedi");
     }
-    if (newQty > maxQuantity) return;
-
-    const productUnitId = !selectedVariantId ? getDefaultProductUnitId(enrichedProduct) : null;
-    void setProductQuantity(enrichedProduct, cartItem, newQty, {
-      variantId: selectedVariantId,
-      productUnitId,
-    });
   };
 
   if (!productId) {
@@ -494,7 +570,7 @@ export default function UrunlerDetayPage() {
 
             <div className="mt-10 border-t border-[#D9C5B0]/40 pt-8">
               <div className="space-y-5">
-                {isInCart && (
+                {showQuantitySelector && (
                   <p className="inline-flex items-center gap-2 text-sm text-[#5C4638]">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#A17E65]/15">
                       <Check className="h-3 w-3 text-[#A17E65]" strokeWidth={2.5} />
@@ -510,77 +586,44 @@ export default function UrunlerDetayPage() {
                 )}
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <div className="flex items-center gap-3">
-                    <span className="min-w-[3.25rem] text-sm text-[#8B6B57]">Adet</span>
-                    <div
-                      className="inline-flex items-center overflow-hidden rounded-full border border-[#D9C5B0] bg-white"
-                      role="group"
-                      aria-label="Ürün adedi"
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          isInCart ? handleQuantityChange(-1) : setQuantity((q) => Math.max(1, q - 1))
-                        }
-                        disabled={isCartBusy || (!isInCart && quantity <= 1)}
-                        className="flex h-11 w-11 items-center justify-center text-[#5C4638] transition hover:bg-[#F5EDE4] active:bg-[#EDE0D1] disabled:opacity-30"
-                        aria-label="Adedi azalt"
-                      >
-                        <Minus className="h-4 w-4" strokeWidth={2} />
-                      </button>
-                      <span className="min-w-[2.5rem] px-1 text-center font-mono text-base tabular-nums text-[#5C4638]">
-                        {isCartBusy ? (
-                          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#D9C5B0] border-t-[#5C4638]" />
-                        ) : isInCart ? (
-                          cartQuantity
-                        ) : (
-                          quantity
-                        )}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          isInCart
-                            ? handleQuantityChange(1)
-                            : setQuantity((q) => Math.min(maxQuantity, q + 1))
-                        }
-                        disabled={
-                          isCartBusy ||
-                          (isInCart ? cartQuantity >= maxQuantity : quantity >= maxQuantity)
-                        }
-                        className="flex h-11 w-11 items-center justify-center text-[#5C4638] transition hover:bg-[#F5EDE4] active:bg-[#EDE0D1] disabled:opacity-30"
-                        aria-label="Adedi artır"
-                      >
-                        <Plus className="h-4 w-4" strokeWidth={2} />
-                      </button>
+                  {showQuantitySelector ? (
+                    <div className="flex flex-1 items-center gap-3">
+                      <span className="min-w-[3.25rem] text-sm text-[#8B6B57]">Adet</span>
+                      <InputQuantity
+                        variant="pill"
+                        quantity={displayQuantity}
+                        onChange={(newQty) => void handleQuantityCommit(newQty)}
+                        min={0}
+                        max={maxQuantity}
+                        disabled={isCartBusy || !canAddToCart}
+                        debounceMs={800}
+                      />
                     </div>
-                  </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void handleAddToCart()}
+                      disabled={!canAddToCart || isCartBusy}
+                      className="inline-flex w-full flex-1 items-center justify-center gap-2.5 rounded-full bg-[#5C4638] px-8 py-4 text-sm font-medium tracking-wide text-[#F8F1E9] shadow-sm transition hover:bg-[#3F2F25] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-md"
+                    >
+                      {isCartBusy ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <>
+                          <ShoppingBag className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.5} />
+                          Sepete Ekle
+                        </>
+                      )}
+                    </button>
+                  )}
 
-                  <div className="flex flex-1 gap-2.5 sm:justify-end">
-                    {!isInCart && (
-                      <button
-                        type="button"
-                        onClick={handleAddToCart}
-                        disabled={!canAddToCart || isCartBusy}
-                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#5C4638] px-6 text-sm font-medium text-[#F8F1E9] transition hover:bg-[#3F2F25] disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-xs sm:flex-none sm:min-w-[200px]"
-                      >
-                        {isCartBusy ? (
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                          <>
-                            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-                            Sepete Ekle
-                          </>
-                        )}
-                      </button>
-                    )}
-
+                  <div className="flex shrink-0 gap-2.5 sm:justify-end">
                     <button
                       type="button"
                       onClick={() => toggle()}
                       disabled={isTogglingFavorite}
                       aria-label={isFavorite ? "Favorilerden çıkar" : "Favorilere ekle"}
-                      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition ${
+                      className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border transition ${
                         isFavorite
                           ? "border-[#5C4638] bg-[#5C4638] text-[#F8F1E9]"
                           : "border-[#D9C5B0] bg-white text-[#5C4638] hover:border-[#A17E65]"

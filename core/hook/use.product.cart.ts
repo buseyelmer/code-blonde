@@ -1,29 +1,30 @@
 "use client";
 
 import { useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useCart } from "@raxonltd/raxon-core/hook";
 import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import type { BasketItemSummaryInterface } from "@raxonltd/raxon-core/interface/basket.interface";
-import { resolveCartInsertIds } from "@/core/util/cart.insert";
-
-const CART_QUERY_KEY = ["organization", "cart"];
+import { resolveCartInsertIdsSync } from "@/core/util/cart.insert";
 
 type CartLineIds = {
   variantId: string | null;
   productUnitId: string | null;
+  productOnly?: boolean;
 };
 
-async function resolveLineIds(
+function resolveLineIds(
   product: Product,
   variantId?: string | null,
   productUnitId?: string | null,
-): Promise<CartLineIds> {
-  if (variantId || productUnitId) {
-    return { variantId: variantId ?? null, productUnitId: variantId ? null : (productUnitId ?? null) };
+): CartLineIds {
+  if (variantId) {
+    return { variantId, productUnitId: null };
   }
-  return resolveCartInsertIds(product);
+  if (productUnitId) {
+    return { variantId: null, productUnitId };
+  }
+  return resolveCartInsertIdsSync(product, { allowProductOnly: true });
 }
 
 export function useProductCart() {
@@ -31,60 +32,49 @@ export function useProductCart() {
     cart,
     addToCart,
     removeItem,
-    changeQuantity,
+    updateQuantity,
     isAddingToCart,
     isUpdatingCart,
   } = useRaxon();
   const insertMutation = useCart().insert();
-  const queryClient = useQueryClient();
-
-  const refreshCart = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-    await queryClient.refetchQueries({ queryKey: CART_QUERY_KEY });
-  }, [queryClient]);
-
-  const insertLine = useCallback(
-    async (
-      productId: string,
-      quantity: number,
-      type: "increment" | "set",
-      ids: CartLineIds,
-    ) => {
-      await insertMutation.mutateAsync({
-        productId,
-        variantId: ids.variantId ?? undefined,
-        productUnitId: !ids.variantId ? (ids.productUnitId ?? undefined) : undefined,
-        quantity,
-        type,
-        deposit: "disable",
-      });
-      await refreshCart();
-    },
-    [insertMutation, refreshCart],
-  );
 
   const addProduct = useCallback(
-    async (
+    (
       product: Product,
       quantity = 1,
       options?: { variantId?: string | null; productUnitId?: string | null; linePay?: number },
     ) => {
-      const ids = await resolveLineIds(product, options?.variantId, options?.productUnitId);
-      if (!ids.variantId && !ids.productUnitId) return false;
+      try {
+        const ids = resolveLineIds(product, options?.variantId, options?.productUnitId);
+        const linePay = options?.linePay;
 
-      if (ids.variantId) {
-        addToCart(product.id, quantity, ids.variantId, { linePay: options?.linePay });
+        if (ids.variantId || ids.productOnly) {
+          addToCart(product.id, quantity, ids.variantId ?? undefined, { linePay });
+          return true;
+        }
+
+        if (ids.productUnitId) {
+          insertMutation.mutate({
+            productId: product.id,
+            productUnitId: ids.productUnitId,
+            quantity,
+            type: quantity > 1 ? "set" : "increment",
+            deposit: "disable",
+          });
+          return true;
+        }
+
+        addToCart(product.id, quantity, undefined, { linePay });
         return true;
+      } catch {
+        return false;
       }
-
-      await insertLine(product.id, quantity, "increment", ids);
-      return true;
     },
-    [addToCart, insertLine],
+    [addToCart, insertMutation],
   );
 
   const setProductQuantity = useCallback(
-    async (
+    (
       product: Product,
       item: BasketItemSummaryInterface,
       quantity: number,
@@ -95,14 +85,9 @@ export function useProductCart() {
         return;
       }
 
-      if (ids.variantId && item.id && !String(item.id).startsWith("optimistic-")) {
-        changeQuantity(item.id, quantity - (item.quantity ?? 0), product.id, ids.variantId);
-        return;
-      }
-
-      await insertLine(product.id, quantity, "set", ids);
+      updateQuantity(String(item.id), quantity, String(product.id));
     },
-    [changeQuantity, insertLine, removeItem],
+    [removeItem, updateQuantity],
   );
 
   return {
@@ -110,6 +95,6 @@ export function useProductCart() {
     addProduct,
     setProductQuantity,
     removeItem,
-    isCartBusy: isAddingToCart || isUpdatingCart || insertMutation.isPending,
+    isCartBusy: isAddingToCart || isUpdatingCart,
   };
 }

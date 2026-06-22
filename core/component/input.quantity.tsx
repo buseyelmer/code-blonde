@@ -1,63 +1,98 @@
 import { Minus, Plus } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+
+export type InputQuantityHandle = {
+  getValue: () => number;
+  commitNow: () => void;
+};
 
 interface InputQuantityProps {
   quantity?: number;
   size?: 'sm' | 'md' | 'lg';
-  defaultValue?: number;
-  unitPrice?: number;
-  minimum?: number;
+  variant?: 'default' | 'pill';
+  debounceMs?: number;
   onChange: (quantity: number) => void;
   disabled?: boolean;
   min?: number;
   max?: number;
 }
 
-export const InputQuantity = ({
-  quantity,
-  size = 'md',
-
-  onChange,
-  disabled = false,
-  min = 1,
-  max,
-}: InputQuantityProps) => {
+export const InputQuantity = forwardRef<InputQuantityHandle, InputQuantityProps>(function InputQuantity(
+  {
+    quantity,
+    size = 'md',
+    variant = 'default',
+    debounceMs = 700,
+    onChange,
+    disabled = false,
+    min = 1,
+    max,
+  },
+  ref,
+) {
   const [localQuantity, setLocalQuantity] = useState(quantity);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUserUpdateRef = useRef(false);
+  const skipDebounceRef = useRef(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
-  // Prop değişikliklerini takip et
-  useEffect(() => {
-    if (!isUserUpdateRef.current) {
-      setLocalQuantity(quantity);
-    }
+  const commit = (value: number) => {
     isUserUpdateRef.current = false;
-  }, [quantity]);
+    onChangeRef.current(value ?? 0);
+  };
 
-  // Local değişiklikleri 500ms sonra onChange'e gönder (onChange ref ile sabit — parent'ta inline fn güvenli)
-  useEffect(() => {
+  const clearPendingCommit = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    getValue: () => localQuantity ?? 0,
+    commitNow: () => {
+      clearPendingCommit();
+      isUserUpdateRef.current = true;
+      commit(localQuantity ?? 0);
+    },
+  }));
+
+  useEffect(() => {
+    if (isUserUpdateRef.current) return;
+
+    skipDebounceRef.current = true;
+    setLocalQuantity(quantity);
+  }, [quantity]);
+
+  useEffect(() => {
+    if (skipDebounceRef.current) {
+      skipDebounceRef.current = false;
+      return;
+    }
+    if (!isUserUpdateRef.current) return;
+
+    clearPendingCommit();
+
+    if (localQuantity === quantity) {
+      isUserUpdateRef.current = false;
+      return;
     }
 
-    if (localQuantity !== quantity && isUserUpdateRef.current) {
+    if (debounceMs <= 0) {
+      commit(localQuantity ?? 0);
+    } else {
       timeoutRef.current = setTimeout(() => {
-        onChangeRef.current(localQuantity ?? 0);
-      }, 500);
+        commit(localQuantity ?? 0);
+      }, debounceMs);
     }
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [localQuantity, quantity]);
+    return clearPendingCommit;
+  }, [localQuantity, quantity, debounceMs]);
 
   const handleIncrement = () => {
     isUserUpdateRef.current = true;
-    setLocalQuantity(prev => {
+    setLocalQuantity((prev) => {
       const base = prev ?? 0;
       const next = base + 1;
       return max !== undefined ? Math.min(next, max) : next;
@@ -66,12 +101,50 @@ export const InputQuantity = ({
 
   const handleDecrement = () => {
     isUserUpdateRef.current = true;
-    setLocalQuantity(prev => {
+    setLocalQuantity((prev) => {
       const base = prev ?? 0;
       const floor = min ?? 1;
       return Math.max(base - 1, floor);
     });
   };
+
+  const floor = min ?? 1;
+  const current = localQuantity ?? 0;
+  const atMin = current <= floor;
+  const atMax = max !== undefined && current >= max;
+
+  if (variant === 'pill') {
+    return (
+      <div
+        className="inline-flex items-center overflow-hidden rounded-full border border-[#D9C5B0] bg-white"
+        role="group"
+        aria-label="Ürün adedi"
+      >
+        <button
+          type="button"
+          onClick={handleDecrement}
+          disabled={disabled || atMin}
+          className="flex h-11 w-11 items-center justify-center text-[#5C4638] transition hover:bg-[#F5EDE4] active:bg-[#EDE0D1] disabled:opacity-30"
+          aria-label="Adedi azalt"
+        >
+          <Minus className="h-4 w-4" strokeWidth={2} />
+        </button>
+        <span className="min-w-[2.5rem] px-1 text-center font-mono text-base tabular-nums text-[#5C4638]">
+          {current}
+        </span>
+        <button
+          type="button"
+          onClick={handleIncrement}
+          disabled={disabled || atMax}
+          className="flex h-11 w-11 items-center justify-center text-[#5C4638] transition hover:bg-[#F5EDE4] active:bg-[#EDE0D1] disabled:opacity-30"
+          aria-label="Adedi artır"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2} />
+        </button>
+      </div>
+    );
+  }
+
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
@@ -82,15 +155,30 @@ export const InputQuantity = ({
     md: 'p-3',
     lg: 'p-4',
   };
+
   return (
-    <div className={`flex items-center border border-gray-300 w-fit ${sizeClasses[size]}`}>
-      <button onClick={handleDecrement} className={`${paddingClasses[size]} hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${sizeClasses[size]}`} disabled={disabled || (localQuantity || 0) <= (min || 1)}>
-        <Minus className="w-4 h-4" />
+    <div className={`flex w-fit items-center border border-gray-300 ${sizeClasses[size]}`}>
+      <button
+        type="button"
+        onClick={handleDecrement}
+        className={`${paddingClasses[size]} flex items-center justify-center transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 ${sizeClasses[size]}`}
+        disabled={disabled || atMin}
+      >
+        <Minus className="h-4 w-4" />
       </button>
-      <span className={`${paddingClasses[size]} border-x border-gray-300 min-w-[50px] text-center ${sizeClasses[size]}`}>{localQuantity}</span>
-      <button onClick={handleIncrement} className={`${paddingClasses[size]} hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${sizeClasses[size]}`} disabled={disabled || (max !== undefined && (localQuantity || 0) >= max)}>
-        <Plus className="w-4 h-4" />
+      <span
+        className={`${paddingClasses[size]} min-w-[50px] border-x border-gray-300 text-center ${sizeClasses[size]}`}
+      >
+        {current}
+      </span>
+      <button
+        type="button"
+        onClick={handleIncrement}
+        className={`${paddingClasses[size]} flex items-center justify-center transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 ${sizeClasses[size]}`}
+        disabled={disabled || atMax}
+      >
+        <Plus className="h-4 w-4" />
       </button>
     </div>
   );
-};
+});

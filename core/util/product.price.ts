@@ -62,11 +62,23 @@ export function getProductPriceInfo(product: Product, variantId?: string | null)
   };
 }
 
-/** Detay endpoint fiyat döndürmezse liste kaydından fiyat alır. */
+/** Detay endpoint fiyat veya birim döndürmezse liste kaydından tamamlar. */
 export function mergeProductListPrice(product: Product, listProduct?: Product | null): Product {
-  if (!listProduct || getProductPriceInfo(product).bestPrice > 0) return product;
-  if (getProductPriceInfo(listProduct).bestPrice === 0) return product;
-  return { ...product, price: listProduct.price };
+  if (!listProduct) return product;
+
+  let merged = product;
+
+  if (getProductPriceInfo(merged).bestPrice === 0 && getProductPriceInfo(listProduct).bestPrice > 0) {
+    merged = { ...merged, price: listProduct.price };
+  }
+  if (!merged.productUnit?.length && listProduct.productUnit?.length) {
+    merged = { ...merged, productUnit: listProduct.productUnit };
+  }
+  if (!merged.variant?.length && listProduct.variant?.length) {
+    merged = { ...merged, variant: listProduct.variant };
+  }
+
+  return merged;
 }
 
 export function sortProductsByPopularity(products: Product[]) {
