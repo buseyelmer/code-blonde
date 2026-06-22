@@ -3,12 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
-        - nvm use 20
-        - npm ci
+        - nvm install
+        - nvm use
+        - curl -fsSL https://bun.sh/install | bash
+        - export PATH="$HOME/.bun/bin:$PATH"
+        - bun --version
+        - bun install --frozen-lockfile
     build:
       commands:
+        - export PATH="$HOME/.bun/bin:$PATH"
         - env | grep -e NEXT_PUBLIC_ >> .env.production || true
-        - npm run build
+        - bun run build
   artifacts:
     baseDirectory: .next
     files:
@@ -17,3 +22,4 @@ frontend:
     paths:
       - node_modules/**/*
       - .next/cache/**/*
+      - $HOME/.bun/**/*
