@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { raxonServer } from '@raxonltd/raxon-core/server';
 
-const handleRaxon = raxonServer();
+const handleRaxon = raxonServer({
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+});
 
 function withNoCacheHeaders(response: NextResponse) {
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
