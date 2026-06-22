@@ -3,8 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GeneralLayout from "@/core/layout/general.layout";
-import SiteHeader from "@/core/layout/site.header";
-import SiteShell from "@/core/layout/site.shell";
+import SiteChrome from "@/core/layout/site.chrome";
 import { SITE_SLOGAN } from "@/core/constant/site.constant";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,8 +43,7 @@ export default function RootLayout({
           }
         >
           <GeneralLayout>
-            <SiteHeader />
-            <SiteShell>{children}</SiteShell>
+            <SiteChrome>{children}</SiteChrome>
           </GeneralLayout>
         </Suspense>
       </body>
