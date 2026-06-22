@@ -26,12 +26,24 @@ function normalizeImagePath(value: unknown): string | null {
   return null;
 }
 
-function collectImagePaths(product: Product): string[] {
+function collectImagePaths(product: Product, variantId?: string | null): string[] {
   const paths: string[] = [];
+  const seen = new Set<string>();
+
   const push = (value: unknown) => {
     const path = normalizeImagePath(value);
-    if (path) paths.push(path);
+    if (!path || seen.has(path)) return;
+    seen.add(path);
+    paths.push(path);
   };
+
+  if (variantId) {
+    for (const image of product.images ?? []) {
+      if (image.variantIds?.includes(variantId)) {
+        push(image.relativePath ?? image);
+      }
+    }
+  }
 
   for (const image of product.images ?? []) {
     push(image);
@@ -58,16 +70,20 @@ function collectImagePaths(product: Product): string[] {
   return paths;
 }
 
-export function getProductImageRelativePath(product: Product): string | null {
-  return collectImagePaths(product)[0] ?? null;
+export function getProductImageRelativePath(product: Product, variantId?: string | null): string | null {
+  return collectImagePaths(product, variantId)[0] ?? null;
 }
 
 export function productHasListingImage(product: Product): boolean {
   return getProductListingImageUrl(product, 0) !== PRODUCT_LISTING_PLACEHOLDER;
 }
 
-export function getProductListingImageUrl(product: Product, index = 0): string {
-  const paths = collectImagePaths(product);
+export function getProductListingImageUrl(
+  product: Product,
+  index = 0,
+  variantId?: string | null,
+): string {
+  const paths = collectImagePaths(product, variantId);
   const relativePath = paths[index] ?? paths[0];
   if (!relativePath) return PRODUCT_LISTING_PLACEHOLDER;
 

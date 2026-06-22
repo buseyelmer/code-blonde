@@ -7,7 +7,7 @@ import { ShoppingBag } from "lucide-react";
 import CartPromoCode from "@/core/component/cart.promo.code";
 import { useCartPricing } from "@/core/hook/use.cart.pricing";
 import { formatBasketItemVariantLine, getBasketItemDisplayName } from "@/core/util/basket.item.display";
-import { buildStorageImageUrl, getBasketItemImagePath } from "@/core/util/basket.enrichment";
+import { getBasketItemImageUrl } from "@/core/util/basket.enrichment";
 import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import { useMemo } from "react";
@@ -50,7 +50,7 @@ export default function CheckoutOrderSummary({ className = "" }: CheckoutOrderSu
             const showListStrike = linePay > 0 && listGross - linePay > 0.01;
             const variantLine = formatBasketItemVariantLine(item);
             const productName = getBasketItemDisplayName(item);
-            const imageUrl = buildStorageImageUrl(getBasketItemImagePath(item, product));
+            const imageUrl = getBasketItemImageUrl(item, product);
 
             return (
               <div key={item.id} className="flex gap-4">

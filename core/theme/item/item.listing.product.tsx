@@ -59,10 +59,14 @@ export default function ItemListingProduct({ product, index = 0 }: Props) {
   const isInCart = cartQuantity > 0;
   const isBusy = isCartBusy || isResolvingCart;
 
-  const primaryUrl = getProductListingImageUrl(product, 0);
-  const secondaryUrl = product.images?.[1]?.relativePath
-    ? getProductListingImageUrl(product, 1)
-    : null;
+  const primaryUrl = useMemo(
+    () => getProductListingImageUrl(product, 0, selectedVariantId),
+    [product, selectedVariantId],
+  );
+  const secondaryUrl = useMemo(() => {
+    const url = getProductListingImageUrl(product, 1, selectedVariantId);
+    return url !== primaryUrl ? url : null;
+  }, [product, primaryUrl, selectedVariantId]);
 
   const categoryName = product.categories?.[0]?.name ?? "";
   const productUrl = `/urunler/${product.id}`;

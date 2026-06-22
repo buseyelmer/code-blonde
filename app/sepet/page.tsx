@@ -14,8 +14,7 @@ import Link from 'next/link';
 import { formatBasketItemVariantLine, getBasketItemDisplayName } from '@/core/util/basket.item.display';
 import {
   buildProductMap,
-  buildStorageImageUrl,
-  getBasketItemImagePath,
+  getBasketItemImageUrl,
   getBasketItemLinePay,
   getBasketItemUnitPrice,
 } from '@/core/util/basket.enrichment';
@@ -140,7 +139,7 @@ export default function CartPage() {
                   const productName = getBasketItemDisplayName(item);
                   const variantLine = formatBasketItemVariantLine(item);
                   const { linePay, unitPrice, listGross, showListStrike } = getItemPricing(item);
-                  const imageUrl = buildStorageImageUrl(getBasketItemImagePath(item, product));
+                  const imageUrl = getBasketItemImageUrl(item, product);
 
                   return (
                     <div
