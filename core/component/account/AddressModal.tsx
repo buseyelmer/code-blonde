@@ -125,7 +125,9 @@ export function AddressModal({
       setMode('search');
     }
     setAddressSearchError(null);
-  }, [isOpen, editingData, defaultRecipient, reset, resetAddressSearch, setAddressSearchQuery]);
+    // Yalnızca modal açıldığında veya düzenlenen adres değiştiğinde sıfırla
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingData?.id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -168,6 +170,9 @@ export function AddressModal({
   const handleAddressSearchQueryChange = (value: string) => {
     onAddressSearchQueryChange(value);
     setAddressSearchError(null);
+    if (value.length >= 3) {
+      setShowAddressSearchResults(true);
+    }
 
     if (!value.trim()) {
       resetAddressSearch();

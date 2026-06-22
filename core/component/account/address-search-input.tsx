@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Loader2, MapPin, Search } from 'lucide-react';
 
@@ -41,6 +41,7 @@ export function AddressSearchInput({
   embedded = false,
 }: AddressSearchInputProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
 
@@ -56,15 +57,16 @@ export function AddressSearchInput({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        onShowResultsChange(false);
-      }
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      onShowResultsChange(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onShowResultsChange]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!showResults || query.length < 3) {
       setDropdownStyle(null);
       return;
@@ -80,7 +82,7 @@ export function AddressSearchInput({
       window.removeEventListener('resize', handleReposition);
       window.removeEventListener('scroll', handleReposition, true);
     };
-  }, [showResults, query, results.length]);
+  }, [showResults, query, results.length, isSearching]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') onShowResultsChange(false);
@@ -96,6 +98,7 @@ export function AddressSearchInput({
     showDropdown && dropdownStyle
       ? createPortal(
           <div
+            ref={dropdownRef}
             style={{
               position: 'fixed',
               top: dropdownStyle.top,
