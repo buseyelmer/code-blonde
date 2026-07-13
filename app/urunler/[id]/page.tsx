@@ -310,15 +310,12 @@ export default function UrunlerDetayPage() {
       if (!ok) {
         setQuantityUiActive(false);
         setDraftQuantity(1);
-        toast.error("Ürün sepete eklenemedi");
         return;
       }
-
-      toast.success("Ürün sepete eklendi");
     } catch {
       setQuantityUiActive(false);
       setDraftQuantity(1);
-      toast.error("Ürün sepete eklenemedi");
+      toast.error("Ürün sepete eklenemedi", { id: "cart-add" });
     }
   };
 

@@ -5,6 +5,7 @@ import { useRaxon } from "@raxonltd/raxon-core";
 import { useCart } from "@raxonltd/raxon-core/hook";
 import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import type { BasketItemSummaryInterface } from "@raxonltd/raxon-core/interface/basket.interface";
+import toast from "react-hot-toast";
 import { resolveCartInsertIdsSync } from "@/core/util/cart.insert";
 
 type CartLineIds = {
@@ -42,7 +43,12 @@ export function useProductCart() {
     (
       product: Product,
       quantity = 1,
-      options?: { variantId?: string | null; productUnitId?: string | null; linePay?: number },
+      options?: {
+        variantId?: string | null;
+        productUnitId?: string | null;
+        linePay?: number;
+        silent?: boolean;
+      },
     ) => {
       try {
         const ids = resolveLineIds(product, options?.variantId, options?.productUnitId);
@@ -50,6 +56,9 @@ export function useProductCart() {
 
         if (ids.variantId || ids.productOnly) {
           addToCart(product.id, quantity, ids.variantId ?? undefined, { linePay });
+          if (!options?.silent) {
+            toast.success("Ürün sepete eklendi", { id: "cart-add" });
+          }
           return true;
         }
 
@@ -61,12 +70,21 @@ export function useProductCart() {
             type: quantity > 1 ? "set" : "increment",
             deposit: "disable",
           });
+          if (!options?.silent) {
+            toast.success("Ürün sepete eklendi", { id: "cart-add" });
+          }
           return true;
         }
 
         addToCart(product.id, quantity, undefined, { linePay });
+        if (!options?.silent) {
+          toast.success("Ürün sepete eklendi", { id: "cart-add" });
+        }
         return true;
       } catch {
+        if (!options?.silent) {
+          toast.error("Ürün sepete eklenemedi", { id: "cart-add" });
+        }
         return false;
       }
     },

@@ -9,6 +9,8 @@ export type BlogPost = {
   metaKeywords: string[];
   coverUrl: string;
   publishedAt: string;
+  authorName?: string;
+  productIds?: string[];
 };
 
 export const BLOG_POSTS: BlogPost[] = [
@@ -32,6 +34,7 @@ export const BLOG_POSTS: BlogPost[] = [
     coverUrl:
       "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&h=800&fit=crop&q=80",
     publishedAt: "2026-03-15T10:00:00.000Z",
+    authorName: "Code Blonde",
     content: `
 <p>Doğru nude ruj, yüzünüzü soluklaştırmak yerine doğal bir ışıltı verir. Ancak her nude ton herkese uymaz — seçiminizi cilt alt tonunuza göre yapmak fark yaratır.</p>
 
@@ -71,6 +74,7 @@ export const BLOG_POSTS: BlogPost[] = [
     coverUrl:
       "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1200&h=800&fit=crop&q=80",
     publishedAt: "2026-03-10T10:00:00.000Z",
+    authorName: "Code Blonde",
     content: `
 <p>Kalıcı ve doğal görünen makyajın sırrı, iyi hazırlanmış bir cilt yüzeyindedir. Aşağıdaki 5 adım, fondötenin eşit dağılmasını ve gün boyu taze kalmasını sağlar.</p>
 
@@ -112,6 +116,7 @@ export const BLOG_POSTS: BlogPost[] = [
     coverUrl:
       "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&h=800&fit=crop&q=80",
     publishedAt: "2026-03-05T10:00:00.000Z",
+    authorName: "Code Blonde",
     content: `
 <p>Mat rujlar şık ve modern bir görünüm sunar; ancak kuru dudaklarda çatlayabilir veya gün ortasında solabilir. Doğru teknikle 8–12 saat kalıcı sonuç almak mümkündür.</p>
 
@@ -151,6 +156,7 @@ export const BLOG_POSTS: BlogPost[] = [
     coverUrl:
       "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1200&h=800&fit=crop&q=80",
     publishedAt: "2026-02-28T10:00:00.000Z",
+    authorName: "Code Blonde",
     content: `
 <p>Nude makyaj yıl boyu şıktır; ancak mevsim değişiminde cilt tonunuz ve ışık koşulları farklılaşır. İlkbahar ve yaz aylarında daha aydınlık, taze bir palet tercih etmek doğal görünümü güçlendirir.</p>
 

@@ -1,12 +1,24 @@
 import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 
+type ProductWithUnits = Product & {
+  productUnits?: Product["productUnit"];
+};
+
+/** Liste/detay API'si `productUnit` veya `productUnits` dönebilir. */
+export function getProductUnits(product: Product): NonNullable<Product["productUnit"]> {
+  const p = product as ProductWithUnits;
+  if (p.productUnit?.length) return p.productUnit;
+  if (p.productUnits?.length) return p.productUnits;
+  return [];
+}
+
 function unitHasPrice(price?: Product["price"]) {
   if (!price) return false;
   return (price.mainPrice ?? 0) > 0 || (price.payPrice ?? 0) > 0 || (price.basketPrice ?? 0) > 0;
 }
 
 export function getDefaultProductUnitId(product: Product): string | null {
-  const units = product.productUnit ?? [];
+  const units = getProductUnits(product);
   const withPrice = units.find((unit) => unitHasPrice(unit.price));
   if (withPrice) return withPrice.id;
   return units[0]?.id ?? null;

@@ -7,7 +7,7 @@ import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import type { BasketSummaryInterface } from "@raxonltd/raxon-core/interface/basket.interface";
 import { cartNeedsPriceEnrichment, enrichCartPricing } from "@/core/util/cart.pricing";
-import { isLocalPromoId } from "@/core/util/cart.promo.local";
+import { getLocalPromoDiscount, isLocalPromoId } from "@/core/util/cart.promo.local";
 
 const CART_QUERY_KEY = ["organization", "cart"] as const;
 
@@ -26,7 +26,11 @@ export function useCartPriceEnrichment() {
 
   const products = productList?.data;
   const needsEnrichment = useMemo(() => cartNeedsPriceEnrichment(cart), [cart]);
-  const needsLocalPromo = Boolean(promoCode && isLocalPromoId(promoCode.id));
+  const activeCode = cart?.promoCode?.code ?? promoCode?.code;
+  const needsLocalPromo = Boolean(
+    (promoCode && isLocalPromoId(promoCode.id)) ||
+      (activeCode && getLocalPromoDiscount(activeCode) != null),
+  );
 
   useEffect(() => {
     if (!cart?.items?.length || !products?.length) return;

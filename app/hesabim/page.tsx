@@ -68,11 +68,7 @@ export default function ProfilPage() {
   const handleSubmit = (data: { firstName: string; lastName: string; phoneNumber: string }) => {
     updateMutation.mutate(data, {
       onSuccess: () => {
-        toast.success("Profil bilgileriniz güncellendi");
         setIsEditing(false);
-      },
-      onError: () => {
-        toast.error("Güncelleme başarısız");
       },
     });
   };
@@ -86,7 +82,7 @@ export default function ProfilPage() {
       { phoneNumber: profile.phoneNumber },
       {
         onSuccess: () => {
-          toast.success("Doğrulama kodu gönderildi");
+          toast.success("Doğrulama kodu gönderildi", { id: "verify-send" });
           setPhoneVerification((prev) => ({ ...prev, step: "verify" }));
         },
         onError: () => toast.error("Kod gönderilemedi"),
@@ -117,7 +113,7 @@ export default function ProfilPage() {
       { email: profile.email },
       {
         onSuccess: () => {
-          toast.success("Doğrulama kodu gönderildi");
+          toast.success("Doğrulama kodu gönderildi", { id: "verify-send" });
           setEmailVerification((prev) => ({ ...prev, step: "verify" }));
         },
         onError: () => toast.error("Kod gönderilemedi"),

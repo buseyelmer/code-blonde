@@ -1,19 +1,32 @@
 "use client";
 
-import { useRaxon } from "@raxonltd/raxon-core";
-import { useFavorite } from "@raxonltd/raxon-core/hook";
-import { useQueryClient } from "@tanstack/react-query";
+import { nexineAxios, useRaxon } from "@raxonltd/raxon-core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
+import toast from "react-hot-toast";
 
 export function useProductFavorite(productId: string, initialFavorite = false) {
   const { modalAuthRef, isAuthenticated } = useRaxon();
-  const { mutate: toggleFavorite, isPending } = useFavorite().toggle();
   const queryClient = useQueryClient();
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
 
   useEffect(() => {
     setIsFavorite(initialFavorite);
   }, [initialFavorite, productId]);
+
+  const { mutate: toggleFavorite, isPending } = useMutation({
+    mutationFn: async (data: { productId: string }) => {
+      const response = await nexineAxios.post("/customer/favorite", data, {
+        headers: { "x-raxon-silent": "1" },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["product"] });
+      void queryClient.invalidateQueries({ queryKey: ["campaign"] });
+      void queryClient.invalidateQueries({ queryKey: ["favorite"] });
+    },
+  });
 
   const toggle = useCallback(
     (event?: MouseEvent) => {
@@ -33,9 +46,12 @@ export function useProductFavorite(productId: string, initialFavorite = false) {
       toggleFavorite(
         { productId },
         {
-          onError: () => setIsFavorite(!next),
+          onError: () => {
+            setIsFavorite(!next);
+            toast.error("Favori işlemi başarısız oldu");
+          },
           onSuccess: () => {
-            void queryClient.invalidateQueries();
+            toast.success(next ? "Favorilere eklendi" : "Favorilerden çıkarıldı");
           },
         },
       );
@@ -46,7 +62,6 @@ export function useProductFavorite(productId: string, initialFavorite = false) {
       isPending,
       modalAuthRef,
       productId,
-      queryClient,
       toggleFavorite,
     ],
   );

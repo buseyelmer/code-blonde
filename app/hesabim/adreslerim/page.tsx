@@ -67,7 +67,6 @@ export default function AdreslerimPage() {
 
     removeMutation.mutate(id, {
       onSuccess: () => {
-        toast.success('Adres silindi');
         refetch();
       },
       onError: () => {
@@ -114,7 +113,6 @@ export default function AdreslerimPage() {
         { ...payload, id: editingData.id },
         {
           onSuccess: () => {
-            toast.success('Adres güncellendi');
             setIsFormOpen(false);
             setEditingData(null);
             refetch();
@@ -127,7 +125,6 @@ export default function AdreslerimPage() {
     } else {
       createMutation.mutate(payload, {
         onSuccess: () => {
-          toast.success('Adres eklendi');
           setIsFormOpen(false);
           refetch();
         },

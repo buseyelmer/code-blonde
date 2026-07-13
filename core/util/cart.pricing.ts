@@ -18,11 +18,19 @@ export function resolvePromoDiscountPay(
   cart: BasketSummaryInterface,
   promoCode?: PromoCode | null,
 ): number {
-  const apiDiscount = cart.info?.discount?.pay ?? 0;
-  if (apiDiscount > 0) return apiDiscount;
-
   const code = cart.promoCode?.code ?? promoCode?.code;
   const promoId = cart.promoCode?.id ?? promoCode?.id;
+  const localDiscount = code ? getLocalPromoDiscount(code) : null;
+  const apiDiscount = cart.info?.discount?.pay ?? 0;
+
+  // Known local codes (e.g. CODE) must always reduce the total, even if the
+  // API attached a promo record without a discount amount.
+  if (localDiscount != null && localDiscount > 0) {
+    return Math.max(apiDiscount, localDiscount);
+  }
+
+  if (apiDiscount > 0) return apiDiscount;
+
   if (code && isLocalPromoId(promoId)) {
     return getLocalPromoDiscount(code) ?? 0;
   }
@@ -50,20 +58,28 @@ export function enrichCartPricing(
   const deliveryPay = cart.info?.delivery?.pay ?? 0;
   const apiTotal = cart.info?.payPrice?.pay ?? 0;
   const computedTotal = Math.max(0, subtotal - discountPay + deliveryPay);
+  const promoId = cart.promoCode?.id ?? promoCode?.id;
+  const code = cart.promoCode?.code ?? promoCode?.code;
+  const forceLocalTotal =
+    isLocalPromoId(promoId) || (code != null && getLocalPromoDiscount(code) != null);
   const total =
-    discountPay > 0 && (apiTotal <= 0 || apiTotal >= subtotal - 0.01)
+    forceLocalTotal || (discountPay > 0 && (apiTotal <= 0 || apiTotal >= subtotal - 0.01))
       ? computedTotal
       : apiTotal > 0
         ? apiTotal
         : computedTotal;
 
-  const activePromo = cart.promoCode ?? (promoCode && isLocalPromoId(promoCode.id) ? {
-    id: promoCode.id,
-    code: promoCode.code,
-    discount: discountPay,
-    type: promoCode.type,
-    status: promoCode.status,
-  } : undefined);
+  const activePromo =
+    cart.promoCode ??
+    (promoCode && (isLocalPromoId(promoCode.id) || getLocalPromoDiscount(promoCode.code) != null)
+      ? {
+          id: isLocalPromoId(promoCode.id) ? promoCode.id : `local-${promoCode.code.trim().toUpperCase()}`,
+          code: promoCode.code,
+          discount: discountPay,
+          type: promoCode.type,
+          status: promoCode.status,
+        }
+      : undefined);
 
   return {
     ...cart,

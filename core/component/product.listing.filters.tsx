@@ -4,7 +4,13 @@ import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import type { Category } from "@raxonltd/raxon-core/interface/prisma.interface";
 
 export type PriceRange = "all" | "0-500" | "500-1000" | "1000-2000" | "2000+";
-export type SortOption = "newest" | "price-asc" | "price-desc" | "rating";
+export type SortOption =
+  | "newest"
+  | "popular"
+  | "bestsellers"
+  | "price-asc"
+  | "price-desc"
+  | "rating";
 
 export const PRICE_RANGES: { value: PriceRange; label: string; min?: number; max?: number }[] = [
   { value: "all", label: "Tümü" },
@@ -16,6 +22,8 @@ export const PRICE_RANGES: { value: PriceRange; label: string; min?: number; max
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "En Yeniler" },
+  { value: "popular", label: "En Popüler" },
+  { value: "bestsellers", label: "En Çok Satan" },
   { value: "price-asc", label: "Fiyat · Artan" },
   { value: "price-desc", label: "Fiyat · Azalan" },
   { value: "rating", label: "En Beğenilen" },

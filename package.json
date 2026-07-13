@@ -10,7 +10,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/patch-raxon-auth.mjs && node scripts/patch-raxon-toast.mjs"
   },
   "dependencies": {
     "@raxonltd/raxon-core": "^1.1.16",

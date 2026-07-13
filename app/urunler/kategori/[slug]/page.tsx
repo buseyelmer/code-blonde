@@ -1,9 +1,15 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, use } from "react";
 import { UrunlerPageContent } from "@/core/component/urunler.listing";
 
-export default function UrunlerPage() {
+export default function KategoriUrunlerPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
+
   return (
     <Suspense
       fallback={
@@ -12,7 +18,7 @@ export default function UrunlerPage() {
         </div>
       }
     >
-      <UrunlerPageContent />
+      <UrunlerPageContent categorySlug={slug} />
     </Suspense>
   );
 }

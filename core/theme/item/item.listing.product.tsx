@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Heart } from "lucide-react";
+import { useRaxon } from "@raxonltd/raxon-core";
 import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import { useInView } from "@/core/hook/use.in-view";
 import { useProductCart } from "@/core/hook/use.product.cart";
 import { useProductFavorite } from "@/core/hook/use.product.favorite";
 import { getDefaultProductUnitId, getDefaultVariantId } from "@/core/util/cart.insert";
+import { getProductCategoryName } from "@/core/util/product.category";
 import { getProductPriceInfo } from "@/core/util/product.price";
 import { getProductListingImageUrl } from "@/core/util/product.image";
 import "@/core/util/util";
@@ -24,25 +26,34 @@ export default function ItemListingProduct({ product, index = 0 }: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedProductUnitId, setSelectedProductUnitId] = useState<string | null>(null);
   const [isResolvingCart, setIsResolvingCart] = useState(false);
+  const { flatCategory = [], category = [] } = useRaxon();
   const { cart, addProduct, setProductQuantity, removeItem, isCartBusy } = useProductCart();
   const { isFavorite, toggle: toggleFavorite, isPending: isTogglingFavorite } = useProductFavorite(
     product.id,
     product.isFavorite ?? false,
   );
 
+  const siteCategories = useMemo(
+    () => (flatCategory.length > 0 ? flatCategory : category),
+    [flatCategory, category],
+  );
+
   useEffect(() => {
     const variantId = getDefaultVariantId(product);
     setSelectedVariantId(variantId);
     setSelectedProductUnitId(variantId ? null : getDefaultProductUnitId(product));
-  }, [product.id, product.variant, product.productUnit]);
+  }, [product]);
 
   const { price, bestPrice, hasDiscount, stock } = useMemo(
     () => getProductPriceInfo(product, selectedVariantId),
     [product, selectedVariantId],
   );
 
-
-  const canAddToCart = bestPrice > 0;
+  const canResolveCartLine = Boolean(
+    selectedVariantId || selectedProductUnitId || getDefaultVariantId(product) || getDefaultProductUnitId(product),
+  );
+  // Fiyat 0 olsa bile birim/varyant çözülebiliyorsa sepete eklenebilir (favoriler dahil).
+  const canAddToCart = canResolveCartLine || bestPrice > 0;
 
   const cartItem = useMemo(
     () =>
@@ -68,7 +79,10 @@ export default function ItemListingProduct({ product, index = 0 }: Props) {
     return url !== primaryUrl ? url : null;
   }, [product, primaryUrl, selectedVariantId]);
 
-  const categoryName = product.categories?.[0]?.name ?? "";
+  const categoryName = useMemo(
+    () => getProductCategoryName(product, siteCategories),
+    [product, siteCategories],
+  );
   const productUrl = `/urunler/${product.id}`;
   const visible = instantReveal || inView;
   const maxQuantity = stock > 0 ? stock : 10;
@@ -78,18 +92,18 @@ export default function ItemListingProduct({ product, index = 0 }: Props) {
 
     setIsResolvingCart(true);
     try {
-      const ok = await addProduct(product, 1, {
-        variantId: selectedVariantId,
-        productUnitId: selectedProductUnitId,
-        linePay: bestPrice,
+      const variantId = selectedVariantId ?? getDefaultVariantId(product);
+      const productUnitId =
+        variantId ? null : selectedProductUnitId ?? getDefaultProductUnitId(product);
+
+      const ok = addProduct(product, 1, {
+        variantId,
+        productUnitId,
+        linePay: bestPrice > 0 ? bestPrice : undefined,
       });
       if (!ok) return;
-      if (!selectedVariantId && !selectedProductUnitId) {
-        const variantId = getDefaultVariantId(product);
-        const productUnitId = variantId ? null : getDefaultProductUnitId(product);
-        if (variantId) setSelectedVariantId(variantId);
-        if (productUnitId) setSelectedProductUnitId(productUnitId);
-      }
+      if (variantId) setSelectedVariantId(variantId);
+      if (productUnitId) setSelectedProductUnitId(productUnitId);
     } finally {
       setIsResolvingCart(false);
     }

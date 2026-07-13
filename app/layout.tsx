@@ -4,7 +4,16 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GeneralLayout from "@/core/layout/general.layout";
 import SiteChrome from "@/core/layout/site.chrome";
-import { SITE_SLOGAN } from "@/core/constant/site.constant";
+import MetaPixel from "@/core/component/meta.pixel";
+import {
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_OG_IMAGE,
+  SITE_SLOGAN,
+  getSiteUrl,
+} from "@/core/constant/site.constant";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -15,15 +24,46 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Code Blonde",
-    template: "%s | Code Blonde",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: SITE_SLOGAN,
+  description: SITE_DESCRIPTION,
+  keywords: [...SITE_KEYWORDS],
+  applicationName: SITE_NAME,
   icons: {
     icon: [{ url: "/code-blonde-icon.svg", type: "image/svg+xml" }],
     apple: "/code-blonde-icon.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: siteUrl,
+    images: [
+      {
+        url: SITE_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — ${SITE_SLOGAN}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [SITE_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 export default function RootLayout({
@@ -34,6 +74,7 @@ export default function RootLayout({
   return (
     <html lang='tr' className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className='min-h-full flex flex-col'>
+        <MetaPixel />
         <Suspense
           fallback={
             <div className="flex min-h-screen flex-col bg-[#F8F1E9]">

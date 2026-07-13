@@ -3,61 +3,24 @@
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Clock, Loader2, ArrowRight, ChevronRight } from "lucide-react";
+import { Calendar, Clock, Loader2, ArrowRight, ChevronRight, User } from "lucide-react";
 import { useArticle, useProduct } from "@raxonltd/raxon-core/hook";
 import type { Product as CustomProduct } from "@raxonltd/raxon-core/interface/product.interface";
 import { Article, Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import ItemListingProduct from "@/core/theme/item/item.listing.product";
-import BlogCover, { resolveArticleCoverUrl } from "@/core/component/blog.cover";
-import { BLOG_POSTS, getBlogPostBySlug, type BlogPost } from "@/core/constant/blog.constant";
-
-type DisplayPost = {
-  id: string;
-  slug: string;
-  title: string;
-  shortDescription: string | null;
-  content: string | null;
-  createdAt: string;
-  coverUrl: string | null;
-};
-
-function formatPublishedAt(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
-}
-
-function estimateReadMinutes(content: string | null | undefined): number {
-  if (!content) return 1;
-  const text = content.replace(/<[^>]+>/g, " ");
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 200));
-}
-
-function blogPostToDisplay(post: BlogPost): DisplayPost {
-  return {
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    shortDescription: post.shortDescription,
-    content: post.content,
-    createdAt: post.publishedAt,
-    coverUrl: post.coverUrl,
-  };
-}
-
-function articleToDisplay(post: Article): DisplayPost {
-  return {
-    id: post.id,
-    slug: post.slug ?? post.id,
-    title: post.title ?? "Başlıksız",
-    shortDescription: post.shortDescription,
-    content: post.content,
-    createdAt: post.createdAt,
-    coverUrl: resolveArticleCoverUrl(post),
-  };
-}
+import BlogCover from "@/core/component/blog.cover";
+import BlogShareButtons from "@/core/component/blog.share.buttons";
+import BlogRelatedOfRelated from "@/core/component/blog.related.of.related";
+import { getBlogPostBySlug } from "@/core/constant/blog.constant";
+import {
+  articleToDisplay,
+  blogPostToDisplay,
+  estimateReadMinutes,
+  formatBlogDate,
+  getSiteUrl,
+  isArticleCurrentlyVisible,
+  mergeVisibleBlogPosts,
+} from "@/core/util/blog";
 
 export default function BlogDetailPage() {
   const params = useParams();
@@ -67,69 +30,101 @@ export default function BlogDetailPage() {
   const isLocal = Boolean(localPost);
 
   const { data: article, isLoading, isError, error } = useArticle().detail(id);
-  const { data: articlesData, isLoading: articlesLoading } = useArticle().fetch({ amount: 12 });
+  const { data: articlesData, isLoading: articlesLoading } = useArticle().fetch({ amount: 100 });
 
-  const displayPost = useMemo<DisplayPost | null>(() => {
+  const apiArticle = article && typeof article === "object" && "id" in article ? (article as Article) : null;
+
+  const displayPost = useMemo(() => {
     if (localPost) return blogPostToDisplay(localPost);
-    if (article && "id" in article) return articleToDisplay(article as Article);
+    if (apiArticle) return articleToDisplay(apiArticle);
     return null;
-  }, [localPost, article]);
+  }, [localPost, apiArticle]);
+
+  const isInactive =
+    !isLocal &&
+    !!apiArticle &&
+    !isArticleCurrentlyVisible(apiArticle.status, apiArticle.startDate, apiArticle.endDate);
 
   const relatedPosts = useMemo(() => {
-    const local = BLOG_POSTS.map(blogPostToDisplay);
-    const api = (articlesData?.data as Article[] | undefined)?.map(articleToDisplay) ?? [];
-    const localSlugs = new Set(local.map((p) => p.slug));
-    const merged = [...local, ...api.filter((p) => !localSlugs.has(p.slug))];
-    return merged.filter((p) => p.slug !== id).slice(0, 3);
+    return mergeVisibleBlogPosts(articlesData?.data as Article[] | undefined)
+      .filter((p) => p.slug !== id)
+      .slice(0, 3);
   }, [articlesData, id]);
 
-  const { data: featuredProductsData, isLoading: featuredProductsLoading } = useProduct().fetch({
-    amount: 4,
+  const linkedIds = displayPost?.productIds ?? [];
+
+  const { data: catalogData, isLoading: catalogLoading } = useProduct().fetch({
+    amount: 48,
     page: 1,
     status: Status.PUBLISHED,
+    enabled: true,
   });
 
-  const { data: otherProductsData, isLoading: otherProductsLoading } = useProduct().fetch({
-    amount: 4,
-    page: 2,
-    status: Status.PUBLISHED,
-  });
+  const catalogProducts: CustomProduct[] = catalogData?.data ?? [];
 
-  const featuredProducts: CustomProduct[] = featuredProductsData?.data?.slice(0, 4) ?? [];
-  const otherProducts: CustomProduct[] = otherProductsData?.data?.slice(0, 4) ?? [];
+  const linkedProducts = useMemo(() => {
+    if (linkedIds.length === 0) return [];
+    const idSet = new Set(linkedIds);
+    return catalogProducts.filter((p) => idSet.has(p.id)).slice(0, 8);
+  }, [catalogProducts, linkedIds]);
+
+  const fallbackProducts = catalogProducts.slice(0, 4);
+  const seedRelatedId = linkedProducts[0]?.id ?? fallbackProducts[0]?.id ?? null;
+
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/blog/${displayPost?.slug ?? id}`
+      : `${getSiteUrl()}/blog/${displayPost?.slug ?? id}`;
 
   const readMins = displayPost
     ? estimateReadMinutes(displayPost.content ?? displayPost.shortDescription ?? "")
     : 0;
 
   const showLoading = !isLocal && !!id && isLoading;
-  const showError = !isLocal && !!id && isError && !displayPost;
+  const notFound = !isLocal && !!id && !isLoading && (isError || !displayPost);
+  const showInactive = !!id && !!displayPost && isInactive;
 
   return (
-    <div className="min-h-screen bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9] pb-20">
+    <div className="min-h-screen bg-[#F8F1E9] pb-20 text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
       {!id && (
-        <div className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-[#8B6B57]">Geçersiz adres.</div>
+        <div className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-[#8B6B57]">
+          Geçersiz adres.
+        </div>
       )}
 
       {showLoading && (
         <div className="flex flex-col items-center justify-center gap-3 py-24 text-[#8B6B57]">
           <Loader2 className="animate-spin text-[#A17E65]" size={32} />
-          <span className="text-xs tracking-[0.15em] uppercase">Yazı yükleniyor…</span>
+          <span className="text-xs uppercase tracking-[0.15em]">Yazı yükleniyor…</span>
         </div>
       )}
 
-      {showError && (
+      {notFound && (
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="rounded-2xl border border-[#C9A99A]/40 bg-[#F5EDE4]/50 px-6 py-8 text-center text-sm text-[#5C4638]">
             Bu yazı yüklenemedi veya bulunamadı.
             {(error as Error)?.message && (
               <span className="mt-2 block text-xs opacity-80">{(error as Error).message}</span>
             )}
+            <Link href="/blog" className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]">
+              Bloga dön
+            </Link>
           </div>
         </div>
       )}
 
-      {!!id && displayPost && (
+      {showInactive && (
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="rounded-2xl border border-[#C9A99A]/40 bg-[#F5EDE4]/50 px-6 py-8 text-center text-sm text-[#5C4638]">
+            Bu yazı şu an yayında değil veya yayın süresi dolmuş.
+            <Link href="/blog" className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]">
+              Bloga dön
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {!!id && displayPost && !showInactive && (
         <div className="mx-auto max-w-7xl px-6 py-10 sm:px-8 lg:py-14">
           <nav className="mb-8 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57]">
             <Link href="/" className="transition-colors hover:text-[#5C4638]">
@@ -148,8 +143,13 @@ export default function BlogDetailPage() {
               <header className="mb-8">
                 <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.12em] text-[#A17E65]">
                   <span className="inline-flex items-center gap-1.5">
+                    <User size={14} className="shrink-0" />
+                    {displayPost.authorName}
+                  </span>
+                  <span className="text-[#D9C5B0]">•</span>
+                  <span className="inline-flex items-center gap-1.5">
                     <Calendar size={14} className="shrink-0" />
-                    {formatPublishedAt(displayPost.createdAt)}
+                    {formatBlogDate(displayPost.createdAt)}
                   </span>
                   <span className="text-[#D9C5B0]">•</span>
                   <span className="inline-flex items-center gap-1.5">
@@ -188,6 +188,10 @@ export default function BlogDetailPage() {
                   {displayPost.shortDescription}
                 </p>
               )}
+
+              <div className="mt-10 border-t border-[#D9C5B0]/40 pt-6">
+                <BlogShareButtons url={shareUrl} title={displayPost.title} />
+              </div>
             </article>
 
             <aside className="lg:col-span-4">
@@ -220,9 +224,7 @@ export default function BlogDetailPage() {
                           <h4 className="line-clamp-2 text-sm font-medium leading-snug text-[#5C4638] transition-colors group-hover:text-[#A17E65]">
                             {post.title}
                           </h4>
-                          <p className="mt-1 text-[11px] text-[#A17E65]">
-                            {formatPublishedAt(post.createdAt)}
-                          </p>
+                          <p className="mt-1 text-[11px] text-[#A17E65]">{formatBlogDate(post.createdAt)}</p>
                         </div>
                       </Link>
                     ))}
@@ -234,7 +236,9 @@ export default function BlogDetailPage() {
 
           <div className="mt-16 border-t border-[#D9C5B0]/50 pt-12">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-serif text-2xl text-[#5C4638]">İlginizi Çekebilir</h2>
+              <h2 className="font-serif text-2xl text-[#5C4638]">
+                {linkedProducts.length > 0 ? "Bu Yazıdaki Ürünler" : "İlginizi Çekebilir"}
+              </h2>
               <Link
                 href="/urunler"
                 className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57] transition hover:text-[#5C4638]"
@@ -243,42 +247,34 @@ export default function BlogDetailPage() {
                 <ArrowRight size={14} />
               </Link>
             </div>
-            {featuredProductsLoading && <p className="text-xs text-[#8B6B57]">Ürünler yükleniyor…</p>}
-            {!featuredProductsLoading && featuredProducts.length === 0 && (
+            {catalogLoading && <p className="text-xs text-[#8B6B57]">Ürünler yükleniyor…</p>}
+            {!catalogLoading && (linkedProducts.length > 0 ? linkedProducts : fallbackProducts).length === 0 && (
               <p className="text-xs text-[#8B6B57]">Şu an önerilecek ürün bulunmuyor.</p>
             )}
-            {!featuredProductsLoading && featuredProducts.length > 0 && (
+            {!catalogLoading && (linkedProducts.length > 0 ? linkedProducts : fallbackProducts).length > 0 && (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-                {featuredProducts.map((product, index) => (
+                {(linkedProducts.length > 0 ? linkedProducts : fallbackProducts).map((product, index) => (
                   <ItemListingProduct key={product.id} product={product} index={index} />
                 ))}
               </div>
             )}
           </div>
 
-          <div className="mt-16 border-t border-[#D9C5B0]/50 pt-12">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-serif text-2xl text-[#5C4638]">Bunlar da İlginizi Çekebilir</h2>
-              <Link
-                href="/urunler"
-                className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57] transition hover:text-[#5C4638]"
-              >
-                Tümünü Gör
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-            {otherProductsLoading && <p className="text-xs text-[#8B6B57]">Ürünler yükleniyor…</p>}
-            {!otherProductsLoading && otherProducts.length === 0 && (
-              <p className="text-xs text-[#8B6B57]">Şu an önerilecek ürün bulunmuyor.</p>
-            )}
-            {!otherProductsLoading && otherProducts.length > 0 && (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-                {otherProducts.map((product, index) => (
-                  <ItemListingProduct key={product.id} product={product} index={index} />
-                ))}
+          {seedRelatedId && (
+            <div className="mt-16 border-t border-[#D9C5B0]/50 pt-12">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="font-serif text-2xl text-[#5C4638]">Bunlar da İlginizi Çekebilir</h2>
+                <Link
+                  href="/urunler"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57] transition hover:text-[#5C4638]"
+                >
+                  Tümünü Gör
+                  <ArrowRight size={14} />
+                </Link>
               </div>
-            )}
-          </div>
+              <BlogRelatedOfRelated productId={seedRelatedId} />
+            </div>
+          )}
         </div>
       )}
     </div>

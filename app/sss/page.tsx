@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { HelpCircle, ChevronDown, Search, MessageSquare, Mail, ArrowUpRight, ChevronRight } from 'lucide-react';
 import { useFaq } from '@raxonltd/raxon-core/hook';
 import { useRaxon } from '@raxonltd/raxon-core';
-import { Faq } from '@raxonltd/raxon-core/interface/prisma.interface';
+import { DEFAULT_FAQS } from '@/core/constant/faq.constant';
 
 const nudePalette = {
   cream: '#F8F1E9',
@@ -18,10 +18,31 @@ const nudePalette = {
   espresso: '#5C4638',
 };
 
+type FaqDisplay = {
+  id: string;
+  question: string;
+  answer: string;
+  tags?: string[] | null;
+};
+
 interface FaqItemProps {
-  faq: Faq;
+  faq: FaqDisplay;
   isOpen: boolean;
   onToggle: () => void;
+}
+
+function mergeFaqs(panelFaqs: FaqDisplay[]): FaqDisplay[] {
+  if (!panelFaqs.length) return DEFAULT_FAQS;
+
+  const existingQuestions = new Set(
+    panelFaqs.map((faq) => faq.question.trim().toLowerCase()),
+  );
+
+  const extras = DEFAULT_FAQS.filter(
+    (faq) => !existingQuestions.has(faq.question.trim().toLowerCase()),
+  );
+
+  return [...panelFaqs, ...extras];
 }
 
 function FaqItem({ faq, isOpen, onToggle }: FaqItemProps) {
@@ -93,7 +114,10 @@ export default function SssPage() {
   const { fetch } = useFaq();
   const { data, isLoading } = fetch({ page: 1, amount: 100 });
 
-  const faqs = data?.data || [];
+  const faqs = useMemo(
+    () => mergeFaqs((data?.data as FaqDisplay[] | undefined) || []),
+    [data?.data],
+  );
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -102,6 +126,11 @@ export default function SssPage() {
     });
     return Array.from(tags).sort();
   }, [faqs]);
+
+  const quickHelpTags = useMemo(() => {
+    const preferred = ['Kargo & Teslimat', 'İade & Değişim', 'Ödeme'];
+    return preferred.filter((tag) => allTags.includes(tag));
+  }, [allTags]);
 
   const filteredFaqs = useMemo(() => {
     return faqs.filter(faq => {
@@ -516,22 +545,31 @@ export default function SssPage() {
                   En çok sorulan sorulara göz atın ve hızlıca yanıt bulun.
                 </p>
                 <div className="mt-5 space-y-2">
-                  {['Kargo & Teslimat', 'İade & Değişim', 'Ödeme Seçenekleri'].map((item, idx) => (
+                  {(quickHelpTags.length > 0
+                    ? quickHelpTags
+                    : ['Kargo & Teslimat', 'İade & Değişim', 'Ödeme']
+                  ).map((tag) => (
                     <button
-                      key={idx}
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setSearchQuery('');
+                      }}
                       className="w-full rounded-xl px-4 py-3 text-left text-sm font-light transition-all duration-200"
                       style={{ 
-                        backgroundColor: `${nudePalette.warmBeige}15`,
+                        backgroundColor: selectedTag === tag ? `${nudePalette.warmBeige}35` : `${nudePalette.warmBeige}15`,
                         color: nudePalette.cream
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = `${nudePalette.warmBeige}30`;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = `${nudePalette.warmBeige}15`;
+                        e.currentTarget.style.backgroundColor =
+                          selectedTag === tag ? `${nudePalette.warmBeige}35` : `${nudePalette.warmBeige}15`;
                       }}
                     >
-                      {item}
+                      {tag}
                     </button>
                   ))}
                 </div>

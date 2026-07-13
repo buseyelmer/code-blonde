@@ -1,8 +1,14 @@
 import type { Category } from "@raxonltd/raxon-core/interface/prisma.interface";
+import { getCategoryHref } from "@/core/util/category";
 
 export type FooterCategoryMatch = {
   label: string;
   keywords: string[];
+};
+
+export type FooterNavLink = {
+  label: string;
+  href: string;
 };
 
 export const FOOTER_FEATURED_CATEGORIES: FooterCategoryMatch[] = [
@@ -10,6 +16,20 @@ export const FOOTER_FEATURED_CATEGORIES: FooterCategoryMatch[] = [
   { label: "Saç Şekillendirme", keywords: ["saç şekillendirme", "sac sekillendirme", "şekillendirme", "sekillendirme"] },
   { label: "Cilt Bakım", keywords: ["cilt bakım", "cilt bakim", "cilt"] },
   { label: "Vücut Bakım", keywords: ["vücut bakım", "vucut bakim", "vücut", "vucut"] },
+];
+
+export const FOOTER_HELP_LINKS: FooterNavLink[] = [
+  { label: "Sıkça Sorulan Sorular", href: "/sss" },
+  { label: "İletişim", href: "/iletisim" },
+  { label: "Kargo & Teslimat", href: "/sozlesmeler/kargo-teslimat" },
+  { label: "İade & Değişim", href: "/sozlesmeler/iade-degisim" },
+];
+
+export const FOOTER_LEGAL_LINKS: FooterNavLink[] = [
+  { label: "Mesafeli Satış Sözleşmesi", href: "/sozlesmeler/mesafeli-satis" },
+  { label: "Gizlilik Politikası", href: "/sozlesmeler/gizlilik-sozlesmesi" },
+  { label: "Kullanım Şartları", href: "/sozlesmeler/kullanim-sartlari" },
+  { label: "Çerez Politikası", href: "/sozlesmeler/cerez-politikasi" },
 ];
 
 function normalizeTitle(value: string): string {
@@ -51,7 +71,7 @@ export function resolveFooterCategoryLinks(categories: Category[]) {
 
     return {
       label,
-      href: match?.id ? `/urunler?categoryId=${match.id}` : "/urunler",
+      href: match ? getCategoryHref(match, topLevel) : "/urunler",
     };
   });
 }

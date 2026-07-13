@@ -14,37 +14,49 @@ const inputNormal = `${inputBase} border-[#D9C5B0] focus:border-[#5C4638] focus:
 
 export default function GirisYapPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { mutate: login } = useAuth().loginEmail();
-  const { mutate: loginGuest } = useAuth().loginGuest();
+  const [formError, setFormError] = useState('');
+  const loginMutation = useAuth().loginEmail();
   const { mutate: loginSocial } = useAuth().loginSocial();
-  const form = useForm();
+  const form = useForm<{ email: string; password: string; rememberMe?: boolean }>();
   const router = useRouter();
 
- 
-  const handleLoginSocial = (provider: string) => {
-    loginSocial({ platform: provider, returnUrl: '/hesabim' }, {
-      onSuccess: (url) => {
-        if (typeof window !== 'undefined') {
-          window.location.href = url;
-        }
-      },
-    });
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    const err = error as { response?: { data?: { info?: { title?: string; message?: string } } } };
+    return err?.response?.data?.info?.title || err?.response?.data?.info?.message || fallback;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    form.handleSubmit(data => {
-      login(data, {
-        onSuccess: () => {
-          
-          router.push('/hesabim');
+  const handleLoginSocial = (provider: string) => {
+    setFormError('');
+    loginSocial(
+      { platform: provider, returnUrl: '/hesabim' },
+      {
+        onSuccess: (url) => {
+          if (typeof url === 'string' && url.length > 0) {
+            window.location.href = url;
+            return;
+          }
+          const message = 'Sosyal giriş bağlantısı alınamadı';
+          setFormError(message);
+          toast.error(message);
         },
-        onError: (error: any) => {
-          toast.error(error?.response?.data?.info?.title || 'Giriş başarısız');
-        }
-      });
-    })();
+        onError: (error: unknown) => {
+          const message = getErrorMessage(error, 'Sosyal giriş başarısız');
+          setFormError(message);
+        },
+      },
+    );
   };
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    setFormError('');
+    try {
+      await loginMutation.mutateAsync(data);
+      router.push('/hesabim');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'E-posta veya şifre hatalı.');
+      setFormError(message);
+    }
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
@@ -65,7 +77,16 @@ export default function GirisYapPage() {
         </div>
 
         <div className="rounded-3xl border border-[#D9C5B0]/50 bg-white/40 backdrop-blur-sm p-8 sm:p-10 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-7">
+          <form onSubmit={onSubmit} className="space-y-7">
+            {formError ? (
+              <div
+                role="alert"
+                className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-500"
+              >
+                {formError}
+              </div>
+            ) : null}
+
             <div>
               <label htmlFor="email" className="mb-2.5 block text-[10px] font-light uppercase tracking-[3px] text-[#A17E65]">
                 E-posta adresi
@@ -75,7 +96,11 @@ export default function GirisYapPage() {
                 <input
                   id="email"
                   type="email"
-                  {...form.register('email')}
+                  {...form.register('email', {
+                    onChange: () => {
+                      if (formError) setFormError('');
+                    },
+                  })}
                   placeholder="ornek@email.com"
                   className={`${inputNormal} pl-11 pr-4 text-sm`}
                   required
@@ -92,7 +117,11 @@ export default function GirisYapPage() {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  {...form.register('password')}
+                  {...form.register('password', {
+                    onChange: () => {
+                      if (formError) setFormError('');
+                    },
+                  })}
                   placeholder="••••••••"
                   className={`${inputNormal} pl-11 pr-11 text-sm`}
                   required
@@ -129,9 +158,10 @@ export default function GirisYapPage() {
 
             <button
               type="submit"
-              className="group flex w-full items-center justify-center gap-3 rounded-full bg-[#5C4638] px-4 py-4 text-xs font-light uppercase tracking-[2.5px] text-[#F8F1E9] shadow-sm transition-all hover:bg-[#3F2F25] active:scale-[0.985]"
+              disabled={loginMutation.isPending}
+              className="group flex w-full items-center justify-center gap-3 rounded-full bg-[#5C4638] px-4 py-4 text-xs font-light uppercase tracking-[2.5px] text-[#F8F1E9] shadow-sm transition-all hover:bg-[#3F2F25] active:scale-[0.985] disabled:opacity-60"
             >
-              <span>Giriş yap</span>
+              <span>{loginMutation.isPending ? 'Giriş yapılıyor...' : 'Giriş yap'}</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
 
@@ -146,7 +176,7 @@ export default function GirisYapPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={() => handleLoginSocial('google')}
@@ -170,6 +200,17 @@ export default function GirisYapPage() {
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
                 <span className="text-xs font-light tracking-[1px] text-[#5C4638]">Facebook</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleLoginSocial('apple')}
+                className="flex items-center justify-center gap-2.5 rounded-2xl border border-[#D9C5B0] bg-white/50 py-3 px-4 transition-all hover:border-[#A17E65] hover:bg-white"
+              >
+                <svg className="h-4 w-4 text-[#5C4638]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M16.365 1.43c0 1.14-.42 2.2-1.18 3.02-.8.88-2.12 1.56-3.22 1.47-.14-1.1.4-2.26 1.16-3.04.8-.84 2.2-1.46 3.24-1.45zM20.9 17.34c-.56 1.3-.83 1.88-1.56 3.03-1.02 1.56-2.46 3.5-4.24 3.52-1.58.02-1.99-.95-4.14-.94-2.15.01-2.6.96-4.18.94-1.78-.02-3.14-1.77-4.16-3.33-2.86-4.4-3.16-9.56-1.4-12.28 1.24-1.92 3.2-3.04 5.04-3.04 1.88 0 3.06 1.02 4.62 1.02 1.5 0 2.42-1.02 4.58-1.02 1.64 0 3.38.9 4.62 2.44-4.06 2.22-3.4 8.02.82 9.66z" />
+                </svg>
+                <span className="text-xs font-light tracking-[1px] text-[#5C4638]">Apple</span>
               </button>
             </div>
 

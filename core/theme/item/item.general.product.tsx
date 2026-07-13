@@ -1,10 +1,11 @@
 import { useRaxon } from "@raxonltd/raxon-core";
-import { useCart, useFavorite, useNewsletter } from "@raxonltd/raxon-core/hook";
+import { useCart, useNewsletter } from "@raxonltd/raxon-core/hook";
 import { useEffect, useMemo, useState } from "react";
 import { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star, ShoppingBag, Check } from "lucide-react";
+import { useProductFavorite } from "@/core/hook/use.product.favorite";
 function getUniqueOptions(product: Product, optionKey: 'attributeOption1' | 'attributeOption2') {
     const seen = new Set<string>();
     return (
@@ -31,9 +32,12 @@ export default function ItemProduct({ product }: { product: Product }) {
     const [showEmailInput, setShowEmailInput] = useState(false);
     const [email, setEmail] = useState('');
     const { mutate: insertCart, isPending: isAddingToCart } = useCart().insert();
-    const { mutate: toggleFavorite, isPending: isTogglingFavorite } = useFavorite().toggle();
+    const { isFavorite, toggle: toggleFavorite, isPending: isTogglingFavorite } = useProductFavorite(
+      product.id,
+      product.isFavorite ?? false,
+    );
     const { subscribeByVariant: subscribeByVariantMutation } = useNewsletter();
-    const { cart, modalAuthRef, isAuthenticated } = useRaxon();
+    const { cart } = useRaxon();
   
     useEffect(() => {
       if (product.variant && product.variant.length > 0 && !selectedVariantId) {
@@ -53,7 +57,6 @@ export default function ItemProduct({ product }: { product: Product }) {
       return cart?.items?.some(item => item.productId === product.id && item.variant?.id === selectedVariantId);
     }, [cart, product.id, selectedVariantId]);
   
-    const isFavorite = product.isFavorite ?? false;
     const productTitle = product.name;
     const price = selectedVariant?.price?.mainPrice || product.price?.mainPrice || 0;
     const discountPrice = selectedVariant?.price?.discountPrice || product.price?.discountPrice;
@@ -73,14 +76,7 @@ export default function ItemProduct({ product }: { product: Product }) {
     else if (product.tags?.includes('PREMIUM')) badge = { text: 'Premium', color: 'bg-purple-700' };
   
     const toggleLike = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!isAuthenticated) {
-        modalAuthRef.current?.open();
-        return;
-      }
-      if (!product.id || isTogglingFavorite) return;
-      toggleFavorite({ productId: product.id });
+      toggleFavorite(e);
     };
   
     const handleAddToCart = (e: React.MouseEvent) => {

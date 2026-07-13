@@ -1,71 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { ArrowRight, Calendar, Clock, Loader2, ChevronRight } from "lucide-react";
+import { Suspense, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Calendar, Clock, Loader2, ChevronRight, User } from "lucide-react";
 import { useArticle } from "@raxonltd/raxon-core/hook";
-import { Article } from "@raxonltd/raxon-core/interface/prisma.interface";
-import BlogCover, { resolveArticleCoverUrl } from "@/core/component/blog.cover";
-import { BLOG_POSTS, type BlogPost } from "@/core/constant/blog.constant";
+import type { Article } from "@raxonltd/raxon-core/interface/prisma.interface";
+import BlogCover from "@/core/component/blog.cover";
+import {
+  BLOG_PAGE_SIZE,
+  estimateReadMinutes,
+  formatBlogDate,
+  mergeVisibleBlogPosts,
+  paginatePosts,
+} from "@/core/util/blog";
 
-type DisplayPost = {
-  id: string;
-  slug: string;
-  title: string;
-  shortDescription: string | null;
-  content: string | null;
-  createdAt: string;
-  coverUrl: string | null;
-};
+function BlogListContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageParam = Number(searchParams.get("page") || "1");
+  const requestedPage = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
 
-function formatPublishedAt(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
-}
+  const { data, isLoading, isError } = useArticle().fetch({ amount: 100 });
 
-function estimateReadMinutes(content: string | null | undefined): number {
-  if (!content) return 1;
-  const text = content.replace(/<[^>]+>/g, " ");
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 200));
-}
+  const posts = useMemo(
+    () => mergeVisibleBlogPosts(data?.data as Article[] | undefined),
+    [data],
+  );
 
-function blogPostToDisplay(post: BlogPost): DisplayPost {
-  return {
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    shortDescription: post.shortDescription,
-    content: post.content,
-    createdAt: post.publishedAt,
-    coverUrl: post.coverUrl,
+  const { page, totalPages, total, items } = useMemo(
+    () => paginatePosts(posts, requestedPage, BLOG_PAGE_SIZE),
+    [posts, requestedPage],
+  );
+
+  useEffect(() => {
+    if (requestedPage !== page) {
+      const params = new URLSearchParams(searchParams.toString());
+      if (page <= 1) params.delete("page");
+      else params.set("page", String(page));
+      const qs = params.toString();
+      router.replace(qs ? `/blog?${qs}` : "/blog");
+    }
+  }, [page, requestedPage, router, searchParams]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
+  const goToPage = (nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPage <= 1) params.delete("page");
+    else params.set("page", String(nextPage));
+    const qs = params.toString();
+    router.push(qs ? `/blog?${qs}` : "/blog");
   };
-}
-
-function articleToDisplay(post: Article): DisplayPost {
-  return {
-    id: post.id,
-    slug: post.slug ?? post.id,
-    title: post.title ?? "Başlıksız",
-    shortDescription: post.shortDescription,
-    content: post.content,
-    createdAt: post.createdAt,
-    coverUrl: resolveArticleCoverUrl(post),
-  };
-}
-
-export default function BlogListPage() {
-  const { data, isLoading, isError } = useArticle().fetch();
-
-  const posts = useMemo(() => {
-    const localPosts = BLOG_POSTS.map(blogPostToDisplay);
-    const apiPosts = (data?.data as Article[] | undefined)?.map(articleToDisplay) ?? [];
-    const localSlugs = new Set(localPosts.map((p) => p.slug));
-    const merged = [...localPosts, ...apiPosts.filter((p) => !localSlugs.has(p.slug))];
-    return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [data]);
 
   return (
     <div className="min-h-screen bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
@@ -79,6 +67,11 @@ export default function BlogListPage() {
             <span className="text-[#5C4638]">Blog</span>
           </nav>
           <h1 className="font-serif text-4xl text-[#5C4638] sm:text-5xl">Blog & Rehber</h1>
+          {total > 0 && (
+            <p className="mt-3 text-sm text-[#8B6B57]">
+              {total.toLocaleString("tr-TR")} yazı · Sayfa {page} / {totalPages}
+            </p>
+          )}
         </div>
       </div>
 
@@ -86,7 +79,7 @@ export default function BlogListPage() {
         {isLoading && posts.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-24 text-[#8B6B57]">
             <Loader2 className="animate-spin text-[#A17E65]" size={32} />
-            <span className="text-xs tracking-[0.15em] uppercase">Yazılar yükleniyor…</span>
+            <span className="text-xs uppercase tracking-[0.15em]">Yazılar yükleniyor…</span>
           </div>
         )}
 
@@ -96,9 +89,15 @@ export default function BlogListPage() {
           </div>
         )}
 
-        {posts.length > 0 && (
+        {!isLoading && posts.length === 0 && !isError && (
+          <div className="rounded-2xl border border-[#C9A99A]/40 bg-[#F5EDE4]/50 px-6 py-8 text-center text-sm text-[#5C4638]">
+            Şu an yayınlanan blog yazısı bulunmuyor.
+          </div>
+        )}
+
+        {items.length > 0 && (
           <ul className="flex flex-col gap-10 lg:gap-14">
-            {posts.map((post) => {
+            {items.map((post) => {
               const href = `/blog/${post.slug}`;
               const mins = estimateReadMinutes(post.content ?? post.shortDescription ?? "");
 
@@ -120,8 +119,13 @@ export default function BlogListPage() {
                     <div className="flex min-w-0 flex-col md:col-span-7">
                       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.12em] text-[#A17E65]">
                         <span className="inline-flex items-center gap-1.5">
+                          <User size={14} className="shrink-0" />
+                          {post.authorName}
+                        </span>
+                        <span className="text-[#D9C5B0]">•</span>
+                        <span className="inline-flex items-center gap-1.5">
                           <Calendar size={14} className="shrink-0" />
-                          {formatPublishedAt(post.createdAt)}
+                          {formatBlogDate(post.createdAt)}
                         </span>
                         <span className="text-[#D9C5B0]">•</span>
                         <span className="inline-flex items-center gap-1.5">
@@ -151,7 +155,60 @@ export default function BlogListPage() {
             })}
           </ul>
         )}
+
+        {totalPages > 1 && (
+          <nav
+            aria-label="Blog sayfalama"
+            className="mt-12 flex flex-wrap items-center justify-center gap-2 border-t border-[#D9C5B0]/40 pt-8"
+          >
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => goToPage(page - 1)}
+              className="rounded-full border border-[#D9C5B0] px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#5C4638] transition hover:border-[#5C4638] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Önceki
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => goToPage(n)}
+                aria-current={n === page ? "page" : undefined}
+                className={`min-w-10 rounded-full px-3 py-2 text-xs tabular-nums transition ${
+                  n === page
+                    ? "bg-[#5C4638] text-[#F8F1E9]"
+                    : "border border-[#D9C5B0] text-[#5C4638] hover:border-[#5C4638]"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => goToPage(page + 1)}
+              className="rounded-full border border-[#D9C5B0] px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#5C4638] transition hover:border-[#5C4638] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Sonraki
+            </button>
+          </nav>
+        )}
       </div>
     </div>
+  );
+}
+
+export default function BlogListPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center bg-[#F8F1E9] text-[#8B6B57]">
+          <Loader2 className="animate-spin text-[#A17E65]" size={32} />
+        </div>
+      }
+    >
+      <BlogListContent />
+    </Suspense>
   );
 }

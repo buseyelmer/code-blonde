@@ -55,8 +55,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function KayitOlPage() {
   const router = useRouter();
-  const { register: authRegister } = useAuth();
+  const { register: authRegister, loginEmail } = useAuth();
   const registerMutation = authRegister();
+  const loginMutation = loginEmail();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -87,8 +88,20 @@ export default function KayitOlPage() {
       acceptMarketing: data.acceptMarketing || false
     }, {
       onSuccess: () => {
-        toast.success('Kayıt başarılı! Giriş yapabilirsiniz.');
-        router.push('/guvenlik/giris-yap');
+        loginMutation.mutate(
+          { email: data.email, password: data.password },
+          {
+            onSuccess: () => {
+              toast.success('Kayıt tamamlandı');
+              const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+              router.push(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/hesabim');
+            },
+            onError: () => {
+              toast.success('Kayıt başarılı! Giriş yapabilirsiniz.');
+              router.push('/guvenlik/giris-yap');
+            },
+          },
+        );
       },
       onError: (e: any) => {
         toast.error(e.response?.data?.info?.title || 'Kayıt başarısız');

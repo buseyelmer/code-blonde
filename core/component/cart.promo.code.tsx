@@ -94,7 +94,7 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
       setPromoInput(localPromo.code);
       setError(null);
       setIsOpen(true);
-      toast.success("Promosyon kodu uygulandı");
+      toast.success("Promosyon kodu uygulandı", { id: "promo-code" });
       return true;
     },
     [productList?.data, queryClient, resolveCart, setPromoCode],
@@ -131,8 +131,16 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
           campaignId: targetCart.campaign?.id ?? undefined,
         },
         {
-          onSuccess: (response) => {
+          onSuccess: async (response) => {
             const updatedCart = unwrapBasketSummary(response);
+            const apiDiscount = updatedCart?.info?.discount?.pay ?? 0;
+
+            // API accepted the code but did not reduce the total — use local fallback.
+            if (apiDiscount <= 0 && getLocalPromoDiscount(foundPromoCode.code) != null) {
+              await applyLocalPromo(foundPromoCode.code);
+              return;
+            }
+
             if (updatedCart) {
               queryClient.setQueryData(CART_QUERY_KEY, updatedCart);
             } else {
@@ -143,7 +151,7 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
             setPromoInput(foundPromoCode.code);
             setError(null);
             setIsOpen(true);
-            toast.success("Promosyon kodu uygulandı");
+            toast.success("Promosyon kodu uygulandı", { id: "promo-code" });
           },
           onError: async (updateError) => {
             const appliedLocally = await applyLocalPromo(foundPromoCode.code);
@@ -165,6 +173,15 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
     }
 
     setError(null);
+
+    // Local codes (e.g. CODE) apply client-side — skip API to avoid false error toasts.
+    if (getLocalPromoDiscount(trimmed) != null) {
+      void applyLocalPromo(trimmed).then((applied) => {
+        if (!applied) setError("Promosyon kodu uygulanamadı.");
+      });
+      return;
+    }
+
     findPromoCode(trimmed, {
       onSuccess: (rawPromoCode) => {
         const foundPromoCode = unwrapApiEntity<PromoCode>(rawPromoCode);
@@ -194,7 +211,7 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
       setPromoCode(null);
       setPromoInput("");
       setError(null);
-      toast.success("Promosyon kodu kaldırıldı");
+      toast.success("Promosyon kodu kaldırıldı", { id: "promo-code" });
       return;
     }
 
@@ -218,7 +235,7 @@ export default function CartPromoCode({ compact = false }: CartPromoCodeProps) {
           setPromoCode(null);
           setPromoInput("");
           setError(null);
-          toast.success("Promosyon kodu kaldırıldı");
+          toast.success("Promosyon kodu kaldırıldı", { id: "promo-code" });
         },
         onError: (updateError) => {
           setError(getApiErrorMessage(updateError, "Promosyon kodu kaldırılamadı."));

@@ -8,6 +8,7 @@ import { Heart, LogIn, Search, ShoppingBag, User, UserPlus } from "lucide-react"
 import { Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import SiteLogo from "@/core/component/site.logo";
 import { findCategoryByKeywords } from "@/core/constant/footer.constant";
+import { getCategoryHref, getCategoryName, getCategorySlug } from "@/core/util/category";
 
 const STATIC_LINKS = [
   { label: "Koleksiyon", href: "/koleksiyon" },
@@ -19,15 +20,10 @@ const STATIC_LINKS = [
 
 const EXTRA_NAV_CATEGORY_KEYWORDS = ["makyaj", "makeup", "kozmetik", "güneş koruma", "gunes koruma"];
 
-function getCategoryName(category: Category) {
-  if (Array.isArray(category.name)) return category.name.getName();
-  if (typeof category.name === "string") return category.name;
-  return category.code ?? "Kategori";
-}
-
 function isLinkActive(pathname: string, href: string) {
   if (href.startsWith("/#")) return false;
   if (href === "/") return pathname === "/";
+  if (href === "/urunler") return pathname === "/urunler";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -143,13 +139,16 @@ function DesktopCategoryNav({
   pathname,
   mainNavCategories,
   extraNavCategory,
+  allTopCategories,
 }: {
   pathname: string;
   mainNavCategories: Category[];
   extraNavCategory: Category | null;
+  allTopCategories: Category[];
 }) {
-  const searchParams = useSearchParams();
-  const activeCategoryId = searchParams.get("categoryId");
+  const activeSlug = pathname.startsWith("/urunler/kategori/")
+    ? pathname.split("/").filter(Boolean).pop() ?? null
+    : null;
 
   return (
     <nav className="hidden border-t border-[#D9C5B0]/35 pb-3.5 pt-3 lg:block" aria-label="Kategoriler">
@@ -169,8 +168,8 @@ function DesktopCategoryNav({
         )}
 
         {mainNavCategories.map((cat) => {
-          const href = `/urunler?categoryId=${cat.id}`;
-          const active = pathname === "/urunler" && activeCategoryId === cat.id;
+          const href = getCategoryHref(cat, allTopCategories);
+          const active = activeSlug === getCategorySlug(cat, allTopCategories);
           return (
             <NavLink key={cat.id} href={href} label={getCategoryName(cat)} active={active} compact />
           );
@@ -178,9 +177,9 @@ function DesktopCategoryNav({
 
         {extraNavCategory && (
           <NavLink
-            href={`/urunler?categoryId=${extraNavCategory.id}`}
+            href={getCategoryHref(extraNavCategory, allTopCategories)}
             label={getCategoryName(extraNavCategory)}
-            active={pathname === "/urunler" && activeCategoryId === extraNavCategory.id}
+            active={activeSlug === getCategorySlug(extraNavCategory, allTopCategories)}
             compact
           />
         )}
@@ -362,6 +361,7 @@ export default function SectionGeneralHeader() {
             pathname={pathname}
             mainNavCategories={mainNavCategories}
             extraNavCategory={extraNavCategory}
+            allTopCategories={topCategories}
           />
         </Suspense>
       </div>
@@ -387,7 +387,7 @@ export default function SectionGeneralHeader() {
                 {mainNavCategories.map((cat) => (
                   <Link
                     key={cat.id}
-                    href={`/urunler?categoryId=${cat.id}`}
+                    href={getCategoryHref(cat, topCategories)}
                     className="rounded-full border border-[#D9C5B0]/70 px-3.5 py-2 font-serif text-xs text-[#5C4638] transition-colors hover:bg-[#EDE0D1]/60"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -396,7 +396,7 @@ export default function SectionGeneralHeader() {
                 ))}
                 {extraNavCategory && (
                   <Link
-                    href={`/urunler?categoryId=${extraNavCategory.id}`}
+                    href={getCategoryHref(extraNavCategory, topCategories)}
                     className="rounded-full border border-[#D9C5B0]/70 px-3.5 py-2 font-serif text-xs text-[#5C4638] transition-colors hover:bg-[#EDE0D1]/60"
                     onClick={() => setMenuOpen(false)}
                   >
