@@ -250,7 +250,7 @@ export default function SectionGeneralHeader() {
     setMenuOpen(false);
   }, [pathname]);
 
-  const openAuth = () => modalAuthRef.current?.open();
+  const openAuth = () => modalAuthRef?.current?.open();
 
   const handleFavorites = () => {
     if (isAuthenticated) {

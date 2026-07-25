@@ -4,9 +4,72 @@
 @source "../node_modules/@raxonltd/raxon-core/dist/**/*.{js,mjs}";
 @source "../node_modules/rizzui/dist/**/*.{js,mjs}";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* RizzUI — raxon-core checkout formları için gerekli */
+  --muted: oklch(91.58% 0 0);
+  --muted-foreground: oklch(66% 0 0);
+
+  --border-radius: 0.5rem;
+  --border-width: 0.0625rem;
+  --border-color: oklch(90.37% 0 0);
+
+  --text-primary: oklch(0% 0 0);
+  --text-secondary: oklch(40.17% 0 0);
+
+  --primary-lighter: oklch(91.58% 0 0);
+  --primary: oklch(17.76% 0 0);
+  --primary-dark: oklch(0% 0 0);
+  --primary-foreground: oklch(100% 0 0);
+
+  --secondary-lighter: oklch(91.99% 0.0386 276.02);
+  --secondary: oklch(50.51% 0.2633 276.95);
+  --secondary-dark: oklch(45.41% 0.2431 277.06);
+  --secondary-foreground: oklch(100% 0 0);
+
+  --red-lighter: oklch(89.99% 0.0393 14);
+  --red: oklch(59.6% 0.2445 29.23);
+  --red-dark: oklch(51.71% 0.2121 29.2338);
+
+  --orange-lighter: oklch(95.67% 0.0452 84.5695);
+  --orange: oklch(78.37% 0.1587 72.99);
+  --orange-dark: oklch(54.83% 0.1339 53.95);
+
+  --blue-lighter: oklch(91.66% 0.0404 257.5078);
+  --blue: oklch(57.31% 0.2144 258.25);
+  --blue-dark: oklch(51.58% 0.1888 258.27);
+
+  --green-lighter: oklch(92.79% 0.086 155.61);
+  --green: oklch(64.01% 0.1776 148.74);
+  --green-dark: oklch(53.79% 0.1441 149.52);
+}
+
+[data-theme="dark"] {
+  --background: oklch(14.11% 0.0112 275.23);
+  --foreground: oklch(90.37% 0 0);
+  --muted: oklch(32.11% 0 0);
+  --muted-foreground: oklch(51.03% 0 0);
+  --border-color: oklch(91.58% 0 0);
+  --text-primary: oklch(100% 0 0);
+  --text-secondary: oklch(51.03% 0 0);
+  --primary-lighter: oklch(25.2% 0 0);
+  --primary: oklch(95.81% 0 0);
+  --primary-dark: oklch(100% 0 0);
+  --primary-foreground: oklch(0% 0 0);
+  --secondary-lighter: oklch(26.35% 0.1154 280.96);
+  --secondary-dark: oklch(85.2% 0.0733 276.238);
+  --red-lighter: oklch(27.08% 0.1111 29.23);
+  --red-dark: oklch(86.69% 0.0714 18.6304);
+  --orange-lighter: oklch(28.29% 0.0698 49.34);
+  --orange-dark: oklch(93.15% 0.1175 98.83);
+  --blue-lighter: oklch(32.05% 0.0873 254.4);
+  --blue-dark: oklch(90.53% 0.0611 225.72);
+  --green-lighter: oklch(27.23% 0.0672 152.71);
+  --green-dark: oklch(92.79% 0.086 155.61);
 }
 
 @theme inline {
@@ -14,481 +77,59 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --border-radius: var(--border-radius);
+  --color-border: var(--border-color);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-primary-lighter: var(--primary-lighter);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary-lighter: var(--secondary-lighter);
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-red-lighter: var(--red-lighter);
+  --color-red: var(--red);
+  --color-red-dark: var(--red-dark);
+
+  --color-orange-lighter: var(--orange-lighter);
+  --color-orange: var(--orange);
+  --color-orange-dark: var(--orange-dark);
+
+  --color-blue-lighter: var(--blue-lighter);
+  --color-blue: var(--blue);
+  --color-blue-dark: var(--blue-dark);
+
+  --color-green-lighter: var(--green-lighter);
+  --color-green: var(--green);
+  --color-green-dark: var(--green-dark);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: inherit !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: inherit;
 }
 
 body {
   background: #F8F1E9;
   color: #5C4638;
   font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Raxon ödeme — site header kullanılır, paket header'ı gizlenir */
-.checkout-page header.border-b.border-gray-100 {
-  display: none !important;
-}
-
-.checkout-page .min-h-screen.overflow-x-hidden {
-  min-height: auto !important;
-  overflow-x: clip !important;
-  background-color: #f8f1e9 !important;
-}
-
-.checkout-page .mx-auto.max-w-7xl {
-  width: 100%;
-  max-width: 80rem;
-}
-
-.checkout-page .md\:flex-row {
-  align-items: flex-start;
-}
-
-@media (min-width: 768px) {
-  .checkout-page .flex.flex-col.gap-10 {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 2.5rem;
-  }
-
-  .checkout-page .min-w-0.flex-1.rounded-2xl {
-    flex: 1 1 0%;
-    min-width: 0;
-  }
-
-  .checkout-page aside.md\:w-96 {
-    width: 24rem;
-    flex-shrink: 0;
-  }
-}
-
-.checkout-page .min-h-screen.bg-gray-50,
-.checkout-page .min-h-screen.bg-neutral-50 {
-  background-color: #f8f1e9 !important;
-}
-
-.checkout-page .bg-\[\#CF0A2C\] {
-  background-color: #5c4638 !important;
-}
-
-.checkout-page .text-\[\#CF0A2C\] {
-  color: #5c4638 !important;
-}
-
-.checkout-page .hover\:bg-\[\#a80824\]:hover {
-  background-color: #3f2f25 !important;
-}
-
-.checkout-page .bg-\[\#CF0A2C\]\/10 {
-  background-color: rgb(92 70 56 / 0.1) !important;
-}
-
-.checkout-page .hover\:text-\[\#CF0A2C\]:hover {
-  color: #5c4638 !important;
-}
-
-.checkout-page .focus\:border-\[\#CF0A2C\]:focus {
-  border-color: #5c4638 !important;
-}
-
-.checkout-page--standalone .rizzui-input-field:focus {
-  border-color: transparent !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.checkout-page .focus\:ring-\[\#CF0A2C\]\/25:focus {
-  --tw-ring-color: rgb(92 70 56 / 0.25) !important;
-}
-
-/* Raxon özet paneli gizlenir; site özeti kullanılır */
-.checkout-page aside.md\:w-96 {
-  display: none !important;
-}
-
-.checkout-page__layout {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 0 1rem 2.5rem;
-}
-
-.checkout-page--standalone {
-  width: 100%;
-  max-width: 32rem;
-  margin: 0 auto;
-}
-
-.checkout-page__raxon {
-  width: 100%;
-}
-
-/* Raxon CheckoutView — üst logo gizle */
-.checkout-page--standalone main > .mb-3.flex.justify-center {
-  display: none !important;
-}
-
-/* Sipariş özeti üst çubuğu */
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child {
-  display: block !important;
-  border-bottom: 1px solid rgb(243 244 246);
-}
-
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child button {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 1rem !important;
-  background: transparent !important;
-}
-
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child button:hover {
-  background-color: rgb(249 250 251) !important;
-}
-
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child button p {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #111827 !important;
-}
-
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child button .text-gray-500 {
-  font-weight: 400;
-  color: #6b7280 !important;
-}
-
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm > div:first-child button .font-semibold {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #111827 !important;
-}
-
-/* Beyaz kart paneli */
-.checkout-page--standalone main .border-gray-200.bg-white.shadow-sm {
-  border-color: rgb(229 231 235) !important;
-  border-radius: 0.5rem !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05) !important;
-}
-
-.checkout-page--standalone main {
-  max-width: 32rem;
-  margin: 0 auto;
-  padding: 0 !important;
-}
-
-.checkout-page--standalone main.px-4 {
-  padding-inline: 0 !important;
-  padding-block: 0 !important;
-}
-
-.checkout-page--standalone .min-h-screen.overflow-x-hidden {
-  min-height: 0 !important;
-  background-color: transparent !important;
-}
-
-.checkout-page__top {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 1rem 1rem 0;
-}
-
-@media (min-width: 1024px) {
-  .checkout-page__top {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* Adım göstergesi — siyah aktif/tamamlanan daireler */
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] {
-  border-color: rgb(243 244 246) !important;
-  padding: 1rem 1.5rem !important;
-}
-
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] .bg-gray-900 {
-  background-color: #111827 !important;
-}
-
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] .bg-gray-200 {
-  background-color: #e5e7eb !important;
-}
-
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] .border-gray-300 {
-  border-color: #d1d5db !important;
-}
-
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] .text-gray-900 {
-  color: #111827 !important;
-}
-
-.checkout-page--standalone nav[aria-label="Ödeme adımları"] .text-gray-500 {
-  color: #6b7280 !important;
-}
-
-/* Form başlık ve metin */
-.checkout-page--standalone h2 {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #111827 !important;
-  letter-spacing: normal;
-}
-
-.checkout-page--standalone p.text-sm.text-gray-500,
-.checkout-page--standalone p.text-sm.text-gray-600 {
-  color: #6b7280 !important;
-  line-height: 1.5;
-}
-
-.checkout-page--standalone .font-medium.text-gray-600,
-.checkout-page--standalone .text-gray-600.underline-offset-2 {
-  color: #4b5563 !important;
-}
-
-.checkout-page--standalone .font-medium.text-gray-600:hover,
-.checkout-page--standalone .text-gray-600.underline-offset-2:hover {
-  color: #111827 !important;
-}
-
-/* Birincil buton — siyah, tam genişlik */
-.checkout-page--standalone .bg-gray-900 {
-  background-color: #111827 !important;
-}
-
-.checkout-page--standalone .hover\:bg-gray-800:hover {
-  background-color: #1f2937 !important;
-}
-
-.checkout-page--standalone button.rounded-lg.bg-gray-900,
-.checkout-page--standalone button.w-full.rounded-lg {
-  min-height: 2.75rem;
-  border-radius: 0.5rem !important;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-/* Sepete dön linki */
-.checkout-page--standalone a.text-sm {
-  color: #4b5563 !important;
-  font-weight: 500;
-}
-
-.checkout-page--standalone a.text-sm:hover {
-  color: #111827 !important;
-}
-
-/* Güvenli ödeme alt bölüm */
-.checkout-page--standalone .border-t.border-gray-100 {
-  border-color: rgb(243 244 246) !important;
-  padding: 1rem 1.5rem !important;
-}
-
-.checkout-page--standalone .text-xs.text-gray-500 {
-  color: #6b7280 !important;
-}
-
-.checkout-page--standalone .text-gray-700 {
-  color: #374151 !important;
-}
-
-/* ── Checkout form fields (rizzui + native) ── */
-.checkout-page--standalone .rizzui-input-root {
-  width: 100%;
-}
-
-/* Rizzui input — referans: label üstte, kutu tek çerçeve */
-.checkout-page--standalone .rizzui-input-root > label {
-  display: block;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-}
-
-.checkout-page--standalone .rizzui-input-label,
-.checkout-page--standalone label.rizzui-input-label,
-.checkout-page--standalone span.rizzui-input-label {
-  display: block;
-  margin-bottom: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: #111827 !important;
-  border: none !important;
-  background: transparent !important;
-  padding: 0 !important;
-  min-height: auto !important;
-  box-shadow: none !important;
-}
-
-.checkout-page--standalone .rizzui-input-root label > span:not(.rizzui-input-label) {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-height: 2.75rem !important;
-  box-sizing: border-box !important;
-  border: 1px solid #5c4638 !important;
-  border-radius: 0.375rem !important;
-  background-color: #ffffff !important;
-  box-shadow: none !important;
-  padding-inline: 0.875rem !important;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.checkout-page--standalone .rizzui-input-root label > span:not(.rizzui-input-label):focus-within {
-  border-color: #5c4638 !important;
-  box-shadow: 0 0 0 1px #5c4638 !important;
-}
-
-.checkout-page--standalone .grid > * {
-  min-width: 0;
-}
-
-.checkout-page--standalone .rizzui-input-field {
-  box-sizing: border-box !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
-  border: 0 !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0.5rem 0 !important;
-  margin: 0 !important;
-  font-size: 0.875rem !important;
-  line-height: 1.5 !important;
-  color: #111827 !important;
-  appearance: none;
-}
-
-.checkout-page--standalone .rizzui-input-field::placeholder {
-  color: rgb(139 107 87 / 0.55);
-}
-
-.checkout-page--standalone .rizzui-input-field:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border: 0 !important;
-}
-
-/* Phone row: extra left room for +90 prefix */
-.checkout-page--standalone .relative .rizzui-input-root.pl-20 label > span:not(.rizzui-input-label) {
-  padding-left: 4.5rem !important;
-}
-
-/* Native selects + address search (class on element itself) */
-.checkout-page--standalone select.rizzui-input-container,
-.checkout-page--standalone input.rizzui-input-container,
-.checkout-page--standalone .checkout-field {
-  box-sizing: border-box !important;
-  display: block;
-  width: 100% !important;
-  min-height: 2.75rem;
-  border: 1px solid #5c4638 !important;
-  border-radius: 0.375rem !important;
-  background-color: #ffffff !important;
-  padding: 0.625rem 0.875rem !important;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #111827 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.checkout-page--standalone select.rizzui-input-container:focus,
-.checkout-page--standalone input.rizzui-input-container:focus,
-.checkout-page--standalone .checkout-field:focus {
-  border-color: #5c4638 !important;
-  box-shadow: 0 0 0 1px #5c4638 !important;
-}
-
-.checkout-page--standalone input#address-search.rizzui-input-container {
-  padding-left: 2.75rem !important;
-}
-
-.checkout-page--standalone input.rizzui-input-container::placeholder,
-.checkout-page--standalone .checkout-field::placeholder {
-  color: rgb(139 107 87 / 0.55);
-}
-
-/* Legacy rizzui-input-container wrapper (if present) */
-.checkout-page--standalone span.rizzui-input-container {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-height: 2.75rem !important;
-  box-sizing: border-box !important;
-  border: 1px solid #5c4638 !important;
-  border-radius: 0.375rem !important;
-  background-color: #ffffff !important;
-  box-shadow: none !important;
-  padding-inline: 0.875rem !important;
-}
-
-.checkout-page--standalone span.rizzui-input-container > input {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  width: 100% !important;
-  padding: 0.625rem 0 !important;
-}
-
-.checkout-page--standalone .border-gray-200 {
-  border-color: rgb(229 231 235) !important;
-}
-
-.checkout-page--standalone .rounded-lg {
-  border-radius: 0.5rem !important;
-}
-
-.checkout-page--standalone #address-search:focus {
-  border-color: #5c4638 !important;
-  box-shadow: 0 0 0 2px rgb(92 70 56 / 0.12) !important;
-}
-
-.checkout-page--standalone .text-red-500,
-.checkout-page--standalone .text-red-600 {
-  margin-top: 0.375rem;
-  font-size: 0.8125rem;
-}
-
-.checkout-page__main .mx-auto.max-w-7xl {
-  max-width: none !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-@media (min-width: 1024px) {
-  .checkout-page__layout:not(.checkout-page__layout--single) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 400px;
-    align-items: start;
-    gap: 2.5rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-
-  .checkout-page__summary {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .checkout-page__main {
-    grid-column: 1;
-    grid-row: 1;
-  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,16 +8,14 @@ import { useParams } from "next/navigation";
 import {
   ArrowRight,
   Check,
-  ChevronDown,
   ChevronRight,
   Heart,
   ShoppingBag,
   Star,
 } from "lucide-react";
-import { useProduct } from "@raxonltd/raxon-core/hook";
+import { useProduct, useReview } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import type { Product, ProductDetail } from "@raxonltd/raxon-core/interface/product.interface";
-import ItemListingProduct from "@/core/theme/item/item.listing.product";
 import { getProductPriceInfo, mergeProductListPrice } from "@/core/util/product.price";
 import { useProductCart } from "@/core/hook/use.product.cart";
 import { containsHtmlMarkup, isSameProductText } from "@/core/util/product.html";
@@ -26,6 +24,17 @@ import { useProductFavorite } from "@/core/hook/use.product.favorite";
 import { buildStorageImageUrl } from "@/core/util/basket.enrichment";
 import { getProductListingImageUrl } from "@/core/util/product.image";
 import { InputQuantity } from "@/core/component/input.quantity";
+import { ProductDetailFeatures } from "@/core/component/product/product-detail.features";
+import { ProductDetailRelated } from "@/core/component/product/product-detail.related";
+import { ProductDetailReviews } from "@/core/component/product/product-detail.reviews";
+import {
+  PRODUCT_TRUST_LABELS,
+  ProductDetailTrustBadges,
+} from "@/core/component/product/product-detail.trust-badges";
+import { buildProductListHref } from "@/core/util/product-listing";
+import { resolveProductReviewSummary } from "@/core/util/product-detail-display";
+import { productListingQueryParsers } from "@/core/theme/section/product/product-listing.nuqs";
+import { useQueryStates } from "nuqs";
 import toast from "react-hot-toast";
 import "@/core/util/util";
 
@@ -37,7 +46,7 @@ function resolveImageUrl(relativePath?: string | null): string {
   return buildStorageImageUrl(relativePath) ?? "https://placehold.co/800x1000/F5EDE4/8B6B57?text=Code+Blonde";
 }
 
-const TRUST_BADGES = ["100% Vegan", "Cruelty Free", "Parabensiz"];
+const TRUST_BADGES = PRODUCT_TRUST_LABELS;
 
 const PRODUCT_HTML_CLASS =
   "prose prose-sm max-w-none text-[#8B6B57] prose-headings:font-serif prose-headings:text-[#5C4638] prose-p:my-2 prose-p:leading-relaxed prose-strong:text-[#5C4638] prose-ul:my-2 prose-li:my-0.5";
@@ -81,39 +90,24 @@ function isVariantAvailable(product: Product, option1Id?: string, option2Id?: st
   });
 }
 
-function AccordionItem({
-  title,
-  children,
-  defaultOpen = false,
-}: {
-  title: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <div className="border-t border-[#D9C5B0]/50">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-4 py-4 text-left transition hover:text-[#A17E65]"
-        aria-expanded={open}
-      >
-        <span className="text-[10px] tracking-[0.32em] uppercase text-[#A17E65]">{title}</span>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-[#8B6B57] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          strokeWidth={1.5}
-        />
-      </button>
-      {open && <div className="-mt-1 pb-4 text-sm leading-relaxed text-[#8B6B57]">{children}</div>}
-    </div>
-  );
-}
-
 export default function UrunlerDetayPage() {
   const params = useParams();
   const productId = typeof params.id === "string" ? params.id : "";
+  const [listParams] = useQueryStates(productListingQueryParsers);
+  const productListHref = buildProductListHref({
+    page: listParams.page,
+    amount: listParams.amount,
+    category: listParams.category,
+    tags: listParams.tags,
+    search: listParams.search,
+    sort: listParams.sort,
+    order: listParams.order,
+    orderDirection: listParams.orderDirection,
+    minPrice: listParams.minPrice,
+    maxPrice: listParams.maxPrice,
+    brandId: listParams.brandId,
+    attributeOptions: listParams.attributeOptions,
+  });
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedProductUnitId, setSelectedProductUnitId] = useState<string | null>(null);
@@ -122,7 +116,15 @@ export default function UrunlerDetayPage() {
   const [quantityUiActive, setQuantityUiActive] = useState(false);
 
   const { data: product, isLoading, isError } = useProduct().detail(productId);
-  const { data: relatedProducts } = useProduct().related(productId);
+  const { data: relatedProducts, isLoading: relatedProductsLoading } = useProduct().related(productId, {
+    enabled: Boolean(productId),
+    take: 8,
+  });
+  const { data: productReviewsData, isLoading: productReviewsLoading } = useReview().fetch({
+    productId: product?.id,
+    amount: 6,
+    enabled: Boolean(product?.id),
+  });
   const { cart, addProduct, setProductQuantity, removeItem, isCartBusy } = useProductCart();
 
   const needsListEnrichment = Boolean(
@@ -143,6 +145,17 @@ export default function UrunlerDetayPage() {
     const listMatch = listFallback?.data?.find((item) => item.id === product.id);
     return mergeProductListPrice(product, listMatch) as ProductDetail;
   }, [product, listFallback?.data]);
+
+  const productReviews = productReviewsData?.data ?? [];
+  const productReviewsTotal = productReviewsData?.count ?? productReviews.length;
+  const reviewSummary = useMemo(
+    () =>
+      resolveProductReviewSummary(enrichedProduct ?? undefined, {
+        fallbackReviews: productReviews,
+        fallbackCount: productReviewsTotal,
+      }),
+    [enrichedProduct, productReviews, productReviewsTotal],
+  );
 
   const { isFavorite, toggle, isPending: isTogglingFavorite } = useProductFavorite(
     productId,
@@ -353,17 +366,10 @@ export default function UrunlerDetayPage() {
   const productTitle = enrichedProduct.name;
   const shortDescription = enrichedProduct.shortDescription?.trim() ?? "";
   const fullDescription = enrichedProduct.description?.trim() ?? "";
-  const richContent = enrichedProduct.richContent?.trim() ?? "";
   const descriptionsDiffer = Boolean(
     shortDescription && fullDescription && !isSameProductText(fullDescription, shortDescription),
   );
   const heroDescription = shortDescription || (fullDescription && !descriptionsDiffer ? fullDescription : "");
-  const showDescriptionAccordion = descriptionsDiffer;
-  const showRichContentAccordion = Boolean(
-    richContent &&
-      !isSameProductText(richContent, fullDescription) &&
-      !isSameProductText(richContent, shortDescription),
-  );
   const categoryName = resolveCategoryName(enrichedProduct.categories?.[0]?.name);
 
   return (
@@ -375,7 +381,7 @@ export default function UrunlerDetayPage() {
               Ana Sayfa
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-[#D9C5B0]" strokeWidth={1.5} />
-            <Link href="/urunler" className="transition hover:text-[#5C4638]">
+            <Link href={productListHref} className="transition hover:text-[#5C4638]">
               Ürünler
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-[#D9C5B0]" strokeWidth={1.5} />
@@ -438,13 +444,13 @@ export default function UrunlerDetayPage() {
               {productTitle}
             </h1>
 
-            {enrichedProduct.review?.count > 0 && (
+            {reviewSummary && reviewSummary.count > 0 && (
               <div className="mt-4 flex items-center gap-1.5">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
                     className={`h-3.5 w-3.5 ${
-                      i < Math.floor(enrichedProduct.review?.rating || 0)
+                      i < Math.floor(reviewSummary.rating)
                         ? "fill-[#A17E65] text-[#A17E65]"
                         : "text-[#D9C5B0]"
                     }`}
@@ -452,7 +458,7 @@ export default function UrunlerDetayPage() {
                   />
                 ))}
                 <span className="ml-1 text-xs text-[#8B6B57]">
-                  {enrichedProduct.review.rating.toFixed(1)} · {enrichedProduct.review.count} değerlendirme
+                  {reviewSummary.rating.toFixed(1)} · {reviewSummary.count} değerlendirme
                 </span>
               </div>
             )}
@@ -633,66 +639,38 @@ export default function UrunlerDetayPage() {
               </div>
             </div>
 
-            <div className="mt-12">
-              {showDescriptionAccordion && (
-                <AccordionItem title="Ürün Açıklaması" defaultOpen>
-                  {containsHtmlMarkup(fullDescription) ? (
-                    <ProductHtmlContent html={fullDescription} />
-                  ) : (
-                    <p>{fullDescription}</p>
-                  )}
-                </AccordionItem>
-              )}
-              {showRichContentAccordion && (
-                <AccordionItem title="Detaylı Bilgi">
-                  <ProductHtmlContent html={richContent} />
-                </AccordionItem>
-              )}
-              {enrichedProduct.property?.length > 0 && (
-                <AccordionItem title="Özellikler">
-                  <ul className="space-y-2">
-                    {enrichedProduct.property.map((prop) => (
-                      <li key={prop.id}>
-                        <span className="text-[#5C4638]">{prop.name}</span>
-                        {prop.description && (
-                          <span className="text-[#8B6B57]"> — {prop.description}</span>
-                        )}
-                        {prop.richContent && containsHtmlMarkup(prop.richContent) && (
-                          <ProductHtmlContent html={prop.richContent} className="mt-1" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionItem>
-              )}
+            <div className="mt-10">
+              <ProductDetailTrustBadges />
             </div>
+
+            <ProductDetailFeatures product={enrichedProduct} />
           </div>
         </div>
 
-        {relatedProducts && relatedProducts.length > 0 && (
-          <section className="border-t border-[#D9C5B0]/50 pt-16 lg:pt-20">
-            <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[10px] tracking-[0.38em] uppercase text-[#A17E65]">Keşfetmeye Devam</p>
-                <h2 className="mt-2 font-serif text-2xl tracking-tight text-[#5C4638] sm:text-3xl">
-                  Benzer Ürünler
-                </h2>
-              </div>
-              <Link
-                href="/urunler"
-                className="inline-flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[#5C4638] transition hover:text-[#A17E65]"
-              >
-                Tümünü Gör
-                <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 sm:gap-y-14 lg:grid-cols-3 lg:gap-x-8">
-              {relatedProducts.slice(0, 6).map((item, index) => (
-                <ItemListingProduct key={item.id} product={item} index={index} />
-              ))}
-            </div>
-          </section>
-        )}
+        <ProductDetailReviews
+          reviews={productReviews}
+          isLoading={productReviewsLoading}
+          totalCount={productReviewsTotal}
+        />
+
+        <ProductDetailRelated
+          products={relatedProducts}
+          isLoading={relatedProductsLoading}
+          listState={{
+            page: listParams.page,
+            amount: listParams.amount,
+            category: listParams.category,
+            tags: listParams.tags,
+            search: listParams.search,
+            sort: listParams.sort,
+            order: listParams.order,
+            orderDirection: listParams.orderDirection,
+            minPrice: listParams.minPrice,
+            maxPrice: listParams.maxPrice,
+            brandId: listParams.brandId,
+            attributeOptions: listParams.attributeOptions,
+          }}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { UrunlerPageContent } from "@/core/component/urunler.listing";
+import UrunlerPageClient from "@/core/component/urunler.page.client";
 
 export default function UrunlerPage() {
   return (
@@ -12,7 +12,7 @@ export default function UrunlerPage() {
         </div>
       }
     >
-      <UrunlerPageContent />
+      <UrunlerPageClient />
     </Suspense>
   );
 }

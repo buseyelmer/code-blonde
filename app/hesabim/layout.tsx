@@ -10,15 +10,15 @@ import { useRaxon } from "@raxonltd/raxon-core";
 import { AccountSpinner } from "@/core/component/account/account.ui";
 
 const menuItems = [
-  { href: "/hesabim", label: "Hesabım", icon: User, exact: true },
-  { href: "/hesabim/siparislerim", label: "Siparişlerim", icon: ShoppingBag, exact: false },
-  { href: "/hesabim/favorilerim", label: "Favorilerim", icon: Heart, exact: false },
-  { href: "/hesabim/adreslerim", label: "Adreslerim", icon: MapPin, exact: false },
-  { href: "/hesabim/faturalarim", label: "Faturalarım", icon: FileText, exact: false },
+  { href: "/hesabim", label: "Hesabım", icon: User },
+  { href: "/hesabim/siparislerim", label: "Siparişlerim", icon: ShoppingBag },
+  { href: "/hesabim/favorilerim", label: "Favorilerim", icon: Heart },
+  { href: "/hesabim/adreslerim", label: "Adreslerim", icon: MapPin },
+  { href: "/hesabim/faturalarim", label: "Faturalarım", icon: FileText },
 ] as const;
 
-function isMenuActive(pathname: string, href: string, exact: boolean = false) {
-  if (exact) return pathname === href;
+function isMenuActive(pathname: string, href: string) {
+  if (href === "/hesabim") return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -36,7 +36,7 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] bg-[#F8F1E9]">
+      <div className="min-h-screen bg-[#F8F1E9]">
         <AccountSpinner />
       </div>
     );
@@ -49,21 +49,33 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
   const initials = `${profile?.firstName?.[0] ?? ""}${profile?.lastName?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div className="bg-[#F8F1E9] pb-16 pt-4 sm:pt-6 lg:pb-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="lg:flex lg:items-start lg:gap-10 xl:gap-14">
-          <aside className="mb-6 lg:mb-0 lg:w-72 lg:shrink-0 xl:w-80">
-            <div className="overflow-hidden rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] shadow-[0_1px_3px_rgba(92,70,56,0.04)] lg:sticky lg:top-28">
-              <div className="border-b border-[#D9C5B0]/40 px-4 py-4 sm:px-6 sm:py-5">
+    <div className="min-h-screen bg-[#F8F1E9]">
+      <div className="border-b border-[#D9C5B0]/40 bg-[#FDFAF6]">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-10 lg:px-8">
+          <span className="text-[10px] font-medium tracking-[0.24em] uppercase text-[#A17E65]">
+            Hesabım
+          </span>
+          <h1 className="mt-2 font-serif text-2xl tracking-tight text-[#5C4638] sm:text-3xl">
+            Kişisel Alan
+          </h1>
+          <div className="mt-3 h-1 w-20 rounded-full bg-[#5C4638]" />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
+          <aside className="w-full shrink-0 lg:w-72 xl:w-80">
+            <div className="sticky top-28 overflow-hidden rounded-sm border border-[#D9C5B0]/50 bg-[#FDFAF6] shadow-[0_1px_3px_rgba(92,70,56,0.04)]">
+              <div className="border-b border-[#D9C5B0]/40 px-4 py-5 sm:px-6">
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#5C4638] font-serif text-base text-[#F8F1E9] sm:h-14 sm:w-14 sm:text-lg">
                     {initials || "CB"}
                   </div>
                   <div className="min-w-0">
-                    <h2 className="truncate font-serif text-base text-[#5C4638] sm:text-lg">
+                    <h3 className="truncate font-serif text-base text-[#5C4638] sm:text-lg">
                       {profile?.firstName} {profile?.lastName}
-                    </h2>
-                    <p className="truncate text-sm text-[#8B6B57]">{profile?.email}</p>
+                    </h3>
+                    <p className="truncate text-xs text-[#8B6B57] sm:text-sm">{profile?.email}</p>
                   </div>
                 </div>
               </div>
@@ -71,7 +83,7 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
               <nav className="border-b border-[#D9C5B0]/30 p-2" aria-label="Hesap menüsü">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
-                  const active = isMenuActive(pathname, item.href, item.exact);
+                  const active = isMenuActive(pathname, item.href);
                   return (
                     <Link
                       key={item.href}
@@ -83,7 +95,9 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                      <span className="min-w-0 flex-1 tracking-wide">{item.label}</span>
+                      <span className="min-w-0 flex-1 text-[10px] tracking-[0.2em] uppercase">
+                        {item.label}
+                      </span>
                       <ChevronRight
                         className={`hidden h-4 w-4 shrink-0 sm:block ${active ? "text-[#F8F1E9]/70" : "text-[#D9C5B0]"}`}
                         strokeWidth={1.5}
@@ -97,7 +111,7 @@ export default function ProfilLayout({ children }: { children: React.ReactNode }
                 <button
                   type="button"
                   onClick={logout}
-                  className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-sm text-[#A17E65] transition hover:bg-[#F8F1E9] hover:text-[#5C4638]"
+                  className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-[10px] tracking-[0.2em] uppercase text-[#A17E65] transition hover:bg-[#F8F1E9] hover:text-[#5C4638]"
                 >
                   <LogOut className="h-4 w-4" strokeWidth={1.5} />
                   <span>Çıkış Yap</span>

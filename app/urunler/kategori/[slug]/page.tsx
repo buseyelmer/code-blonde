@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, use } from "react";
-import { UrunlerPageContent } from "@/core/component/urunler.listing";
+import UrunlerPageClient from "@/core/component/urunler.page.client";
 
 export default function KategoriUrunlerPage({
   params,
@@ -18,7 +18,7 @@ export default function KategoriUrunlerPage({
         </div>
       }
     >
-      <UrunlerPageContent categorySlug={slug} />
+      <UrunlerPageClient categorySlug={slug} />
     </Suspense>
   );
 }

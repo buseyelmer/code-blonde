@@ -34,7 +34,7 @@ export function useProductFavorite(productId: string, initialFavorite = false) {
       event?.stopPropagation();
 
       if (!isAuthenticated) {
-        modalAuthRef.current?.open();
+        modalAuthRef?.current?.open();
         return;
       }
 

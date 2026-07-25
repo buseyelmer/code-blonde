@@ -13,14 +13,18 @@ import { getDefaultProductUnitId, getDefaultVariantId } from "@/core/util/cart.i
 import { getProductCategoryName } from "@/core/util/product.category";
 import { getProductPriceInfo } from "@/core/util/product.price";
 import { getProductListingImageUrl } from "@/core/util/product.image";
+import { getProductPath } from "@/core/util/product-path";
+import { appendProductListStateToHref } from "@/core/util/product-listing";
+import type { ProductListingUrlState } from "@/core/util/product-listing";
 import "@/core/util/util";
 
 interface Props {
   product: Product;
   index?: number;
+  listState?: ProductListingUrlState;
 }
 
-export default function ItemListingProduct({ product, index = 0 }: Props) {
+export default function ItemListingProduct({ product, index = 0, listState }: Props) {
   const instantReveal = index < 12;
   const { ref, inView } = useInView({ disabled: instantReveal });
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
@@ -83,7 +87,9 @@ export default function ItemListingProduct({ product, index = 0 }: Props) {
     () => getProductCategoryName(product, siteCategories),
     [product, siteCategories],
   );
-  const productUrl = `/urunler/${product.id}`;
+  const productUrl = listState
+    ? appendProductListStateToHref(getProductPath(product), listState)
+    : getProductPath(product);
   const visible = instantReveal || inView;
   const maxQuantity = stock > 0 ? stock : 10;
 

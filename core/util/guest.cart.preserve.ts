@@ -15,22 +15,24 @@ export function toGuestCartSnapshot(
 ): GuestCartSnapshotItem[] {
   if (!items?.length) return [];
 
-  return items
-    .map((item) => {
-      const productId = item.productId || item.product?.id;
-      if (!productId || !item.quantity || item.quantity < 1) return null;
+  const snapshot: GuestCartSnapshotItem[] = [];
 
-      const variantId = item.variantId || item.variant?.id || undefined;
-      const productUnitId = !variantId ? item.productUnit?.id || undefined : undefined;
+  for (const item of items) {
+    const productId = item.productId || item.product?.id;
+    if (!productId || !item.quantity || item.quantity < 1) continue;
 
-      return {
-        productId,
-        variantId: variantId || undefined,
-        productUnitId,
-        quantity: item.quantity,
-      } satisfies GuestCartSnapshotItem;
-    })
-    .filter((item): item is GuestCartSnapshotItem => item != null);
+    const variantId = item.variantId || item.variant?.id || undefined;
+    const productUnitId = !variantId ? item.productUnit?.id || undefined : undefined;
+
+    snapshot.push({
+      productId,
+      variantId: variantId || undefined,
+      productUnitId,
+      quantity: item.quantity,
+    });
+  }
+
+  return snapshot;
 }
 
 export function saveGuestCartSnapshot(items: BasketItemSummaryInterface[] | undefined | null) {

@@ -7,10 +7,13 @@ import { Calendar, Clock, Loader2, ArrowRight, ChevronRight, User } from "lucide
 import { useArticle, useProduct } from "@raxonltd/raxon-core/hook";
 import type { Product as CustomProduct } from "@raxonltd/raxon-core/interface/product.interface";
 import { Article, Status } from "@raxonltd/raxon-core/interface/prisma.interface";
-import ItemListingProduct from "@/core/theme/item/item.listing.product";
 import BlogCover from "@/core/component/blog.cover";
 import BlogShareButtons from "@/core/component/blog.share.buttons";
-import BlogRelatedOfRelated from "@/core/component/blog.related.of.related";
+import { BlogSidebarArticles, BlogRecommendedArticles } from "@/core/component/blog/blog.related.articles";
+import {
+  BlogSidebarProducts,
+  BlogArticleRelatedProducts,
+} from "@/core/component/blog/blog.related.products";
 import { getBlogPostBySlug } from "@/core/constant/blog.constant";
 import {
   articleToDisplay,
@@ -30,7 +33,7 @@ export default function BlogDetailPage() {
   const isLocal = Boolean(localPost);
 
   const { data: article, isLoading, isError, error } = useArticle().detail(id);
-  const { data: articlesData, isLoading: articlesLoading } = useArticle().fetch({ amount: 100 });
+  const { data: articlesData, isLoading: articlesLoading } = useArticle().fetch({ amount: 100, published: true });
 
   const apiArticle = article && typeof article === "object" && "id" in article ? (article as Article) : null;
 
@@ -40,36 +43,51 @@ export default function BlogDetailPage() {
     return null;
   }, [localPost, apiArticle]);
 
-  const isInactive =
-    !isLocal &&
-    !!apiArticle &&
-    !isArticleCurrentlyVisible(apiArticle.status, apiArticle.startDate, apiArticle.endDate);
+  const linkedIds = displayPost?.productIds ?? [];
+
+  const { data: relatedByProductsData, isLoading: relatedByProductsLoading } = useArticle().fetch({
+    productIds: linkedIds,
+    published: true,
+    amount: 6,
+    enabled: linkedIds.length > 0 && !isLocal,
+  });
 
   const relatedPosts = useMemo(() => {
-    return mergeVisibleBlogPosts(articlesData?.data as Article[] | undefined)
-      .filter((p) => p.slug !== id)
-      .slice(0, 3);
-  }, [articlesData, id]);
+    const fromProducts = mergeVisibleBlogPosts(relatedByProductsData?.data as Article[] | undefined).filter(
+      (post) => post.slug !== id,
+    );
+    if (fromProducts.length > 0) return fromProducts.slice(0, 3);
 
-  const linkedIds = displayPost?.productIds ?? [];
+    return mergeVisibleBlogPosts(articlesData?.data as Article[] | undefined)
+      .filter((post) => post.slug !== id)
+      .slice(0, 3);
+  }, [relatedByProductsData?.data, articlesData, id]);
 
   const { data: catalogData, isLoading: catalogLoading } = useProduct().fetch({
     amount: 48,
     page: 1,
     status: Status.PUBLISHED,
-    enabled: true,
+    enabled: linkedIds.length > 0,
   });
 
-  const catalogProducts: CustomProduct[] = catalogData?.data ?? [];
-
-  const linkedProducts = useMemo(() => {
+  const linkedProducts = useMemo((): CustomProduct[] => {
+    if (apiArticle?.products?.length) {
+      return apiArticle.products as unknown as CustomProduct[];
+    }
     if (linkedIds.length === 0) return [];
     const idSet = new Set(linkedIds);
-    return catalogProducts.filter((p) => idSet.has(p.id)).slice(0, 8);
-  }, [catalogProducts, linkedIds]);
+    return (catalogData?.data ?? []).filter((product) => idSet.has(product.id));
+  }, [apiArticle, catalogData?.data, linkedIds]);
 
-  const fallbackProducts = catalogProducts.slice(0, 4);
-  const seedRelatedId = linkedProducts[0]?.id ?? fallbackProducts[0]?.id ?? null;
+  const articleProductIds = useMemo(
+    () => linkedProducts.map((product) => product.id),
+    [linkedProducts],
+  );
+
+  const isInactive =
+    !isLocal &&
+    !!apiArticle &&
+    !isArticleCurrentlyVisible(apiArticle.status, apiArticle.startDate, apiArticle.endDate);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -83,6 +101,8 @@ export default function BlogDetailPage() {
   const showLoading = !isLocal && !!id && isLoading;
   const notFound = !isLocal && !!id && !isLoading && (isError || !displayPost);
   const showInactive = !!id && !!displayPost && isInactive;
+  const relatedArticlesLoading = articlesLoading || relatedByProductsLoading;
+  const productsLoading = catalogLoading && linkedIds.length > 0 && !apiArticle?.products?.length;
 
   return (
     <div className="min-h-screen bg-[#F8F1E9] pb-20 text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
@@ -106,7 +126,10 @@ export default function BlogDetailPage() {
             {(error as Error)?.message && (
               <span className="mt-2 block text-xs opacity-80">{(error as Error).message}</span>
             )}
-            <Link href="/blog" className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]">
+            <Link
+              href="/blog"
+              className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]"
+            >
               Bloga dön
             </Link>
           </div>
@@ -117,7 +140,10 @@ export default function BlogDetailPage() {
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="rounded-2xl border border-[#C9A99A]/40 bg-[#F5EDE4]/50 px-6 py-8 text-center text-sm text-[#5C4638]">
             Bu yazı şu an yayında değil veya yayın süresi dolmuş.
-            <Link href="/blog" className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]">
+            <Link
+              href="/blog"
+              className="mt-6 inline-flex text-[11px] uppercase tracking-[0.2em] text-[#A17E65] hover:text-[#5C4638]"
+            >
               Bloga dön
             </Link>
           </div>
@@ -192,89 +218,39 @@ export default function BlogDetailPage() {
               <div className="mt-10 border-t border-[#D9C5B0]/40 pt-6">
                 <BlogShareButtons url={shareUrl} title={displayPost.title} />
               </div>
+
+              <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-[#D9C5B0]/40 pt-8">
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[#5C4638] transition hover:text-[#A17E65]"
+                >
+                  <ArrowRight className="h-4 w-4 rotate-180" strokeWidth={1.5} />
+                  Tüm yazılara dön
+                </Link>
+              </div>
             </article>
 
             <aside className="lg:col-span-4">
-              <div className="sticky top-24 rounded-2xl border border-[#D9C5B0]/40 bg-[#F5EDE4]/30 p-6">
-                <h3 className="font-serif text-xl text-[#5C4638]">İlişkili Yazılar</h3>
-                {articlesLoading && relatedPosts.length === 0 && (
-                  <p className="mt-4 text-xs text-[#8B6B57]">Yazılar yükleniyor…</p>
-                )}
-                {relatedPosts.length === 0 && !articlesLoading && (
-                  <p className="mt-4 text-xs text-[#8B6B57]">Başka yazı bulunmuyor.</p>
-                )}
-                {relatedPosts.length > 0 && (
-                  <div className="mt-5 flex flex-col gap-4">
-                    {relatedPosts.map((post) => (
-                      <Link
-                        key={post.id}
-                        href={`/blog/${post.slug}`}
-                        className="group flex gap-3 rounded-xl p-2 transition-colors hover:bg-[#EDE0D1]/50"
-                      >
-                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#EDE0D1]">
-                          <BlogCover
-                            src={post.coverUrl}
-                            alt={post.title}
-                            sizes="80px"
-                            imageClassName="object-cover transition-transform duration-300 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="line-clamp-2 text-sm font-medium leading-snug text-[#5C4638] transition-colors group-hover:text-[#A17E65]">
-                            {post.title}
-                          </h4>
-                          <p className="mt-1 text-[11px] text-[#A17E65]">{formatBlogDate(post.createdAt)}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+              <div className="sticky top-24 space-y-6">
+                <BlogSidebarProducts products={linkedProducts} isLoading={productsLoading} />
+                <BlogSidebarArticles posts={relatedPosts} isLoading={relatedArticlesLoading} />
               </div>
             </aside>
           </div>
 
-          <div className="mt-16 border-t border-[#D9C5B0]/50 pt-12">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-serif text-2xl text-[#5C4638]">
-                {linkedProducts.length > 0 ? "Bu Yazıdaki Ürünler" : "İlginizi Çekebilir"}
-              </h2>
-              <Link
-                href="/urunler"
-                className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57] transition hover:text-[#5C4638]"
-              >
-                Tümünü Gör
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-            {catalogLoading && <p className="text-xs text-[#8B6B57]">Ürünler yükleniyor…</p>}
-            {!catalogLoading && (linkedProducts.length > 0 ? linkedProducts : fallbackProducts).length === 0 && (
-              <p className="text-xs text-[#8B6B57]">Şu an önerilecek ürün bulunmuyor.</p>
-            )}
-            {!catalogLoading && (linkedProducts.length > 0 ? linkedProducts : fallbackProducts).length > 0 && (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-                {(linkedProducts.length > 0 ? linkedProducts : fallbackProducts).map((product, index) => (
-                  <ItemListingProduct key={product.id} product={product} index={index} />
-                ))}
-              </div>
-            )}
-          </div>
+          <BlogArticleRelatedProducts
+            sourceProductIds={articleProductIds.length > 0 ? articleProductIds : linkedIds}
+            excludeIds={articleProductIds.length > 0 ? articleProductIds : linkedIds}
+            linkedProducts={linkedProducts}
+            linkedLoading={productsLoading}
+          />
 
-          {seedRelatedId && (
-            <div className="mt-16 border-t border-[#D9C5B0]/50 pt-12">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="font-serif text-2xl text-[#5C4638]">Bunlar da İlginizi Çekebilir</h2>
-                <Link
-                  href="/urunler"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#8B6B57] transition hover:text-[#5C4638]"
-                >
-                  Tümünü Gör
-                  <ArrowRight size={14} />
-                </Link>
-              </div>
-              <BlogRelatedOfRelated productId={seedRelatedId} />
-            </div>
-          )}
+          <BlogRecommendedArticles
+            posts={mergeVisibleBlogPosts(articlesData?.data as Article[] | undefined)}
+            isLoading={articlesLoading}
+            excludeSlugs={[id]}
+            title="Diğer Önerilen Yazılar"
+          />
         </div>
       )}
     </div>

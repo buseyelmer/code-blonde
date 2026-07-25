@@ -14,6 +14,8 @@ import {
   mergeVisibleBlogPosts,
   paginatePosts,
 } from "@/core/util/blog";
+import { BlogRecommendedArticles } from "@/core/component/blog/blog.related.articles";
+import { BlogListRecommendedProducts } from "@/core/component/blog/blog.related.products";
 
 function BlogListContent() {
   const router = useRouter();
@@ -194,6 +196,15 @@ function BlogListContent() {
             </button>
           </nav>
         )}
+
+        <BlogRecommendedArticles
+          posts={posts}
+          isLoading={isLoading}
+          excludeSlugs={items.map((post) => post.slug)}
+          title="Önerilen Yazılar"
+        />
+
+        <BlogListRecommendedProducts />
       </div>
     </div>
   );
