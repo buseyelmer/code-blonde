@@ -317,11 +317,19 @@ export function resolveHomeCollection(
   };
 }
 
+/** Banner/hero koleksiyonları vitrin için; İmza Seriler grid'inde gösterilmez. */
+export function isBannerCollection(collection: Collection): boolean {
+  const tags = (collection.tags ?? []).map((tag) => tag.toLowerCase());
+  const title = normalizeTitle(collection.title ?? "");
+  return tags.includes("banner") || title === "banner" || title === "hero" || title === "ana banner";
+}
+
 export function resolveHomeCollections(
   collections: Collection[],
   categories: Category[] = [],
 ): ResolvedHomeCollection[] {
   return [...collections]
+    .filter((collection) => !isBannerCollection(collection))
     .sort((a, b) => getHomeCollectionDisplayOrder(a) - getHomeCollectionDisplayOrder(b))
     .map((collection) => resolveHomeCollection(collection, categories));
 }

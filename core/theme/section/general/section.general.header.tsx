@@ -101,7 +101,7 @@ function HeaderSearch({ className = "" }: { className?: string }) {
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Ürün veya kategori ara..."
-        className="h-11 w-full rounded-full border border-[#D9C5B0]/70 bg-[#FDFAF6]/50 pl-12 pr-5 font-serif text-sm tracking-wide text-[#5C4638] placeholder:text-[#B89B88]/90 transition-colors focus:border-[#A17E65]/55 focus:bg-[#FDFAF6] focus:outline-none"
+        className="h-11 w-full rounded-full border border-[#D9C5B0]/70 bg-[#FDFAF6] pl-12 pr-5 font-serif text-sm tracking-wide text-[#5C4638] placeholder:text-[#B89B88]/90 transition-colors focus:border-[#A17E65]/55 focus:bg-white focus:outline-none"
         aria-label="Ürün ara"
       />
     </form>
@@ -264,24 +264,24 @@ export default function SectionGeneralHeader() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 z-50 isolate transition-all duration-500 ${
         scrolled
-          ? "border-b border-[#D9C5B0]/50 bg-[#F8F1E9]/95 shadow-sm backdrop-blur-md"
-          : "border-b border-[#D9C5B0]/30 bg-[#F8F1E9]/85 backdrop-blur-sm"
+          ? "border-b border-[#D9C5B0]/50 bg-[#F8F1E9] shadow-sm"
+          : "border-b border-[#D9C5B0]/40 bg-[#F8F1E9]"
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Üst satır: logo · arama · ikonlar */}
-        <div className="relative flex items-center gap-3 py-3 lg:gap-6 lg:py-4">
-          <Link href="/" className="relative z-10 flex shrink-0 items-center">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 lg:gap-6 lg:py-4">
+          <Link href="/" className="flex shrink-0 items-center">
             <SiteLogo className="relative h-14 w-40 sm:h-16 sm:w-48 md:h-[4.5rem] md:w-60" priority />
           </Link>
 
-          <div className="pointer-events-none absolute inset-x-4 top-1/2 hidden -translate-y-1/2 justify-center sm:inset-x-6 lg:flex lg:inset-x-8">
-            <div className="pointer-events-auto w-full max-w-2xl xl:max-w-3xl">
+          <div className="hidden min-w-0 justify-center px-2 lg:flex">
+            <div className="w-full max-w-xl xl:max-w-2xl">
               <Suspense
                 fallback={
-                  <div className="h-11 w-full rounded-full border border-[#D9C5B0]/60 bg-white/50" aria-hidden />
+                  <div className="h-11 w-full rounded-full border border-[#D9C5B0]/60 bg-[#FDFAF6]" aria-hidden />
                 }
               >
                 <HeaderSearch />
@@ -289,7 +289,7 @@ export default function SectionGeneralHeader() {
             </div>
           </div>
 
-          <div className="relative z-10 ml-auto flex items-center gap-1 sm:gap-1.5">
+          <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
             <div className="hidden items-center gap-1 sm:flex sm:gap-1.5">
               <IconAction label="Favorilerim" onClick={handleFavorites}>
                 <Heart className="h-[22px] w-[22px]" strokeWidth={1.5} />
