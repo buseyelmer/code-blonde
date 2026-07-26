@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
 import SiteLogo from "@/core/component/site.logo";
 import {
   SITE_CONTACT,
@@ -102,13 +103,13 @@ export default function Footer() {
           <div className="lg:col-span-4">
             <Link
               href="/"
-              className="mb-6 inline-block rounded-sm bg-[#F8F1E9]/95 px-3 py-2 transition-opacity hover:opacity-90"
+              className="mb-6 inline-block transition-opacity hover:opacity-90"
             >
-              <SiteLogo className="relative h-12 w-44 sm:h-14 sm:w-52" />
+              <SiteLogo
+                variant="onDark"
+                className="relative h-16 w-56 sm:h-20 sm:w-72"
+              />
             </Link>
-            <p className="font-serif text-2xl leading-snug tracking-tight text-[#F8F1E9] sm:text-[1.65rem]">
-              {SITE_NAME}
-            </p>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#C9B5A4]">{tagline}</p>
             <p className="mt-6 text-[11px] tracking-[0.28em] text-[#A17E65] uppercase">
               {SITE_FOOTER_TAGLINE}
@@ -211,9 +212,11 @@ export default function Footer() {
               className="group inline-flex items-center gap-2 rounded-full bg-[#F8F1E9] px-5 py-2.5 text-[11px] tracking-[0.18em] text-[#3F2F25] uppercase transition-transform duration-300 hover:-translate-y-0.5"
             >
               Sıkça Sorulan Sorular
-              <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-0.5">
-                →
-              </span>
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                strokeWidth={1.5}
+                aria-hidden
+              />
             </Link>
           </div>
         </div>

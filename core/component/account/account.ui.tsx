@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export const accountLabelClass =
@@ -115,7 +115,11 @@ export function AccountQuickLink({
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D9C5B0]/70 bg-[#F8F1E9] text-[#5C4638] transition group-hover:border-[#5C4638] group-hover:bg-[#5C4638] group-hover:text-[#F8F1E9]">
           <Icon className="h-4 w-4" strokeWidth={1.5} />
         </div>
-        <span className="text-[#D9C5B0] transition group-hover:text-[#A17E65]">→</span>
+        <ArrowRight
+          className="h-4 w-4 text-[#D9C5B0] transition group-hover:text-[#A17E65]"
+          strokeWidth={1.5}
+          aria-hidden
+        />
       </div>
       <h3 className="mt-4 font-serif text-lg text-[#5C4638]">{title}</h3>
       <p className="mt-1 text-sm text-[#8B6B57]">{description}</p>

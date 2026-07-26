@@ -1,82 +1,146 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { SITE_SLOGAN } from "@/core/constant/site.constant";
+import { useEffect, useState } from "react";
 
-const HERO_STATS = [
-  { value: "92%", label: "Bitkisel İçerik" },
-  { value: "100%", label: "Vegan Formül" },
-  { value: "12K", label: "Mutlu Müşteri" },
+const SLIDES = [
+  {
+    src: "/hero-1.jpg",
+    alt: "Güzelliğin kodunu keşfet — laboratuvar estetiğinde Code Blonde bakım dünyası",
+    title: "Güzelliğin kodunu keşfet.",
+    subtitle: "İhtiyacın olan bakım, doğru içeriklerle bir araya geliyor.",
+  },
+  {
+    src: "/hero-2.jpg",
+    alt: "Güzellik senin doğanda var — DNA formunda saç ve bakım ürünleri",
+    title: "Güzellik senin doğanda var.",
+    subtitle: "Kendine özel bakım formülü.",
+  },
+  {
+    src: "/hero-3.jpg",
+    alt: "Yeni bir sen buradan başlıyor — Code Blonde bakım dünyasına açılan kapı",
+    title: "Yeni bir sen buradan başlıyor.",
+    subtitle: "Bakım dünyasına açılan ilk adımı at.",
+  },
 ] as const;
 
-export default function SectionHomeHero() {
-  return (
-    <section className="relative overflow-x-clip py-7 sm:py-9 lg:py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#D9C5B0_0.6px,transparent_1px)] bg-[length:5px_5px] opacity-25" />
-      <div className="pointer-events-none absolute -right-32 top-16 h-[420px] w-[420px] rounded-full bg-[#D9C5B0]/20 blur-3xl" />
-      <div className="pointer-events-none absolute -left-24 top-1/2 h-[320px] w-[320px] rounded-full bg-[#C9A99A]/10 blur-3xl" />
+const AUTO_MS = 5500;
 
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-10 sm:gap-11 lg:grid-cols-2 lg:gap-14 xl:gap-16">
-          <div className="min-w-0">
-            <div className="mb-5 inline-block rounded-full border border-[#C9A99A]/60 px-5 py-1 text-[10px] tracking-[0.3em] uppercase sm:mb-6">
-              Yeni Sezon · 2026
-            </div>
-            <h1 className="font-serif text-5xl leading-[0.95] tracking-tight text-[#5C4638] sm:text-6xl lg:text-[4.5rem] lg:leading-[0.92] xl:text-[5rem]">
-              Doğal
-              <br />
-              <span className="italic text-[#A17E65]">Güzelliğin</span>
-              <br />
-              Kodu
-            </h1>
-            <p className="mt-5 text-base leading-relaxed text-[#8B6B57] sm:mt-6 lg:max-w-xl lg:text-lg xl:max-w-2xl">
-              {SITE_SLOGAN}
-            </p>
-            <div className="mt-7 flex flex-wrap gap-4 sm:mt-8">
+export default function SectionHomeHero() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => {
+      setIndex((current) => (current + 1) % SLIDES.length);
+    }, AUTO_MS);
+    return () => window.clearInterval(id);
+  }, [paused]);
+
+  const goTo = (next: number) => {
+    setIndex((next + SLIDES.length) % SLIDES.length);
+  };
+
+  const active = SLIDES[index];
+
+  return (
+    <section
+      className="relative h-[calc(100svh-8rem)] w-full overflow-hidden bg-[#E8C4B0] lg:h-[calc(100svh-9.25rem)]"
+      aria-roledescription="carousel"
+      aria-label="Ana sayfa vitrin"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="absolute inset-0">
+        {SLIDES.map((slide, i) => (
+          <div
+            key={slide.src}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
+              i === index ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
+            aria-hidden={i !== index}
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              priority={i === 0}
+              className="object-cover object-[center_40%] sm:object-center"
+              sizes="100vw"
+            />
+          </div>
+        ))}
+
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#5C4638]/25 via-transparent to-transparent sm:from-[#5C4638]/15" />
+
+        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-6 px-5 pb-8 pt-16 sm:px-8 sm:pb-10 lg:px-12 lg:pb-12">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-xl">
+              <p className="font-serif text-[11px] tracking-[0.35em] uppercase text-white/90 drop-shadow-sm">
+                code blonde
+              </p>
+              <h1 className="sr-only">{active.title}</h1>
+              <p className="sr-only">{active.subtitle}</p>
               <Link
                 href="/koleksiyon"
-                className="group inline-flex items-center gap-3 rounded-full bg-[#5C4638] px-8 py-4 text-xs tracking-[0.2em] uppercase text-[#F8F1E9] transition-all hover:scale-[1.02] hover:bg-[#3F2F25]"
+                className="pointer-events-auto mt-4 inline-flex items-center gap-3 rounded-full bg-[#5C4638]/90 px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase text-[#F8F1E9] backdrop-blur-sm transition-all hover:bg-[#3F2F25] hover:scale-[1.02]"
               >
                 Koleksiyonu Keşfet
                 <svg
-                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  className="h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
                 </svg>
               </Link>
-              <Link
-                href="/hakkimizda"
-                className="inline-flex items-center rounded-full border border-[#C9A99A] px-8 py-4 text-xs tracking-[0.2em] uppercase text-[#5C4638] transition-all hover:border-[#5C4638] hover:bg-[#EDE0D1]"
+            </div>
+
+            <div className="pointer-events-auto flex items-center gap-3 self-start sm:self-end">
+              <button
+                type="button"
+                onClick={() => goTo(index - 1)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
+                aria-label="Önceki görsel"
               >
-                Hikayemiz
-              </Link>
-            </div>
-
-            <div className="mt-9 grid w-full grid-cols-3 gap-4 border-t border-[#D9C5B0]/50 pt-8 sm:mt-10 sm:gap-6 sm:pt-9 lg:max-w-xl xl:max-w-2xl">
-              {HERO_STATS.map((stat) => (
-                <div key={stat.label} className="min-w-0">
-                  <p className="font-serif text-2xl leading-none text-[#5C4638] sm:text-3xl">{stat.value}</p>
-                  <p className="mt-2 text-[10px] leading-snug tracking-[0.16em] text-[#8B6B57] sm:text-xs sm:tracking-[0.18em]">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex min-w-0 items-center justify-center lg:justify-end">
-            <div className="relative aspect-[4/5] w-full max-w-[280px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-[400px] xl:max-w-[440px]">
-              <Image
-                src="/hero-product.png"
-                alt="Code Blonde premium kozmetik koleksiyonu"
-                fill
-                priority
-                className="object-contain"
-                sizes="(max-width: 1024px) 90vw, 45vw"
-              />
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex items-center gap-2 px-1" role="tablist" aria-label="Vitrin slaytları">
+                {SLIDES.map((slide, i) => (
+                  <button
+                    key={slide.src}
+                    type="button"
+                    role="tab"
+                    aria-selected={i === index}
+                    aria-label={`Slayt ${i + 1}`}
+                    onClick={() => goTo(i)}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      i === index ? "w-8 bg-white" : "w-1.5 bg-white/45 hover:bg-white/70"
+                    }`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => goTo(index + 1)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
+                aria-label="Sonraki görsel"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>

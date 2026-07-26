@@ -2,7 +2,7 @@
 
 import { useOrder } from "@raxonltd/raxon-core/hook";
 import { Order, TrackingCode } from "@raxonltd/raxon-core/interface/prisma.interface";
-import { MapPin, Truck } from "lucide-react";
+import { ArrowRight, MapPin, Truck } from "lucide-react";
 import { useParams } from "next/navigation";
 function isTrackingCodeObject(tc: Order['trackingCode']): tc is TrackingCode {
   return tc !== null && tc !== undefined && typeof tc === 'object' && 'trackingNumber' in tc;
@@ -72,8 +72,9 @@ export default function SiparisDetayPaymentPage() {
                       <>
                         <p className='text-sm font-medium text-gray-900'>{order.trackingCode.trackingNumber}</p>
                         {order.trackingCode.trackingLink && (
-                          <a href={order.trackingCode.trackingLink} target='_blank' rel='noopener noreferrer' className='text-sm text-blue-600 hover:underline mt-1 inline-block'>
-                            Kargoyu Takip Et →
+                          <a href={order.trackingCode.trackingLink} target='_blank' rel='noopener noreferrer' className='mt-1 inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline'>
+                            Kargoyu Takip Et
+                            <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
                           </a>
                         )}
                       </>

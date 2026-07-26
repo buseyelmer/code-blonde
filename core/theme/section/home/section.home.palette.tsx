@@ -5,12 +5,94 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
+import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import ItemListingProduct, { ProductListingSkeleton } from "@/core/theme/item/item.listing.product";
-import { takeProductsWithListingImages } from "@/core/util/product.image";
+import { filterProductsWithListingImages } from "@/core/util/product.image";
+import {
+  sortProductsByBestsellers,
+  sortProductsByPopularity,
+} from "@/core/util/product.price";
 import "@/core/util/util";
 
 const FEATURED_COUNT = 4;
-const FETCH_AMOUNT = 64;
+const FETCH_AMOUNT = 100;
+/** Yeni gelen / popüler bloklarıyla çakışmayı azaltmak için atlanan ürün sayısı */
+const SKIP_HEAD_COUNT = 12;
+
+function getCreatedAtTime(product: Product) {
+  const value = product.createdAt ?? product.updatedAt;
+  if (!value) return 0;
+  const time = Date.parse(value);
+  return Number.isFinite(time) ? time : 0;
+}
+
+function getPrimaryCategoryKey(product: Product) {
+  const category = product.categories?.[0];
+  return category?.id || category?.slug || category?.name || product.id;
+}
+
+function getEditorScore(product: Product) {
+  const rating = product.review?.rating ?? 0;
+  const count = product.review?.count ?? 0;
+  const tagBoost =
+    product.tags?.some((tag) => /premium|bestseller|editör|editor|favori/i.test(tag))
+      ? 5
+      : 0;
+  return rating * Math.log10(count + 1) + tagBoost;
+}
+
+function pickEditorSelection(items: Product[], count: number): Product[] {
+  const withImages = filterProductsWithListingImages(items);
+  if (withImages.length === 0) return [];
+
+  const newestIds = new Set(
+    [...withImages]
+      .sort((a, b) => getCreatedAtTime(b) - getCreatedAtTime(a))
+      .slice(0, SKIP_HEAD_COUNT)
+      .map((product) => product.id),
+  );
+  const bestsellerIds = new Set(
+    sortProductsByBestsellers(withImages)
+      .slice(0, SKIP_HEAD_COUNT)
+      .map((product) => product.id),
+  );
+
+  const preferFresh = withImages.filter(
+    (product) => !newestIds.has(product.id) && !bestsellerIds.has(product.id),
+  );
+  const pool = (preferFresh.length >= count ? preferFresh : withImages)
+    .slice()
+    .sort((a, b) => {
+      const scoreDiff = getEditorScore(b) - getEditorScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
+      return (a.name || "").localeCompare(b.name || "", "tr");
+    });
+
+  const selected: Product[] = [];
+  const usedCategories = new Set<string>();
+  const usedIds = new Set<string>();
+
+  // Önce farklı kategorilerden birer ürün
+  for (const product of pool) {
+    const categoryKey = getPrimaryCategoryKey(product);
+    if (usedCategories.has(categoryKey)) continue;
+    selected.push(product);
+    usedCategories.add(categoryKey);
+    usedIds.add(product.id);
+    if (selected.length >= count) return selected;
+  }
+
+  // Kategori yetmezse puan / isim sırasıyla tamamla
+  const rankedFallback = sortProductsByPopularity(pool);
+  for (const product of rankedFallback) {
+    if (usedIds.has(product.id)) continue;
+    selected.push(product);
+    usedIds.add(product.id);
+    if (selected.length >= count) break;
+  }
+
+  return selected;
+}
 
 export default function SectionHomePalette() {
   const { data, isLoading } = useProduct().fetch({
@@ -21,9 +103,10 @@ export default function SectionHomePalette() {
     order: { column: "createdAt", direction: "desc" },
   });
 
-  const products = useMemo(() => {
-    return takeProductsWithListingImages(data?.data ?? [], FEATURED_COUNT);
-  }, [data?.data]);
+  const products = useMemo(
+    () => pickEditorSelection(data?.data ?? [], FEATURED_COUNT),
+    [data?.data],
+  );
 
   const showSkeleton = isLoading && products.length === 0;
 

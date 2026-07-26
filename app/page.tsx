@@ -34,6 +34,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F8F1E9] text-[#5C4638] selection:bg-[#C9A99A] selection:text-[#F8F1E9]">
+      <SectionHomeHero />
+
       <div className="border-y border-[#D9C5B0]/50 bg-[#EDE0D1]/60 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-14 gap-y-2 px-8 text-[11px] font-light tracking-[2.5px] text-[#8B6B57]/80">
           {(HOME_DATA?.TRUST_ITEMS ?? []).map((item) => (
@@ -42,7 +44,6 @@ export default function Home() {
         </div>
       </div>
 
-      <SectionHomeHero />
       <SectionHomeValues />
       <SectionHomeCollection />
       <SectionHomePicks />

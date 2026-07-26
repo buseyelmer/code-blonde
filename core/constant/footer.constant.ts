@@ -19,6 +19,7 @@ export const FOOTER_FEATURED_CATEGORIES: FooterCategoryMatch[] = [
 ];
 
 export const FOOTER_HELP_LINKS: FooterNavLink[] = [
+  { label: "Hakkımızda", href: "/hakkimizda" },
   { label: "Sıkça Sorulan Sorular", href: "/sss" },
   { label: "İletişim", href: "/iletisim" },
   { label: "Kargo & Teslimat", href: "/sozlesmeler/kargo-teslimat" },

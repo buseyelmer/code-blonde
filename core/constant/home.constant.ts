@@ -1,3 +1,6 @@
+import type { LucideIcon } from "lucide-react";
+import { Leaf, PawPrint, Recycle, Sparkles } from "lucide-react";
+
 export const palette = {
     cream: "#F8F1E9",
     warmBeige: "#EDE0D1",
@@ -168,15 +171,15 @@ export interface Product {
   ];
 
   export interface Ingredient {
-    icon: string;
+    icon: LucideIcon;
     title: string;
     desc: string;
   }
   export const INGREDIENTS: Ingredient[] = [
-    { icon: "🌿", title: "Doğal İçerik", desc: "%92 bitkisel kaynaklı formül" },
-    { icon: "🐰", title: "Cruelty Free", desc: "Hayvan testi yapılmaz" },
-    { icon: "♻️", title: "Sürdürülebilir", desc: "Geri dönüştürülebilir ambalaj" },
-    { icon: "✨", title: "Dermatolojik", desc: "Hassas ciltler için test edildi" },
+    { icon: Leaf, title: "Doğal İçerik", desc: "%92 bitkisel kaynaklı formül" },
+    { icon: PawPrint, title: "Cruelty Free", desc: "Hayvan testi yapılmaz" },
+    { icon: Recycle, title: "Sürdürülebilir", desc: "Geri dönüştürülebilir ambalaj" },
+    { icon: Sparkles, title: "Dermatolojik", desc: "Hassas ciltler için test edildi" },
   ];
 
   export interface Testimonial {

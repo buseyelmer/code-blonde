@@ -39,16 +39,19 @@ export default function SectionHomeStory() {
         </div>
 
         <div className="order-1 grid grid-cols-2 gap-4 sm:gap-4 lg:order-2">
-          {(HOME_DATA?.INGREDIENTS ?? []).map((item) => (
+          {(HOME_DATA?.INGREDIENTS ?? []).map((item) => {
+            const Icon = item.icon;
+            return (
             <div
               key={item.title}
               className="rounded-2xl border border-[#D9C5B0]/50 bg-[#FDFAF6] p-5 shadow-[0_2px_12px_rgba(92,70,56,0.04)] sm:p-6"
             >
-              <span className="text-xl sm:text-2xl">{item.icon}</span>
+              <Icon className="h-5 w-5 text-[#A17E65] sm:h-6 sm:w-6" strokeWidth={1.5} aria-hidden />
               <h3 className="mt-4 text-xs tracking-wide text-[#5C4638] sm:mt-4 sm:text-sm">{item.title}</h3>
               <p className="mt-2 text-[11px] leading-relaxed text-[#8B6B57] sm:mt-2 sm:text-xs">{item.desc}</p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

@@ -5,12 +5,20 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
+import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import ItemListingProduct, { ProductListingSkeleton } from "@/core/theme/item/item.listing.product";
-import { takeProductsWithListingImages } from "@/core/util/product.image";
+import {
+  filterProductsWithListingImages,
+} from "@/core/util/product.image";
+import {
+  getProductPriceInfo,
+  sortProductsByBestsellers,
+  sortProductsByPopular,
+} from "@/core/util/product.price";
 import "@/core/util/util";
 
 const PICK_COUNT = 8;
-const FETCH_AMOUNT = 48;
+const FETCH_AMOUNT = 100;
 
 const TABS = [
   { id: "new", label: "Yeni Gelenler" },
@@ -20,43 +28,187 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-function getTabFetchParams(tab: TabId) {
-  switch (tab) {
-    case "popular":
-      return {
-        order: { column: "createdAt" as const, direction: "desc" as const },
-        page: 1,
-        amount: FETCH_AMOUNT,
-      };
-    case "deals":
-      return {
-        isDiscountBasket: true,
-        page: 1,
-        amount: FETCH_AMOUNT,
-      };
-    default:
-      return {
-        order: { column: "createdAt" as const, direction: "desc" as const },
-        page: 1,
-        amount: FETCH_AMOUNT,
-      };
+function getCreatedAtTime(product: Product) {
+  const value = product.createdAt ?? product.updatedAt;
+  if (!value) return 0;
+  const time = Date.parse(value);
+  return Number.isFinite(time) ? time : 0;
+}
+
+function sortByNewest(products: Product[]) {
+  return [...products].sort((a, b) => getCreatedAtTime(b) - getCreatedAtTime(a));
+}
+
+function hasReviewSignal(products: Product[]) {
+  return products.some((product) => (product.review?.count ?? 0) > 0);
+}
+
+function sortForPopular(products: Product[]) {
+  if (hasReviewSignal(products)) {
+    return sortProductsByPopular(products);
   }
+  return sortProductsByBestsellers(products);
+}
+
+function collectProductPrices(product: Product) {
+  const prices = [
+    product.price,
+    ...(product.variant?.map((variant) => variant.price) ?? []),
+    ...(product.productUnit?.map((unit) => unit.price) ?? []),
+  ];
+  return prices.filter(Boolean);
+}
+
+/** İndirim veya sepet fiyatı avantajı olan ürünler */
+function isDealProduct(product: Product) {
+  if (getProductPriceInfo(product).hasDiscount) return true;
+
+  return collectProductPrices(product).some((price) => {
+    const main = price?.mainPrice ?? 0;
+    const discount = price?.discountPrice ?? 0;
+    const basket = price?.basketPrice ?? 0;
+    return (
+      (main > 0 && discount > 0 && discount < main) ||
+      (main > 0 && basket > 0 && basket < main)
+    );
+  });
+}
+
+function getDealPercent(product: Product) {
+  const info = getProductPriceInfo(product);
+  if (info.hasDiscount && info.price > 0) {
+    return ((info.price - info.bestPrice) / info.price) * 100;
+  }
+
+  let best = 0;
+  for (const price of collectProductPrices(product)) {
+    const main = price?.mainPrice ?? 0;
+    if (main <= 0) continue;
+    const discount = price?.discountPrice ?? 0;
+    const basket = price?.basketPrice ?? 0;
+    const dealPrice =
+      discount > 0 && discount < main
+        ? discount
+        : basket > 0 && basket < main
+          ? basket
+          : 0;
+    if (dealPrice > 0) {
+      best = Math.max(best, ((main - dealPrice) / main) * 100);
+    }
+  }
+  return best;
+}
+
+function takeUnique(products: Product[], count: number, excludeIds?: Set<string>) {
+  const selected: Product[] = [];
+  for (const product of products) {
+    if (excludeIds?.has(product.id)) continue;
+    selected.push(product);
+    if (selected.length >= count) break;
+  }
+  return selected;
+}
+
+function mergeUniqueProducts(...lists: Product[][]) {
+  const seen = new Set<string>();
+  const merged: Product[] = [];
+  for (const list of lists) {
+    for (const product of list) {
+      if (seen.has(product.id)) continue;
+      seen.add(product.id);
+      merged.push(product);
+    }
+  }
+  return merged;
+}
+
+function buildTabProducts(items: Product[], dealItems: Product[]) {
+  const withImages = filterProductsWithListingImages(items);
+  const newest = sortByNewest(withImages);
+  const newArrivals = newest.slice(0, PICK_COUNT);
+  const newestIds = new Set(newArrivals.map((product) => product.id));
+
+  const popularRanked = sortForPopular(withImages);
+  // Yeni gelenlerle birebir aynı olmasın diye önce onları hariç tut
+  let popular = takeUnique(popularRanked, PICK_COUNT, newestIds);
+  if (popular.length < PICK_COUNT) {
+    popular = [
+      ...popular,
+      ...takeUnique(popularRanked, PICK_COUNT - popular.length, new Set(popular.map((p) => p.id))),
+    ];
+  }
+
+  const popularIds = new Set(popular.map((product) => product.id));
+  const excludeFromDeals = new Set([...newestIds, ...popularIds]);
+
+  const dealPool = filterProductsWithListingImages(
+    mergeUniqueProducts(dealItems, withImages.filter(isDealProduct)),
+  ).sort((a, b) => getDealPercent(b) - getDealPercent(a));
+
+  let deals = takeUnique(dealPool, PICK_COUNT, excludeFromDeals);
+  if (deals.length < PICK_COUNT) {
+    deals = [
+      ...deals,
+      ...takeUnique(dealPool, PICK_COUNT - deals.length, new Set(deals.map((p) => p.id))),
+    ];
+  }
+
+  // Hiç fırsat yoksa: diğer sekmelerle çakışmayan uygun fiyatlı ürünler
+  if (deals.length === 0) {
+    const pricedFallback = [...withImages]
+      .filter((product) => getProductPriceInfo(product).bestPrice > 0)
+      .sort(
+        (a, b) =>
+          getProductPriceInfo(a).bestPrice - getProductPriceInfo(b).bestPrice,
+      );
+    deals = takeUnique(pricedFallback, PICK_COUNT, excludeFromDeals);
+    if (deals.length < PICK_COUNT) {
+      deals = [
+        ...deals,
+        ...takeUnique(
+          pricedFallback,
+          PICK_COUNT - deals.length,
+          new Set(deals.map((p) => p.id)),
+        ),
+      ];
+    }
+  }
+
+  return {
+    new: newArrivals,
+    popular,
+    deals,
+  } satisfies Record<TabId, Product[]>;
 }
 
 export default function SectionHomePicks() {
   const [activeTab, setActiveTab] = useState<TabId>("new");
-  const fetchParams = useMemo(() => getTabFetchParams(activeTab), [activeTab]);
 
   const { data, isLoading, isFetching } = useProduct().fetch({
     materialType: "product",
     status: Status.PUBLISHED,
-    ...fetchParams,
+    order: { column: "createdAt", direction: "desc" },
+    page: 1,
+    amount: FETCH_AMOUNT,
   });
 
-  const products = useMemo(() => {
-    return takeProductsWithListingImages(data?.data ?? [], PICK_COUNT);
-  }, [data?.data]);
-  const showSkeleton = isLoading && products.length === 0;
+  const { data: dealData, isLoading: isDealLoading, isFetching: isDealFetching } =
+    useProduct().fetch({
+      materialType: "product",
+      status: Status.PUBLISHED,
+      isDiscountBasket: true,
+      page: 1,
+      amount: FETCH_AMOUNT,
+    });
+
+  const tabProducts = useMemo(
+    () => buildTabProducts(data?.data ?? [], dealData?.data ?? []),
+    [data?.data, dealData?.data],
+  );
+  const products = tabProducts[activeTab];
+  const showSkeleton =
+    (isLoading || (activeTab === "deals" && isDealLoading)) && products.length === 0;
+  const tabFetching = isFetching || (activeTab === "deals" && isDealFetching);
 
   return (
     <section id="one-cikanlar" className="bg-[#F8F1E9] py-16 sm:py-14 lg:py-16">
@@ -109,7 +261,7 @@ export default function SectionHomePicks() {
           <div
             key={activeTab}
             className={`grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 transition-opacity duration-300 ${
-              isFetching ? "opacity-70" : "opacity-100"
+              tabFetching ? "opacity-70" : "opacity-100"
             }`}
           >
             {products.map((product, index) => (

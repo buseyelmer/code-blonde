@@ -8,7 +8,7 @@ import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import type { Category } from "@raxonltd/raxon-core/interface/prisma.interface";
 import ItemListingProduct, { ProductListingSkeleton } from "@/core/theme/item/item.listing.product";
-import { sortProductsByPopularity } from "@/core/util/product.price";
+import { sortProductsByBestsellers } from "@/core/util/product.price";
 import { takeProductsWithListingImages } from "@/core/util/product.image";
 import "@/core/util/util";
 
@@ -36,7 +36,7 @@ export default function SectionHomeProducts() {
   });
 
   const products = useMemo(() => {
-    const sorted = sortProductsByPopularity(data?.data ?? []);
+    const sorted = sortProductsByBestsellers(data?.data ?? []);
     return takeProductsWithListingImages(sorted, PRODUCT_COUNT);
   }, [data?.data]);
   const showSkeleton = isLoading && products.length === 0;

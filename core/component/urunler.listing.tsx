@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useProduct, PRODUCT_PAGE_SIZE } from "@raxonltd/raxon-core/hook";
@@ -350,7 +350,10 @@ export function UrunlerPageContent({ categorySlug }: { categorySlug?: string }) 
                         disabled={!hasPrevPage || isFetching}
                         className="text-[10px] tracking-[0.28em] uppercase text-[#8B6B57] transition hover:text-[#5C4638] disabled:pointer-events-none disabled:opacity-30"
                       >
-                        ← Önceki
+                        <span className="inline-flex items-center gap-2">
+                          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+                          Önceki
+                        </span>
                       </button>
                       <span className="font-mono text-[11px] tabular-nums text-[#8B6B57]/60">
                         {page} / {totalPages}
@@ -361,7 +364,10 @@ export function UrunlerPageContent({ categorySlug }: { categorySlug?: string }) 
                         disabled={!hasNextPage || isFetching}
                         className="text-[10px] tracking-[0.28em] uppercase text-[#8B6B57] transition hover:text-[#5C4638] disabled:pointer-events-none disabled:opacity-30"
                       >
-                        Sonraki →
+                        <span className="inline-flex items-center gap-2">
+                          Sonraki
+                          <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+                        </span>
                       </button>
                     </div>
                   )}

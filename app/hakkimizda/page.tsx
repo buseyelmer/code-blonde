@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, Leaf, Sparkles, Heart, Recycle } from "lucide-react";
 import { HOME_DATA } from "@/core/constant/home.constant";
@@ -90,12 +91,15 @@ export default function Hakkimizda() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-[#E8D5C4] via-[#D9C5B0] to-[#C4A484]">
-            <div className="absolute inset-0 bg-[radial-gradient(#F8F1E9_0.6px,transparent_1px)] bg-[length:5px_5px] opacity-20" />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#5C4638]/50 to-transparent p-8">
-              <p className="text-xs tracking-[0.25em] uppercase text-white/70">Est. 2026</p>
-              <p className="mt-2 font-serif text-2xl text-white">Paris • İstanbul • New York</p>
-            </div>
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-2xl bg-[#EDE0D1] sm:max-w-[380px] lg:ml-auto lg:mr-0 lg:max-w-[440px]">
+            <Image
+              src="/CB-hakkimizda.jpg"
+              alt="Code Blonde argan yağı şişeleri — doğal bakım formülleri"
+              fill
+              className="object-cover object-center"
+              sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 440px"
+              priority
+            />
           </div>
         </section>
 
@@ -156,16 +160,19 @@ export default function Hakkimizda() {
         </section>
 
         <section className="mb-20 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {(HOME_DATA?.INGREDIENTS ?? []).map((item) => (
+          {(HOME_DATA?.INGREDIENTS ?? []).map((item) => {
+            const Icon = item.icon;
+            return (
             <div
               key={item.title}
               className="rounded-2xl border border-[#D9C5B0]/30 bg-[#EDE0D1]/40 p-6"
             >
-              <span className="text-2xl">{item.icon}</span>
+              <Icon className="h-6 w-6 text-[#A17E65]" strokeWidth={1.5} aria-hidden />
               <h3 className="mt-4 text-sm tracking-wide text-[#5C4638]">{item.title}</h3>
               <p className="mt-2 text-xs leading-relaxed text-[#8B6B57]">{item.desc}</p>
             </div>
-          ))}
+            );
+          })}
         </section>
 
         <section className="relative overflow-hidden rounded-2xl bg-[#5C4638] px-8 py-14 text-center text-[#F8F1E9] sm:px-12">
