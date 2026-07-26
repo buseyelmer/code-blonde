@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { ArrowRight, ArrowUpDown, ChevronDown, Filter, Loader2 } from "lucide-react";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useProduct } from "@raxonltd/raxon-core/hook";
+import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import { useQueryStates } from "nuqs";
 import {
   productListingQueryParsers,
@@ -154,6 +155,8 @@ export function SectionProductGrid() {
   );
 
   const { data: products, isFetching, isLoading } = useProduct().fetch({
+    materialType: "product",
+    status: Status.PUBLISHED,
     categoryId: resolvedCategoryId,
     tag: listTags,
     hasDiscount: listHasDiscount,
