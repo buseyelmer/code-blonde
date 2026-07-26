@@ -321,7 +321,14 @@ export function resolveHomeCollection(
 export function isBannerCollection(collection: Collection): boolean {
   const tags = (collection.tags ?? []).map((tag) => tag.toLowerCase());
   const title = normalizeTitle(collection.title ?? "");
-  return tags.includes("banner") || title === "banner" || title === "hero" || title === "ana banner";
+  const shortDescription = normalizeTitle(collection.shortDescription ?? "");
+  return (
+    tags.includes("banner") ||
+    title === "banner" ||
+    title === "hero" ||
+    title === "ana banner" ||
+    shortDescription.startsWith("banner")
+  );
 }
 
 export function resolveHomeCollections(

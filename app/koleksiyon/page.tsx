@@ -8,6 +8,7 @@ import { useRaxon } from '@raxonltd/raxon-core';
 import { Collection, MediaRelated } from '@raxonltd/raxon-core/interface/prisma.interface';
 import first from 'lodash/first';
 import { buildStorageImageUrl } from '@/core/util/basket.enrichment';
+import { isBannerCollection } from '@/core/constant/collection.constant';
 
 function CollectionCard({ collection }: { collection: Collection }) {
   const collectionTitle = collection.title || 'Koleksiyon';
@@ -66,7 +67,8 @@ function CollectionCard({ collection }: { collection: Collection }) {
 }
 
 export default function CollectionsPage() {
-  const { collection: collections, isLoading } = useRaxon();
+  const { collection: allCollections, isLoading } = useRaxon();
+  const collections = (allCollections ?? []).filter((item) => !isBannerCollection(item));
 
   if (isLoading) {
     return (
