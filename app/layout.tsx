@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GeneralLayout from "@/core/layout/general.layout";
 import SiteChrome from "@/core/layout/site.chrome";
@@ -13,16 +12,6 @@ import {
   SITE_SLOGAN,
   getSiteUrl,
 } from "@/core/constant/site.constant";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const siteUrl = getSiteUrl();
 
@@ -72,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='tr' className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="tr" className="h-full antialiased">
       <body className='min-h-full flex flex-col'>
         <MetaPixel />
         <Suspense

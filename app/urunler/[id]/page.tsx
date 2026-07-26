@@ -13,7 +13,7 @@ import {
   ShoppingBag,
   Star,
 } from "lucide-react";
-import { useProduct, useReview } from "@raxonltd/raxon-core/hook";
+import { useProduct } from "@raxonltd/raxon-core/hook";
 import { Status } from "@raxonltd/raxon-core/interface/prisma.interface";
 import type { Product, ProductDetail } from "@raxonltd/raxon-core/interface/product.interface";
 import { getProductPriceInfo, mergeProductListPrice } from "@/core/util/product.price";
@@ -21,6 +21,7 @@ import { useProductCart } from "@/core/hook/use.product.cart";
 import { containsHtmlMarkup, isSameProductText } from "@/core/util/product.html";
 import { getDefaultProductUnitId, getDefaultVariantId } from "@/core/util/cart.insert";
 import { useProductFavorite } from "@/core/hook/use.product.favorite";
+import { useReview } from "@/core/hook/use.review";
 import { buildStorageImageUrl } from "@/core/util/basket.enrichment";
 import { getProductListingImageUrl } from "@/core/util/product.image";
 import { InputQuantity } from "@/core/component/input.quantity";
