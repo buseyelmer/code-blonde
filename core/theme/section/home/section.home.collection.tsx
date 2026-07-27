@@ -14,7 +14,31 @@ export default function SectionHomeCollection() {
     categories,
   );
 
-  if (isLoading || collections.length === 0) {
+  if (isLoading) {
+    return (
+      <section id="koleksiyon" className="pt-14 pb-14 sm:pt-12 sm:pb-12 lg:pt-14 lg:pb-14" aria-busy="true">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-10 max-w-2xl">
+            <div className="h-3 w-28 animate-pulse rounded bg-[#EDE0D1]" />
+            <div className="mt-4 h-10 w-64 animate-pulse rounded bg-[#EDE0D1] sm:h-12" />
+            <div className="mt-5 h-4 w-full max-w-md animate-pulse rounded bg-[#EDE0D1]/80" />
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            {[0, 1, 2].map((key) => (
+              <div key={key} className="overflow-hidden rounded-2xl">
+                <div className="aspect-[3/4] w-full animate-pulse bg-[#EDE0D1]" />
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 text-center text-[11px] tracking-[0.22em] uppercase text-[#8B6B57]">
+            Yükleniyor…
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (collections.length === 0) {
     return null;
   }
 

@@ -58,7 +58,7 @@ function bannerSortValue(collection: Collection): number {
 }
 
 export default function SectionHomeHero() {
-  const { banner = [], collection = [] } = useRaxon();
+  const { banner = [], collection = [], isLoading } = useRaxon();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -93,7 +93,22 @@ export default function SectionHomeHero() {
     return () => window.clearInterval(id);
   }, [paused, slides.length]);
 
-  if (slides.length === 0) return null;
+  if (slides.length === 0) {
+    if (!isLoading) return null;
+    return (
+      <section
+        className="relative flex h-[calc(100svh-8rem)] w-full items-center justify-center overflow-hidden bg-[#E8C4B0] lg:h-[calc(100svh-9.25rem)]"
+        aria-busy="true"
+        aria-label="Vitrin yükleniyor"
+      >
+        <div className="absolute inset-0 animate-pulse bg-[#EDE0D1]/70" />
+        <div className="relative z-10 flex flex-col items-center gap-3 text-[#8B6B57]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D9C5B0] border-t-[#5C4638]" />
+          <span className="text-[11px] tracking-[0.22em] uppercase">Yükleniyor…</span>
+        </div>
+      </section>
+    );
+  }
 
   const goTo = (next: number) => {
     setIndex(((next % slides.length) + slides.length) % slides.length);

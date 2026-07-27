@@ -2,7 +2,7 @@ import type { Product } from "@raxonltd/raxon-core/interface/product.interface";
 import { buildStorageImageUrl } from "@/core/util/basket.enrichment";
 
 export const PRODUCT_LISTING_PLACEHOLDER =
-  "https://placehold.co/480x600/F5EDE4/8B6B57?text=Code+Blonde&font=playfair-display";
+  "https://placehold.co/480x600/EDE0D1/EDE0D1";
 
 type ProductWithMedia = Product & {
   media?: { relativePath?: string | null; path?: string | null; url?: string | null }[];

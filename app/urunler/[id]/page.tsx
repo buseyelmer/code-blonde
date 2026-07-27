@@ -23,7 +23,7 @@ import { getDefaultProductUnitId, getDefaultVariantId } from "@/core/util/cart.i
 import { useProductFavorite } from "@/core/hook/use.product.favorite";
 import { useReview } from "@/core/hook/use.review";
 import { buildStorageImageUrl } from "@/core/util/basket.enrichment";
-import { getProductListingImageUrl } from "@/core/util/product.image";
+import { getProductListingImageUrl, PRODUCT_LISTING_PLACEHOLDER } from "@/core/util/product.image";
 import { InputQuantity } from "@/core/component/input.quantity";
 import { ProductDetailFeatures } from "@/core/component/product/product-detail.features";
 import { ProductDetailRelated } from "@/core/component/product/product-detail.related";
@@ -41,10 +41,10 @@ import "@/core/util/util";
 
 function resolveImageUrl(relativePath?: string | null): string {
   if (!relativePath?.trim()) {
-    return "https://placehold.co/800x1000/F5EDE4/8B6B57?text=Code+Blonde";
+    return PRODUCT_LISTING_PLACEHOLDER;
   }
   if (/^https?:\/\//i.test(relativePath)) return relativePath;
-  return buildStorageImageUrl(relativePath) ?? "https://placehold.co/800x1000/F5EDE4/8B6B57?text=Code+Blonde";
+  return buildStorageImageUrl(relativePath) ?? PRODUCT_LISTING_PLACEHOLDER;
 }
 
 const TRUST_BADGES = PRODUCT_TRUST_LABELS;

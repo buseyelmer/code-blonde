@@ -4,13 +4,12 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRaxon } from "@raxonltd/raxon-core";
 import { useQueryStates } from "nuqs";
 import { useAttribute } from "@raxonltd/raxon-core/hook";
-import { useCategoryBrands } from "@/core/util/use.category.brands";
-import { BadgeTurkishLira, ChevronDown, Folder, Tag, X } from "lucide-react";
+import { BadgeTurkishLira, ChevronDown, Folder, X } from "lucide-react";
 import { SectionProductTree } from "@/core/theme/section/product/section.product.tree";
 import { findCategoryByNavParam } from "@/core/util/category.nav";
 import { productListingQueryParsers } from "@/core/theme/section/product/product-listing.nuqs";
 
-type ExtraDrawerId = "price" | "brand" | string;
+type ExtraDrawerId = "price" | string;
 
 interface FilterDrawerShellProps {
   title: string;
@@ -101,7 +100,7 @@ export interface SectionProductFiltersBarProps {
 }
 
 export function SectionProductFiltersBar({ besideCategory = false, trailingSlot }: SectionProductFiltersBarProps) {
-  const { brand: bootstrapBrands, flatCategory } = useRaxon();
+  const { flatCategory } = useRaxon();
   const [params, setParams] = useQueryStates(productListingQueryParsers);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [extraDrawer, setExtraDrawer] = useState<ExtraDrawerId | null>(null);
@@ -112,8 +111,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
   );
   const resolvedCategoryId = resolvedCategory?.id;
 
-  const { brands, isLoading: brandsLoading } = useCategoryBrands(resolvedCategoryId, bootstrapBrands);
-
   const { data: attributesResponse } = useAttribute().fetch({
     categoryId: resolvedCategoryId,
     enabled: !!resolvedCategoryId,
@@ -121,13 +118,10 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
   const attributes = attributesResponse?.data ?? [];
 
   useEffect(() => {
-    if (!resolvedCategoryId || !params.brandId?.length) return;
-    const allowed = new Set(brands.map((b) => b.id));
-    const next = params.brandId.filter((id) => allowed.has(id));
-    if (next.length !== params.brandId.length) {
-      setParams({ brandId: next.length ? next : null, page: 1 });
+    if (params.brandId?.length) {
+      setParams({ brandId: null, page: 1 });
     }
-  }, [resolvedCategoryId, brands, params.brandId, setParams]);
+  }, [params.brandId, setParams]);
 
   useEffect(() => {
     if (!resolvedCategoryId || !params.attributeOptions?.length) return;
@@ -156,12 +150,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
     if (!resolvedCategory) return null;
     return resolvedCategory.name?.getName?.() || resolvedCategory.name?.toString() || null;
   }, [resolvedCategory]);
-
-  const toggleBrand = (id: string) => {
-    const current = params.brandId ?? [];
-    const next = current.includes(id) ? current.filter((b) => b !== id) : [...current, id];
-    setParams({ brandId: next.length ? next : null, page: 1 });
-  };
 
   const setMinPrice = (v: string) => {
     setParams({ minPrice: v || null, page: 1 });
@@ -192,7 +180,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
   const hasNonCategoryFilters = Boolean(
     params.minPrice ||
       params.maxPrice ||
-      (params.brandId && params.brandId.length > 0) ||
       (params.attributeOptions && params.attributeOptions.length > 0),
   );
 
@@ -200,7 +187,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
     setParams({ minPrice: null, maxPrice: null, brandId: null, attributeOptions: null, page: 1 });
   };
 
-  const brandCount = params.brandId?.length ?? 0;
   const priceActive = Boolean(params.minPrice || params.maxPrice);
   const priceSubtitle = priceActive
     ? [params.minPrice ? `≥ ${params.minPrice} ₺` : null, params.maxPrice ? `≤ ${params.maxPrice} ₺` : null]
@@ -229,16 +215,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
           sublabel={priceActive ? priceSubtitle : "Fiyat"}
           icon={<BadgeTurkishLira size={14} />}
         />
-
-        {brands.length > 0 && (
-          <FilterChip
-            active={brandCount > 0}
-            onClick={() => openDrawer("brand")}
-            label="Marka"
-            sublabel={brandCount > 0 ? `${brandCount} marka` : "Marka"}
-            icon={<Tag size={14} />}
-          />
-        )}
 
         {params.category &&
           attributes.map((attr) => {
@@ -312,33 +288,6 @@ export function SectionProductFiltersBar({ besideCategory = false, trailingSlot 
             />
           </div>
         </div>
-      </FilterDrawerShell>
-
-      <FilterDrawerShell title="Marka" open={extraDrawer === "brand"} onClose={closeExtraDrawer}>
-        {brandsLoading ? (
-          <p className="py-4 text-center text-sm text-[#8B6B57]">Markalar yükleniyor…</p>
-        ) : brands.length === 0 ? (
-          <p className="py-4 text-center text-sm text-[#8B6B57]">Bu kategoride marka bulunamadı.</p>
-        ) : (
-          <ul className="space-y-1">
-            {brands.map((b) => {
-              const checked = (params.brandId ?? []).includes(b.id);
-              return (
-                <li key={b.id}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5 text-sm text-[#5C4638] hover:bg-[#F8F1E9]">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleBrand(b.id)}
-                      className="rounded border-[#D9C5B0] text-[#5C4638] focus:ring-[#A17E65]"
-                    />
-                    <span className="truncate font-medium">{b.name}</span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        )}
       </FilterDrawerShell>
 
       {attributes.map((attr) => {

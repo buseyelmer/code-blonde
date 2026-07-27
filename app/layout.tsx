@@ -4,6 +4,7 @@ import "./globals.css";
 import GeneralLayout from "@/core/layout/general.layout";
 import SiteChrome from "@/core/layout/site.chrome";
 import MetaPixel from "@/core/component/meta.pixel";
+import SiteLoading from "@/core/component/site.loading";
 import {
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
@@ -64,14 +65,7 @@ export default function RootLayout({
     <html lang="tr" className="h-full antialiased">
       <body className='min-h-full flex flex-col'>
         <MetaPixel />
-        <Suspense
-          fallback={
-            <div className="flex min-h-screen flex-col bg-[#F8F1E9]">
-              <div className="h-[8rem] border-b border-[#D9C5B0]/30 lg:h-[9.25rem]" />
-              <main className="flex-1 pt-[8rem] lg:pt-[9.25rem]" />
-            </div>
-          }
-        >
+        <Suspense fallback={<SiteLoading />}>
           <GeneralLayout>
             <SiteChrome>{children}</SiteChrome>
           </GeneralLayout>
