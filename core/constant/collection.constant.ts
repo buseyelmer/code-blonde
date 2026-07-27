@@ -319,16 +319,22 @@ export function resolveHomeCollection(
 
 /** Banner/hero koleksiyonları vitrin için; İmza Seriler grid'inde gösterilmez. */
 export function isBannerCollection(collection: Collection): boolean {
-  const tags = (collection.tags ?? []).map((tag) => tag.toLowerCase());
+  const tags = (collection.tags ?? []).map((tag) => String(tag).toLowerCase().trim());
   const title = normalizeTitle(collection.title ?? "");
   const shortDescription = normalizeTitle(collection.shortDescription ?? "");
-  return (
-    tags.includes("banner") ||
-    title === "banner" ||
-    title === "hero" ||
-    title === "ana banner" ||
-    shortDescription.startsWith("banner")
-  );
+  const description = normalizeTitle(collection.description ?? "");
+
+  if (tags.includes("banner") || tags.includes("hero") || tags.includes("subhero")) return true;
+  if (title === "banner" || title === "hero" || title === "ana banner") return true;
+  if (shortDescription.startsWith("banner") || shortDescription.includes("banner")) return true;
+  if (description.startsWith("banner")) return true;
+  return false;
+}
+
+/** Ana sayfa İmza Seriler: yalnızca tanımlı imza seriler (Saç / Cilt / Parfüm). */
+export function isHomeSignatureCollection(collection: Collection): boolean {
+  if (isBannerCollection(collection)) return false;
+  return findShortHeadingForCollection(collection) != null;
 }
 
 export function resolveHomeCollections(
@@ -336,7 +342,7 @@ export function resolveHomeCollections(
   categories: Category[] = [],
 ): ResolvedHomeCollection[] {
   return [...collections]
-    .filter((collection) => !isBannerCollection(collection))
+    .filter((collection) => isHomeSignatureCollection(collection))
     .sort((a, b) => getHomeCollectionDisplayOrder(a) - getHomeCollectionDisplayOrder(b))
     .map((collection) => resolveHomeCollection(collection, categories));
 }

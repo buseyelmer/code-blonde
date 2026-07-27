@@ -4,13 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useRaxon } from "@raxonltd/raxon-core";
-import { isBannerCollection, resolveHomeCollections } from "@/core/constant/collection.constant";
+import { isHomeSignatureCollection, resolveHomeCollections } from "@/core/constant/collection.constant";
 
 export default function SectionHomeCollection() {
   const { collection, category = [], flatCategory = [], isLoading } = useRaxon();
   const categories = flatCategory.length > 0 ? flatCategory : category;
   const collections = resolveHomeCollections(
-    (collection ?? []).filter((item) => !isBannerCollection(item)),
+    (collection ?? []).filter((item) => isHomeSignatureCollection(item)),
     categories,
   );
 
