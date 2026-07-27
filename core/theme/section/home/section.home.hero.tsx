@@ -47,7 +47,7 @@ function toSlide(collection: Collection): HeroSlide | null {
   return {
     id: collection.id,
     title: collection.title?.trim() || "Code Blonde",
-    href: collection.link?.trim() || `/koleksiyon/${collection.id}`,
+    href: `/koleksiyon/${collection.id}`,
     image,
   };
 }
