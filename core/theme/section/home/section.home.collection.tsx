@@ -45,7 +45,7 @@ export default function SectionHomeCollection() {
   const sectionSubtitle =
     collections.length === 1
       ? "Cilt ve saç için özenle seçilmiş imza serimizle tanışın."
-      : "Saç bakımından cilde, parfüme — günlük güzellik ritualiniz için üç imza seri.";
+      : "Saç, cilt, vücut ve parfüm — günlük güzellik ritualiniz için imza seriler.";
 
   return (
     <section id="koleksiyon" className="pt-14 pb-14 sm:pt-12 sm:pb-12 lg:pt-14 lg:pb-14">

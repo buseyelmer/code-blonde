@@ -30,14 +30,29 @@ export const COLLECTION_HOME_SHORT_HEADINGS: { keywords: string[]; heading: stri
     order: 0,
   },
   {
+    keywords: ["saç şekillendirme", "sac sekillendirme", "şekillendirme", "sekillendirme"],
+    heading: "Saç Şekillendirme",
+    order: 1,
+  },
+  {
     keywords: ["cilt bakım", "cilt bakim", "skin care", "skincare"],
     heading: "Cilt Bakım",
-    order: 1,
+    order: 2,
+  },
+  {
+    keywords: ["vücut bakım", "vucut bakim", "vücut", "vucut", "body"],
+    heading: "Vücut Bakım",
+    order: 3,
   },
   {
     keywords: ["parfüm", "parfum", "fragrance", "edp", "edt"],
     heading: "Parfüm",
-    order: 2,
+    order: 4,
+  },
+  {
+    keywords: ["ağda", "agda", "epilasyon"],
+    heading: "Ağda ve Epilasyon",
+    order: 5,
   },
 ];
 
